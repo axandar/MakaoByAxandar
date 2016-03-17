@@ -3,6 +3,9 @@ package com.axandar.makaoClient;
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Player;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Axandar on 12.03.2016.
  */
@@ -15,10 +18,12 @@ public class ClientProperties{
     private volatile boolean isGameUpdate;
     private volatile boolean isClientRunning;
     private volatile int command;
+    private volatile Card cardOnTop;
     private volatile Card card;
     private volatile Card requestedCard;
     private volatile Player player;
     private volatile Player playerToUpdate;
+    private volatile List<Player> players = new ArrayList<>();
 
     public String getNickName(){
         return nickName;
@@ -106,5 +111,21 @@ public class ClientProperties{
 
     public void setPlayerToUpdate(Player playerToUpdate){
         this.playerToUpdate = playerToUpdate;
+    }
+
+    public Card getCardOnTop(){
+        return cardOnTop;
+    }
+
+    public void setCardOnTop(Card cardOnTop){
+        this.cardOnTop = cardOnTop;
+    }
+
+    public List<Player> getPlayers(){
+        return players;
+    }
+    
+    public void addPlayerToList(Player player){
+        players.add(player.getPlayerID(), player); // TODO: 17.03.2016 Check if players are in order
     }
 }

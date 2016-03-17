@@ -17,9 +17,6 @@ import java.util.List;
  */
 public class ClientConnectObject implements Runnable {
 
-    // TODO: 14.03.2016 przeslanie listy wszystkich graczy
-    // TODO: 14.03.2016 przeslanie pierwszej karty z wierzchu
-
     private String TAG = "Server";
 
     private Socket socket;
@@ -53,6 +50,7 @@ public class ClientConnectObject implements Runnable {
             outputStream.writeObject(ServerProtocol.GAME_STARTED);
             outputStream.writeObject(threadPlayer);//aktualizacja kart w reku
 
+            sendUpdatedPlayersInformation(sessionInfo.getPlayers());
             while(!sessionInfo.isGameExited()){
                 runningGame();
             }
@@ -64,11 +62,11 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void runningGame() throws IOException, InterruptedException, ClassNotFoundException{
-        //moze zastapic justEndedTurnPlayer na actualPlayer
+        //rest players ending theirs turns
         while(!(sessionInfo.getJustEndedTurnPlayerId() == threadPlayer.getPlayerID())){
             handleAnotherPlayersTurns();
         }
-        waitForTurn(); // TODO: 08.03.2016 mozliwe ze niepotrzebne
+        waitForTurn(); // TODO: 08.03.2016 is needed?
         turnStarted();
         table.endTurn(threadPlayer);
     }
@@ -91,13 +89,14 @@ public class ClientConnectObject implements Runnable {
             sessionInfo.decreasePlayersNotReady();
         }
     }
-
+    //Call for handel another player changes in game
     private void handleAnotherPlayersTurns() throws InterruptedException, IOException{
         int savedJustEndedTurnPlayerId = sessionInfo.getJustEndedTurnPlayerId();
         while(savedJustEndedTurnPlayerId == sessionInfo.getJustEndedTurnPlayerId()){
-            Thread.sleep(1000);//czekanie aby nastepny gracz skonczyl ture
+            Thread.sleep(1000);
         }// TODO: 24.02.2016 mozliwy blad // sprawdzic poprawnosc
-        sendUpdatedPlayersInformation(sessionInfo.getPlayers());
+        sendUpdatedPlayersInformation(sessionInfo.getPlayers());// TODO: 17.03.2016 is needed to send all players informations? 
+        sendUpdatedCardOnTop();
     }
 
     private void sendUpdatedPlayersInformation(List<Player> players) throws IOException{
@@ -107,6 +106,10 @@ public class ClientConnectObject implements Runnable {
             outputStream.writeObject(player);
         }
         outputStream.writeObject(ServerProtocol.END_UPDATE_PLAYERS);
+    }
+
+    private void sendUpdatedCardOnTop() throws IOException{
+        outputStream.writeObject(table.getCardOnTop());
     }
 
     private void waitForGameStart(){
@@ -252,17 +255,4 @@ public class ClientConnectObject implements Runnable {
         inputStream.close();
         socket.close();
     }
-
-    /**public void updateThreadPlayer(Player updatedPlayer){
-        threadPlayer = updatedPlayer;
-        try{
-            outputStream.writeObject(threadPlayer);
-        }catch(IOException e){
-            Logger.logError(e);
-        }
-    }
-
-    public int getId(){
-        return id;
-    }**/
 }

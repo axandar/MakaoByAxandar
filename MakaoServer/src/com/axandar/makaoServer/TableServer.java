@@ -241,4 +241,8 @@ public class TableServer {
     public void setQuanityTurnsToWait(int quanityTurnsToWait){
         this.quanityTurnsToWait = quanityTurnsToWait;
     }
+
+    public Card getCardOnTop(){
+        return cardOnTop;
+    }
 }

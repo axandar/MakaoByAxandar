@@ -1,5 +1,6 @@
 package com.axandar.makaoClient;
 
+import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Player;
 import com.axandar.makaoCore.utils.ServerProtocol;
 
@@ -83,13 +84,14 @@ public class Client implements Runnable{
     @Override
     public void run(){
         if(startConnection()) try{
-            toServer.writeObject(nickname);
+            setNickname();
             Object objectFromServer = fromServer.readObject();
 
             if(objectFromServer instanceof Integer){
                 int receivedFromServer = (Integer) objectFromServer;
                 if(receivedFromServer == ServerProtocol.GAME_STARTED){
                     getPlayerObject();
+                    getRestPlayersInfo();
                     startGame();
                 }
             }
@@ -98,17 +100,119 @@ public class Client implements Runnable{
         }
     }
 
+    private void setNickname() throws IOException{
+        toServer.writeObject(nickname);
+    }
+
     private void getPlayerObject() throws IOException, ClassNotFoundException{
         Object objectFromServer = fromServer.readObject();
         if(objectFromServer instanceof Player){
             properties.setPlayer((Player) objectFromServer);
+            properties.updateGame();
+        }
+    }
+
+    private void getRestPlayersInfo() throws IOException, ClassNotFoundException{
+        Object receivedObject = fromServer.readObject();
+        if(receivedObject instanceof Integer){
+            if((int) receivedObject == ServerProtocol.START_UPDATE_PLAYERS){
+                while((int) receivedObject != ServerProtocol.END_UPDATE_PLAYERS){
+                    receivedObject = fromServer.readObject();
+                    if(receivedObject instanceof Player){
+                        properties.addPlayerToList((Player) receivedObject);
+                    }
+                }
+                properties.updateGame();
+            }
         }
     }
 
     private void startGame() throws IOException, ClassNotFoundException, InterruptedException{
+        int receivedCommand = -1;
         while(properties.isClientRunning()){
-            // TODO: 14.03.2016 inicjalizacja listy wszystkich graczy
-            // TODO: 14.03.2016 inicjalizacja pierwszej karty z wierzchu
+            Object receivedObject = fromServer.readObject();
+            if(receivedObject instanceof Integer){
+                receivedCommand = (Integer) receivedObject;
+            }
+
+            if(receivedCommand == ServerProtocol.START_UPDATE_PLAYERS){
+                receivedCommand = updatePlayers();
+                setCardOnTop();//When other player end turn need to update cardOnTop
+            }
+
+            receivedObject = fromServer.readObject();
+            if((receivedObject instanceof Integer) &&
+                    (Integer) receivedObject == ServerProtocol.TURN_STARTED ){
+                //poczatek tury postronie klienta
+                while(properties.getCommand() != ServerProtocol.TURN_ENDED){
+                    if(properties.getCommand() == ServerProtocol.SEND_CARD_NORMAL){
+                        toServer.writeObject(properties.getCard());
+                        receivedObject = fromServer.readObject();
+                        if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.GOT_CARD){
+                            properties.setCommand(ServerProtocol.GOT_CARD);
+                            receivedObject = fromServer.readObject();
+                            if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_ACCEPTED){
+                                properties.setCommand(ServerProtocol.CARD_ACCEPTED);
+                            }else if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_NOTACCEPTED){
+                                properties.setCommand(ServerProtocol.CARD_NOTACCEPTED);
+                            }
+                        }else if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.GOT_ORDER_CARD){
+                            properties.setCommand(ServerProtocol.GOT_ORDER_CARD);
+                            toServer.writeObject(properties.getRequestedCard());
+                            receivedObject = fromServer.readObject();
+                            if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_ACCEPTED){
+                                properties.setCommand(ServerProtocol.CARD_ACCEPTED);
+                            }else if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_NOTACCEPTED){
+                                properties.setCommand(ServerProtocol.CARD_NOTACCEPTED);
+                            }
+                        }
+                    }
+                    // TODO: 13.03.2016 wyslanie informacji gdy gracz ma makao
+
+                    receivedObject = fromServer.readObject();
+                    if(receivedObject instanceof Player){
+                        properties.setPlayer((Player) receivedObject);
+                    }
+
+                    if(properties.getPlayer().isMakao()){
+                        toServer.writeObject(ServerProtocol.PLAYER_SET_MAKAO);
+                    }
+                    Thread.sleep(1000);
+                }
+
+                toServer.writeObject(ServerProtocol.TURN_ENDED);
+                properties.updateGame();
+            }
+        }
+    }
+
+    private int updatePlayers() throws IOException, ClassNotFoundException{
+        Object receivedObject;
+        int receivedCommand = -1;
+        while(receivedCommand != ServerProtocol.END_UPDATE_PLAYERS){
+            receivedObject = fromServer.readObject();
+
+            if(receivedObject instanceof Integer){
+                receivedCommand = (Integer) receivedObject;
+            }else if(receivedObject instanceof Player){
+                properties.setPlayerToUpdate((Player) receivedObject);
+                properties.updateGame();
+            }
+        }
+        return receivedCommand;
+    }
+
+    private void setCardOnTop() throws IOException, ClassNotFoundException{
+        Object receivedObject = fromServer.readObject();
+        if(receivedObject instanceof Card){
+            properties.setCardOnTop((Card) receivedObject);
+            properties.updateGame();
+        }
+    }
+
+    /**{
+        private void startGame() throws IOException, ClassNotFoundException, InterruptedException{
+        while(properties.isClientRunning()){
             Object receivedObjectFromServer = fromServer.readObject();
             int receivedCommand = -1;
             if(receivedObjectFromServer instanceof Integer){
@@ -125,6 +229,11 @@ public class Client implements Runnable{
                         properties.setPlayerToUpdate((Player) receivedObjectFromServer);
                         properties.updateGame();
                     }
+                }
+
+                receivedObjectFromServer = fromServer.readObject();
+                if(receivedObjectFromServer instanceof Card){
+                    properties.setCardOnTop((Card) receivedObjectFromServer);
                 }
             }
 
@@ -173,4 +282,7 @@ public class Client implements Runnable{
             }
         }
     }
+    }**/
 }
+
+
