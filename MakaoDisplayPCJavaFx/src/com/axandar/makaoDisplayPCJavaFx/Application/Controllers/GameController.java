@@ -54,6 +54,7 @@ public class GameController {
         clientProperties = new ClientProperties();
         Client client = new Client(clientProperties);
         Thread clientThread = new Thread(client);
+        // TODO: 17.03.2016 Adding TableClient in another Thread or do all in Controller?
         Runnable updateGUI = () -> {
             player = clientProperties.getPlayer();
             // TODO: 12.03.2016 aktualizacja calego gui wedlug wytycznych z clientProperties BEZ PETLI
