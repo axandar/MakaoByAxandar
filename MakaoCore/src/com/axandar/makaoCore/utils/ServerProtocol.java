@@ -14,21 +14,21 @@ public class ServerProtocol {
     public static int END_UPDATE_PLAYERS = 0x006;
     
     //Game commands
-    public static int ACCEPTED_NICK = 0x0A1;
-    public static int GAME_STARTED = 0x0A2;
-    public static int GAME_ENDED = 0x0A3;
+    public static int ACCEPTED_NICK = 0x101;
+    public static int GAME_STARTED = 0x102;
+    public static int GAME_ENDED = 0x103;
 
 
     //Player commands
-    public static int TURN_STARTED = 0x0B1;
-    public static int TURN_ENDED = 0x0B2;
-    public static int CARD_ACCEPTED = 0x0B3;
-    public static int CARD_NOTACCEPTED = 0x0B4;
-    public static int PLAYER_SET_MAKAO = 0x0B5;
-    public static int PLAYER_CANCEL_MAKAO = 0x0B5;
+    public static int TURN_STARTED = 0x201;
+    public static int TURN_ENDED = 0x202;
+    public static int CARD_ACCEPTED = 0x203;
+    public static int CARD_NOTACCEPTED = 0x204;
+    public static int PLAYER_SET_MAKAO = 0x205;
+    public static int PLAYER_CANCEL_MAKAO = 0x205;
 
     //Client commands
-    public static int SEND_CARD_NORMAL = 0x0C1;
-    //public static int SEND_CARD_ORDER = 0x0C2;
+    public static int SEND_CARD_NORMAL = 0x301;
+    //public static int SEND_CARD_ORDER = 0x302;
     
 }

@@ -8,7 +8,7 @@ public class Logger {
     private static String programName = "[LWJGL Makao]";
 
     public static void logConsole(String tag, String message){
-        System.out.print(programName + " --- [" + tag + "]: " + message);
+        System.out.println(programName + " --- [" + tag + "]: " + message);
     }
 
     public static void logError(Exception exception){

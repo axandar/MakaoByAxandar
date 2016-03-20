@@ -41,7 +41,7 @@ public class Main {
         trayIcon.displayMessage("Hello, World", "notification demo \n kkkk", TrayIcon.MessageType.NONE);**/
     }
 
-    private static void initializeFunctions(){
+    public static List<List<Function>> initializeFunctions(){
         List<Function> card0 = new ArrayList<>();
         card0.add(new Function(Function.CHANGE_COLOR, -1));
         card0.add(new Function(Function.CHANGE_COLOR, -1));
@@ -133,6 +133,7 @@ public class Main {
         card12.add(new Function(Function.GET_CARDS_BACKWARD, 5));
         functions.add(card12);
 
+        return functions;
     }
 
 }

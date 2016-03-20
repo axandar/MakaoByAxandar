@@ -66,20 +66,6 @@ public class TableServer {
         }
     }
 
-    /**private void updatePlayersInfo(){
-        List<ClientConnectObject> clients = sessionInfo.getClients();
-        for(int i = 0; i < clients.size(); i++){
-            ClientConnectObject client = clients.get(i);
-            int clientConnectObjectID = client.getId();
-            for(Player player : players){
-                if(player.getPlayerID() == clientConnectObjectID){
-                    client.updateThreadPlayer(player);
-                }
-            }
-            // TODO: 22.02.2016 is it working????
-        }
-    }**/
-
     public boolean putCardOnTable(Card card, Player player){
         if(isFunctionCorrectly(card, Function.CAMELEON_CARD)){
             graveyard.addCardToDeck(cardOnTop);
@@ -158,11 +144,11 @@ public class TableServer {
     }
 
     private boolean isColorCorrectly(Card card) {
-        return orderedCard.getIdColor() == card.getIdColor();
+        return cardOnTop.getIdColor() == card.getIdColor();
     }
 
     private boolean isTypeCorrectly(Card card) {
-        return orderedCard.getIdType() == card.getIdType();
+        return cardOnTop.getIdType() == card.getIdType();
     }
 
     public void endTurn(Player player){
@@ -173,7 +159,7 @@ public class TableServer {
             }
         }
         if(isNextPlayerFroward){
-            Player nextPlayer = getPreviousPlayer(player);
+            Player nextPlayer = getNextPlayer(player);
             while(nextPlayer.getToWaitTurns() != 0){
                 nextPlayer = getPreviousPlayer(nextPlayer);
             }
@@ -181,13 +167,13 @@ public class TableServer {
             sessionInfo.setJustEndedTurnPlayerId(nextPlayer.getPlayerID());
             setActualPlayer(nextPlayer);
         }else{
-            Player nextPlayer = getNextPlayer(player);
-            while(nextPlayer.getToWaitTurns() != 0){
-                nextPlayer.setToWaitTurns(nextPlayer.getToWaitTurns() - 1);
-                nextPlayer = getNextPlayer(nextPlayer);
+            Player previousPlayer = getPreviousPlayer(player);
+            while(previousPlayer.getToWaitTurns() != 0){
+                previousPlayer.setToWaitTurns(previousPlayer.getToWaitTurns() - 1);
+                previousPlayer = getPreviousPlayer(previousPlayer);
             }
-            sessionInfo.setJustEndedTurnPlayerId(nextPlayer.getPlayerID());
-            setActualPlayer(nextPlayer);
+            sessionInfo.setJustEndedTurnPlayerId(previousPlayer.getPlayerID());
+            setActualPlayer(previousPlayer);
         }
         // TODO: 22.02.2016 dla kazdego polaczenia wysylanie zaktualizowanej listy graczy
     }
@@ -196,10 +182,13 @@ public class TableServer {
         int requestedPlayerID = players.indexOf(player);
         int nextPlayerID;
 
-        if(requestedPlayerID == players.size()){
+        if(requestedPlayerID == players.size()-1){
             nextPlayerID = 0;
         }else nextPlayerID = requestedPlayerID + 1;
 
+        Logger.logConsole("Server getNextPlayer()", "players size = " + players.size());
+        Logger.logConsole("Server getNextPlayer()", "requestedPlayerID = " + requestedPlayerID);
+        Logger.logConsole("Server getNextPlayer()", "nextPlayerID = " + nextPlayerID);
         return players.get(nextPlayerID);
     }
 
@@ -207,9 +196,13 @@ public class TableServer {
         int requestedPlayerID = players.indexOf(player);
         int previousPlayerID;
 
-        if(requestedPlayerID == 0){
-            previousPlayerID = players.size();
-        }else previousPlayerID = requestedPlayerID - 1;
+        if(requestedPlayerID == players.size()-1){
+            previousPlayerID = 0;
+        }else previousPlayerID = requestedPlayerID + 1;
+
+        Logger.logConsole("Server getPreviousPlayer()", "players size = " + players.size());
+        Logger.logConsole("Server getPreviousPlayer()", "requestedPlayerID = " + requestedPlayerID);
+        Logger.logConsole("Server getPreviousPlayer()", "previousPlayerID = " + previousPlayerID);
 
         return players.get(previousPlayerID);
     }
@@ -234,11 +227,11 @@ public class TableServer {
         this.quantityCardsToTake = quantityCardsToTake;
     }
 
-    public int getQuanityTurnsToWait(){
+    public int getQuantityTurnsToWait(){
         return quanityTurnsToWait;
     }
 
-    public void setQuanityTurnsToWait(int quanityTurnsToWait){
+    public void setQuantityTurnsToWait(int quanityTurnsToWait){
         this.quanityTurnsToWait = quanityTurnsToWait;
     }
 

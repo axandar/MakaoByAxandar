@@ -23,8 +23,10 @@ public class GameSession implements Runnable{
     private static int numberOfPlayers;
     private static int port;
 
+    private ServerSocket sSocket;
+
     private volatile SessionInfo sessionInfo;
-    private volatile TableServer table = new TableServer();
+    private volatile TableServer table = setTableServer();
 
     public GameSession(int _numberOfPlayers, int _numberOfDecks, List<List<Function>> _functions, int _port) {
         numberOfPlayers = _numberOfPlayers;
@@ -37,11 +39,12 @@ public class GameSession implements Runnable{
         sessionInfo = new SessionInfo();
 
         try {
-            ServerSocket sSocket = new ServerSocket(port);
+            sSocket = new ServerSocket(port);
             Logger.logConsole("Starting server", "Server started at: " + new Date() + " at port: " + port);
 
             settingUpPlayers(sSocket);
             waitForPlayersGetReady();
+            Logger.logConsole("Server", sessionInfo.getPlayers().size()+"");
             table.initializeGame(numberOfDecks, sessionInfo.getPlayers(), functions, sessionInfo);
 
         } catch(IOException | InterruptedException e) {
@@ -52,6 +55,7 @@ public class GameSession implements Runnable{
     public void settingUpPlayers(ServerSocket serverSocket) throws IOException{
         int actualId = 0;
         while(actualId < numberOfPlayers) {
+            sessionInfo.increasePlayersNotReady();
             Socket socket = serverSocket.accept();
 
             ClientConnectObject clientConnectionObject = new ClientConnectObject(socket, actualId, sessionInfo, table);
@@ -68,5 +72,17 @@ public class GameSession implements Runnable{
         while(sessionInfo.getNumberOfPlayersNotReady() > 0){
             Thread.sleep(1000);
         }
+    }
+
+    public void closeSocket(){
+        try{
+            sSocket.close();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public TableServer setTableServer(){
+        return new TableServer();
     }
 }

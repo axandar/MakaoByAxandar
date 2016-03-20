@@ -38,7 +38,6 @@ public class ClientConnectObject implements Runnable {
 
     @Override
     public void run() {
-        sessionInfo.increasePlayersNotReady();
         String playerIp = socket.getInetAddress().toString();
         TAG += " " + playerIp;
         Logger.logConsole(TAG, playerIp);
@@ -131,7 +130,7 @@ public class ClientConnectObject implements Runnable {
         }
 
         if(threadPlayer.getCardsInHand().size() == 0){
-            playerEndedTurn();
+            playerEndedGame();
         }
 
         outputStream.writeObject(threadPlayer);
@@ -140,6 +139,7 @@ public class ClientConnectObject implements Runnable {
 
     private void turnProcessing() throws IOException, ClassNotFoundException{
         int receivedCommand = 0;
+        threadPlayer.setWasPuttedCard(false);
         while(isTurnNotEnded(receivedCommand)){
             Object receivedObject = inputStream.readObject();
             // TODO: 13.03.2016 sprawdzic przypadek gdy gracz ustawia makao
@@ -192,7 +192,6 @@ public class ClientConnectObject implements Runnable {
             threadPlayer.setWasPuttedCard(true);
         }else{
             outputStream.writeObject(ServerProtocol.CARD_NOTACCEPTED);
-            threadPlayer.setWasPuttedCard(false);
         }
     }
 
@@ -212,7 +211,7 @@ public class ClientConnectObject implements Runnable {
     private void playerNotPuttedCard(){
         if(table.getQuantityCardsToTake() > 0){
             playerGetCards();
-        }else if(table.getQuanityTurnsToWait() > 0){
+        }else if(table.getQuantityTurnsToWait() > 0){
             playerWaitTurns();
         }else{
             playerGetCard();
@@ -226,8 +225,8 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void playerWaitTurns(){
-        table.setPlayerToWaitTurns(threadPlayer, table.getQuanityTurnsToWait());
-        table.setQuanityTurnsToWait(0);
+        table.setPlayerToWaitTurns(threadPlayer, table.getQuantityTurnsToWait());
+        table.setQuantityTurnsToWait(0);
     }
 
     private void playerGetCard(){
@@ -235,7 +234,7 @@ public class ClientConnectObject implements Runnable {
         threadPlayer.setMakao(false);
     }
 
-    private void playerEndedTurn() throws IOException{
+    private void playerEndedGame() throws IOException{
         outputStream.writeObject(ServerProtocol.GAME_ENDED);
         threadPlayer.setMakao(true);
     }
