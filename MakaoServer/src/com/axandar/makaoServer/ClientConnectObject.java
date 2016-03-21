@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class ClientConnectObject implements Runnable {
 
+    // TODO: 22.03.2016 Add option for call "stop makao" on another player
+
     private String TAG = "Server";
 
     private Socket socket;
@@ -91,7 +93,7 @@ public class ClientConnectObject implements Runnable {
             sessionInfo.decreasePlayersNotReady();
         }
     }
-    //Call for handel another player changes in game
+
     private void handleAnotherPlayersTurns() throws InterruptedException, IOException{
         int savedJustEndedTurnPlayerId = sessionInfo.getJustEndedTurnPlayerId();
         while(savedJustEndedTurnPlayerId == sessionInfo.getJustEndedTurnPlayerId()){
@@ -145,7 +147,6 @@ public class ClientConnectObject implements Runnable {
         threadPlayer.setWasPuttedCard(false);
         while(isTurnNotEnded(receivedCommand)){
             Object receivedObject = inputStream.readObject();
-            // TODO: 13.03.2016 sprawdzic przypadek gdy gracz ustawia makao
             if(receivedObject instanceof Integer){
                 outputStream.writeObject(ServerProtocol.GOT_CMD);
                 receivedCommand = (int) receivedObject;
@@ -153,7 +154,7 @@ public class ClientConnectObject implements Runnable {
                 receivedCard((Card) receivedObject);
             }
 
-            handleMakaoCommand(receivedCommand);
+            isCommandMakao(receivedCommand);
         }
     }
 
@@ -203,12 +204,12 @@ public class ClientConnectObject implements Runnable {
                 || card.getFunction().getFunctionID() == Function.CHANGE_COLOR;
     }
 
-    private void handleMakaoCommand(int command){
+    private void isCommandMakao(int command){
         if(command == ServerProtocol.PLAYER_SET_MAKAO){
             threadPlayer.setMakao(true);
-        }else if(command == ServerProtocol.PLAYER_CANCEL_MAKAO){
+        }/**else if(command == ServerProtocol.PLAYER_CANCEL_MAKAO){
             threadPlayer.setMakao(false);
-        }
+        }**/
     }
 
     private void playerNotPuttedCard(){
@@ -239,7 +240,7 @@ public class ClientConnectObject implements Runnable {
 
     private void playerEndedGame() throws IOException{
         outputStream.writeObject(ServerProtocol.GAME_ENDED);
-        threadPlayer.setMakao(true);
+        //threadPlayer.setMakao(true);
         sessionInfo.removePlayer(threadPlayer);
     }
 
