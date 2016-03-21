@@ -119,6 +119,7 @@ public class TableServer {
 
     public boolean putOrderCardOnTable(Card card, Card _orderedCard, Player player){
         if(putCardOnTable(card, player)){
+            // TODO: 21.03.2016 exception when ordered card have functions
             orderedCard = _orderedCard;
             return true;
         }else return false;

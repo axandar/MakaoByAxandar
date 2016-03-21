@@ -197,7 +197,7 @@ public class ClientConnectObject implements Runnable {
 
     private boolean isOrderCard(Card card){
         return card.getFunction().getFunctionID() == Function.ORDER_CARD
-                || card.getFunction().getFunctionID() == Function.CAMELEON_CARD;
+                || card.getFunction().getFunctionID() == Function.CHANGE_COLOR;
     }
 
     private void handleMakaoCommand(int command){
