@@ -77,7 +77,7 @@ public class ClientObjectTest{
         assertEquals("Game started", receivedComand, ServerProtocol.GAME_STARTED);
 
         receivedFromServer = inputStream.readObject();
-        assertEquals("Received player", true, receivedFromServer instanceof Player);
+        assertEquals("Received updated client player", true, receivedFromServer instanceof Player);
 
         receivedFromServer = inputStream.readObject();
         assertEquals("Received command to start updating players",
@@ -87,7 +87,7 @@ public class ClientObjectTest{
         assertEquals("Start updating players", ServerProtocol.START_UPDATE_PLAYERS, receivedComand);
 
         receivedFromServer = inputStream.readObject();
-        assertEquals("Received player", true, receivedFromServer instanceof Player);
+        assertEquals("Received player to update in client", true, receivedFromServer instanceof Player);
 
         receivedFromServer = inputStream.readObject();
         assertEquals("Received command to end updating players", true,
@@ -148,7 +148,7 @@ public class ClientObjectTest{
         assertEquals("Server got Command", ServerProtocol.GOT_CMD, receivedComand);
 
         receivedFromServer = inputStream.readObject();
-        assertEquals("Received Player object", true, receivedFromServer instanceof Player);
+        assertEquals("Received updated client player object", true, receivedFromServer instanceof Player);
         assertEquals("Server send Player", true,
                 receivedFromServer instanceof Player);
     }
