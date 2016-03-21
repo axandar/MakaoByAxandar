@@ -3,7 +3,10 @@ package com.axandar.makaoServer;
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
+import com.axandar.makaoCore.utils.Logger;
 import com.axandar.makaoCore.utils.ServerProtocol;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -19,24 +22,48 @@ import static org.junit.Assert.*;
  */
 public class ClientObjectTest{
 
-    @Test
-    public void testTurn() throws IOException, ClassNotFoundException{
+    private static TableServer table = null;
+    private static ObjectInputStream inputStream = null;
+    private static ObjectOutputStream outputStream = null;
+    private static GameSession gs;
+    private static Socket socket;
 
-        TableServer table = new TableServer();
-        GameSession gs = new GameSession(1, 1, Main.initializeFunctions(), 5000){
+    @BeforeClass
+    public static void loadServerConnection(){
+        table = new TableServer();
+        gs = new GameSession(1, 1, Main.initializeFunctions(), 5000){
             @Override
             public TableServer setTableServer(){
                 return table;
             }
         };
 
-        Player player;
-
         Thread thread = new Thread(gs);
         thread.start();
-        Socket socket = new Socket("192.168.0.100", 5000);
-        ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-        ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+
+        try{
+            socket = new Socket("192.168.0.100", 5000);
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
+            inputStream = new ObjectInputStream(socket.getInputStream());
+        }catch(IOException e){
+            Logger.logError(e);
+        }
+    }
+
+    @AfterClass
+    public static void close(){
+        gs.closeSocket();
+        try{
+            inputStream.close();
+            outputStream.close();
+            socket.close();
+        }catch(IOException e){
+            Logger.logError(e);
+        }
+    }
+
+    @Test
+    public void testTurn() throws IOException, ClassNotFoundException{
 
         outputStream.writeObject("nickname");
         Object receivedFromServer = inputStream.readObject();
@@ -124,10 +151,5 @@ public class ClientObjectTest{
         assertEquals("Received Player object", true, receivedFromServer instanceof Player);
         assertEquals("Server send Player", true,
                 receivedFromServer instanceof Player);
-
-        gs.closeSocket();
-        inputStream.close();
-        outputStream.close();
-        socket.close();
     }
 }

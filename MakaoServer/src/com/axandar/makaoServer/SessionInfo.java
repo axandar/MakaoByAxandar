@@ -45,6 +45,10 @@ public class SessionInfo {
         players.add(player);
     }
 
+    public void removePlayer(Player player){
+        players.remove(player);
+    }
+
     public int decreasePlayersNotReady() {
         return playersNotReady--;
     }

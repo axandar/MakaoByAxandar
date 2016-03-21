@@ -52,6 +52,9 @@ public class ClientConnectObject implements Runnable {
             sendUpdatedPlayersInformation(sessionInfo.getPlayers());
             while(!sessionInfo.isGameExited()){
                 runningGame();
+                if(sessionInfo.getPlayers().size() == 1){
+                    sessionInfo.setGameExited(true);
+                }
             }
 
             closeSockets();
@@ -237,6 +240,7 @@ public class ClientConnectObject implements Runnable {
     private void playerEndedGame() throws IOException{
         outputStream.writeObject(ServerProtocol.GAME_ENDED);
         threadPlayer.setMakao(true);
+        sessionInfo.removePlayer(threadPlayer);
     }
 
     private void waitForTurn(){
@@ -250,6 +254,7 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void closeSockets() throws IOException{
+        Logger.logConsole(TAG, "Closing client socket");
         outputStream.close();
         inputStream.close();
         socket.close();
