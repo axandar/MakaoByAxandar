@@ -17,15 +17,16 @@ public class ClientProperties{
 
     private volatile boolean isGameUpdate;
     private volatile boolean isClientRunning;
-    private volatile int command;
     private volatile Card cardOnTop;
-    private volatile Card card;
+    private volatile Card cardToPut;
     private volatile Card requestedCard;
     private volatile Player player;
     private volatile Player playerToUpdate;
     private volatile List<Player> players = new ArrayList<>();
 
     private volatile boolean isTurnEnded;
+    private volatile boolean isCardAccepted;
+    private volatile boolean isMakaoSet;
 
     public String getNickName(){
         return nickName;
@@ -75,20 +76,12 @@ public class ClientProperties{
         isClientRunning = false;
     }
 
-    public int getCommand(){
-        return command;
+    public Card getCardToPut(){
+        return cardToPut;
     }
 
-    public void setCommand(int command){
-        this.command = command;
-    }
-
-    public Card getCard(){
-        return card;
-    }
-
-    public void setCard(Card card){
-        this.card = card;
+    public void setCardToPut(Card cardToPut){
+        this.cardToPut = cardToPut;
     }
 
     public Card getRequestedCard(){
@@ -141,5 +134,21 @@ public class ClientProperties{
 
     public boolean isTurnEnded(){
         return isTurnEnded;
+    }
+
+    public boolean isCardAccepted(){
+        return isCardAccepted;
+    }
+
+    public void setCardAccepted(boolean cardAccepted){
+        isCardAccepted = cardAccepted;
+    }
+
+    public boolean isMakaoSet(){
+        return isMakaoSet;
+    }
+
+    public void setMakaoSet(boolean makaoSet){
+        isMakaoSet = makaoSet;
     }
 }

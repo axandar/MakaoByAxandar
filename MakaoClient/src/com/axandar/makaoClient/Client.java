@@ -120,61 +120,58 @@ public class Client implements Runnable{
                 //each statement is updating all players information and ending turn of one player
             }else if(receivedCommand == ServerProtocol.TURN_STARTED){
                 while(!properties.isTurnEnded()){
-                    Card cardToSend = properties.getCard();
+                    Card cardToSend = properties.getCardToPut();
                     if(cardToSend != null){
                         if(cardToSend.getFunction().getFunctionID() == Function.ORDER_CARD
                                 || cardToSend.getFunction().getFunctionID() == Function.CHANGE_COLOR){
                             // TODO: 22.03.2016 Send order card to server
+                            toServer.writeObject(cardToSend);
+                            receivedObject = fromServer.readObject();
+                            if(receivedObject instanceof Integer){
+                                receivedCommand = (int) receivedObject;
+                                if(receivedCommand == ServerProtocol.GOT_ORDER_CARD){
+                                    toServer.writeObject(properties.getRequestedCard());
+                                    receivedObject = fromServer.readObject();
+                                    if(receivedObject instanceof Integer){
+                                        receivedCommand = (int) receivedObject;
+                                        if(receivedCommand == ServerProtocol.CARD_ACCEPTED){
+                                            properties.setCardToPut(null);
+                                            //ON CLIENT "if cardToPut is null && cardAccepted = true => then can delete card from hand"
+                                            properties.setCardAccepted(true);
+                                        }else if(receivedCommand == ServerProtocol.CARD_NOTACCEPTED){
+                                            properties.setCardAccepted(false);
+                                        }
+                                    }
+                                }
+                            }
                         }else{
-                            // TODO: 22.03.2016 Send normal card to server
+                            toServer.writeObject(cardToSend);
+                            receivedObject = fromServer.readObject();
+                            if(receivedObject instanceof Integer){
+                                receivedCommand = (int) receivedObject;
+                                if(receivedCommand == ServerProtocol.CARD_ACCEPTED){
+                                    properties.setCardToPut(null);
+                                    properties.setCardAccepted(true);
+                                }else if(receivedCommand == ServerProtocol.CARD_NOTACCEPTED){
+                                    properties.setCardAccepted(false);
+                                }
+                            }
                         }
                     }
                 }
+
+                if(properties.isMakaoSet()){
+                    setMakao();
+                }
+
+                endTurnOnServer();
+
+                receivedObject = fromServer.readObject();
+                if(receivedObject instanceof Player){
+                    properties.setPlayer((Player) receivedObject);
+                }
+
             }
-
-            /**receivedObject = fromServer.readObject();
-            if((receivedObject instanceof Integer) &&
-                    (Integer) receivedObject == ServerProtocol.TURN_STARTED ){
-                //poczatek tury postronie klienta
-                while(properties.getCommand() != ServerProtocol.TURN_ENDED){
-                    if(properties.getCommand() == ServerProtocol.SEND_CARD_NORMAL){
-                        toServer.writeObject(properties.getCard());
-                        receivedObject = fromServer.readObject();
-                        if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.GOT_CARD){
-                            properties.setCommand(ServerProtocol.GOT_CARD);
-                            receivedObject = fromServer.readObject();
-                            if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_ACCEPTED){
-                                properties.setCommand(ServerProtocol.CARD_ACCEPTED);
-                            }else if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_NOTACCEPTED){
-                                properties.setCommand(ServerProtocol.CARD_NOTACCEPTED);
-                            }
-                        }else if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.GOT_ORDER_CARD){
-                            properties.setCommand(ServerProtocol.GOT_ORDER_CARD);
-                            toServer.writeObject(properties.getRequestedCard());
-                            receivedObject = fromServer.readObject();
-                            if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_ACCEPTED){
-                                properties.setCommand(ServerProtocol.CARD_ACCEPTED);
-                            }else if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_NOTACCEPTED){
-                                properties.setCommand(ServerProtocol.CARD_NOTACCEPTED);
-                            }
-                        }
-                    }
-                    // TODO: 13.03.2016 wyslanie informacji gdy gracz ma makao
-
-                    receivedObject = fromServer.readObject();
-                    if(receivedObject instanceof Player){
-                        properties.setPlayer((Player) receivedObject);
-                    }
-
-                    if(properties.getPlayer().isMakao()){
-                        toServer.writeObject(ServerProtocol.PLAYER_SET_MAKAO);
-                    }
-                    Thread.sleep(1000);
-                }
-
-                toServer.writeObject(ServerProtocol.TURN_ENDED);
-                properties.updateGame();
-            }**/
         }
     }
 
@@ -200,79 +197,29 @@ public class Client implements Runnable{
         }
     }
 
-    /**{
-        private void startGame() throws IOException, ClassNotFoundException, InterruptedException{
-        while(properties.isClientRunning()){
-            Object receivedObjectFromServer = fromServer.readObject();
-            int receivedCommand = -1;
-            if(receivedObjectFromServer instanceof Integer){
-                receivedCommand = (Integer) receivedObjectFromServer;
-            }
-
-            if(receivedCommand == ServerProtocol.START_UPDATE_PLAYERS){
-                while(receivedCommand != ServerProtocol.END_UPDATE_PLAYERS){
-                    receivedObjectFromServer = fromServer.readObject();
-
-                    if(receivedObjectFromServer instanceof Integer){
-                        receivedCommand = (Integer) receivedObjectFromServer;
-                    }else if(receivedObjectFromServer instanceof Player){
-                        properties.setPlayerToUpdate((Player) receivedObjectFromServer);
-                        properties.updateGame();
-                    }
-                }
-
-                receivedObjectFromServer = fromServer.readObject();
-                if(receivedObjectFromServer instanceof Card){
-                    properties.setCardOnTop((Card) receivedObjectFromServer);
-                }
-            }
-
-            receivedObjectFromServer = fromServer.readObject();
-            if((receivedObjectFromServer instanceof Integer) &&
-                    (Integer) receivedObjectFromServer == ServerProtocol.TURN_STARTED ){
-                //poczatek tury postronie klienta
-                while(properties.getCommand() != ServerProtocol.TURN_ENDED){
-                    if(properties.getCommand() == ServerProtocol.SEND_CARD_NORMAL){
-                        toServer.writeObject(properties.getCard());
-                        Object receivedObject = fromServer.readObject();
-                        if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.GOT_CARD){
-                            properties.setCommand(ServerProtocol.GOT_CARD);
-                            receivedObject = fromServer.readObject();
-                            if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_ACCEPTED){
-                                properties.setCommand(ServerProtocol.CARD_ACCEPTED);
-                            }else if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_NOTACCEPTED){
-                                properties.setCommand(ServerProtocol.CARD_NOTACCEPTED);
-                            }
-                        }else if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.GOT_ORDER_CARD){
-                            properties.setCommand(ServerProtocol.GOT_ORDER_CARD);
-                            toServer.writeObject(properties.getRequestedCard());
-                            receivedObject = fromServer.readObject();
-                            if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_ACCEPTED){
-                                properties.setCommand(ServerProtocol.CARD_ACCEPTED);
-                            }else if(receivedObject instanceof Integer && (Integer) receivedObject == ServerProtocol.CARD_NOTACCEPTED){
-                                properties.setCommand(ServerProtocol.CARD_NOTACCEPTED);
-                            }
-                        }
-                    }
-                    // TODO: 13.03.2016 wyslanie informacji gdy gracz ma makao
-
-                    receivedObjectFromServer = fromServer.readObject();
-                    if(receivedObjectFromServer instanceof Player){
-                        properties.setPlayer((Player) receivedObjectFromServer);
-                    }
-
-                    if(properties.getPlayer().isMakao()){
-                        toServer.writeObject(ServerProtocol.PLAYER_SET_MAKAO);
-                    }
-                    Thread.sleep(1000);
-                }
-
-                toServer.writeObject(ServerProtocol.TURN_ENDED);
-                properties.updateGame();
+    private void setMakao() throws IOException, ClassNotFoundException{
+        // TODO: 22.03.2016 set throw error when tried send command too many times
+        toServer.writeObject(ServerProtocol.PLAYER_SET_MAKAO);
+        Object receivedObject = fromServer.readObject();
+        if(receivedObject instanceof Integer){
+            int receivedCommand = (int) receivedObject;
+            if(receivedCommand != ServerProtocol.GOT_CMD){
+                setMakao();
             }
         }
     }
-    }**/
+
+    private void endTurnOnServer() throws IOException, ClassNotFoundException{
+        // TODO: 22.03.2016 set throw error when tried send command too many times
+        toServer.writeObject(ServerProtocol.TURN_ENDED);
+        Object receivedObject = fromServer.readObject();
+        if(receivedObject instanceof Integer){
+            int receivedCommand = (int) receivedObject;
+            if(receivedCommand != ServerProtocol.GOT_CMD){
+                endTurnOnServer();
+            }
+        }
+    }
 }
 
 

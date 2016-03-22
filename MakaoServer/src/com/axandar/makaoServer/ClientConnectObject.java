@@ -205,7 +205,9 @@ public class ClientConnectObject implements Runnable {
 
     private void isCommandMakao(int command){
         if(command == ServerProtocol.PLAYER_SET_MAKAO){
-            threadPlayer.setMakao(true);
+            if(threadPlayer.getCardsInHand().size() == 1){
+                threadPlayer.setMakao(true);
+            }
         }/**else if(command == ServerProtocol.PLAYER_CANCEL_MAKAO){
             threadPlayer.setMakao(false);
         }**/

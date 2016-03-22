@@ -67,6 +67,7 @@ public class TableServer {
     }
 
     public boolean putCardOnTable(Card card, Player player){
+        // TODO: 22.03.2016 checking if is oredered card, for how many turns and remember to make possibility of change order
         if(isFunctionCorrectly(card, Function.CAMELEON_CARD)){
             graveyard.addCardToDeck(cardOnTop);
             cardOnTop = card;
