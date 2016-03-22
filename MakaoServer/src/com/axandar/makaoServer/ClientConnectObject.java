@@ -99,12 +99,11 @@ public class ClientConnectObject implements Runnable {
         while(savedJustEndedTurnPlayerId == sessionInfo.getJustEndedTurnPlayerId()){
             Thread.sleep(1000);
         }// TODO: 24.02.2016 mozliwy blad // sprawdzic poprawnosc
-        sendUpdatedPlayersInformation(sessionInfo.getPlayers());// TODO: 17.03.2016 is needed to send all players informations? 
+        sendUpdatedPlayersInformation(sessionInfo.getPlayers());
         sendUpdatedCardOnTop();
     }
 
     private void sendUpdatedPlayersInformation(List<Player> players) throws IOException{
-        // TODO: 22.02.2016 wysylanie zaktualizowanych infomracji o graczach(np. ilosc kart w reku)
         outputStream.writeObject(ServerProtocol.START_UPDATE_PLAYERS);
         for(Player player:players){
             outputStream.writeObject(player);

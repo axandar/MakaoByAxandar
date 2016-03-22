@@ -25,6 +25,8 @@ public class ClientProperties{
     private volatile Player playerToUpdate;
     private volatile List<Player> players = new ArrayList<>();
 
+    private volatile boolean isTurnEnded;
+
     public String getNickName(){
         return nickName;
     }
@@ -127,5 +129,17 @@ public class ClientProperties{
     
     public void addPlayerToList(Player player){
         players.add(player.getPlayerID(), player); // TODO: 17.03.2016 Check if players are in order
+    }
+
+    public void endTurn(){
+        isTurnEnded = true;
+    }
+
+    public void startTurn(){
+        isTurnEnded = false;
+    }
+
+    public boolean isTurnEnded(){
+        return isTurnEnded;
     }
 }

@@ -95,7 +95,7 @@ public class ClientObjectTest{
 
         receivedComand = (int) receivedFromServer;
         assertEquals("End updating players", ServerProtocol.END_UPDATE_PLAYERS, receivedComand);
-
+        //startGame() in Client.java
         receivedFromServer = inputStream.readObject();
         assertEquals("Received command to Turn starting", true, receivedFromServer instanceof Integer);
         receivedComand = (int) receivedFromServer;

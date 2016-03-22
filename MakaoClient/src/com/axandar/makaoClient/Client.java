@@ -1,6 +1,7 @@
 package com.axandar.makaoClient;
 
 import com.axandar.makaoCore.logic.Card;
+import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
 import com.axandar.makaoCore.utils.ServerProtocol;
 
@@ -16,6 +17,8 @@ import static com.axandar.makaoCore.utils.Logger.logError;
  */
 public class Client implements Runnable{
 
+    // TODO: 22.03.2016 make handle error in "instanceof" statements(some kind of error handling)
+
     private String ip;
     private int port;
     private String nickname;
@@ -30,41 +33,6 @@ public class Client implements Runnable{
         ip = properties.getIp();
         port = properties.getPort();
         nickname = properties.getNickName();
-
-        /**Socket socketConnection = null;
-        try {
-            socketConnection = new Socket("127.0.0.1", 5000);
-
-            ObjectOutputStream clientOutputStream = new ObjectOutputStream(socketConnection.getOutputStream());
-            ObjectInputStream clientInputStream = new ObjectInputStream(socketConnection.getInputStream());
-
-            clientOutputStream.writeObject("Axandar");
-
-            Object receivedMessage = clientInputStream.readObject();
-
-            if(receivedMessage instanceof Integer){
-                System.out.println((Integer) receivedMessage);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }**/
-
-        /**Socket socketConnection = null;
-        try {
-            socketConnection = new Socket("127.0.0.1", 5000);
-
-            ObjectOutputStream clientOutputStream = new ObjectOutputStream(socketConnection.getOutputStream());
-            //ObjectInputStream clientInputStream = new ObjectInputStream(socketConnection.getInputStream());
-
-            clientOutputStream.writeObject(1);
-            Thread.sleep(10000);
-            clientOutputStream.writeObject(2);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }**/
 
     }
 
@@ -85,16 +53,7 @@ public class Client implements Runnable{
     public void run(){
         if(startConnection()) try{
             setNickname();
-            Object objectFromServer = fromServer.readObject();
-
-            if(objectFromServer instanceof Integer){
-                int receivedFromServer = (Integer) objectFromServer;
-                if(receivedFromServer == ServerProtocol.GAME_STARTED){
-                    getPlayerObject();
-                    getRestPlayersInfo();
-                    startGame();
-                }
-            }
+            handleCommand();
         }catch(IOException | ClassNotFoundException | InterruptedException e){
             logError(e);
         }
@@ -102,6 +61,21 @@ public class Client implements Runnable{
 
     private void setNickname() throws IOException{
         toServer.writeObject(nickname);
+    }
+
+    private void handleCommand() throws IOException, ClassNotFoundException, InterruptedException{
+        Object objectFromServer = fromServer.readObject();
+
+        if(objectFromServer instanceof Integer){
+            int receivedCommand = (int) objectFromServer;
+            if(receivedCommand == ServerProtocol.ACCEPTED_NICK){
+                handleCommand();
+            }else if(receivedCommand == ServerProtocol.GAME_STARTED){
+                getPlayerObject();
+                getRestPlayersInfo();
+                startGame();
+            }
+        }
     }
 
     private void getPlayerObject() throws IOException, ClassNotFoundException{
@@ -116,10 +90,15 @@ public class Client implements Runnable{
         Object receivedObject = fromServer.readObject();
         if(receivedObject instanceof Integer){
             if((int) receivedObject == ServerProtocol.START_UPDATE_PLAYERS){
-                while((int) receivedObject != ServerProtocol.END_UPDATE_PLAYERS){
+                boolean isUpdatingPlayers = true;
+                while(isUpdatingPlayers){
                     receivedObject = fromServer.readObject();
                     if(receivedObject instanceof Player){
                         properties.addPlayerToList((Player) receivedObject);
+                    }else if(receivedObject instanceof Integer){
+                        if((int) receivedObject == ServerProtocol.END_UPDATE_PLAYERS){
+                            isUpdatingPlayers = false;
+                        }
                     }
                 }
                 properties.updateGame();
@@ -136,11 +115,24 @@ public class Client implements Runnable{
             }
 
             if(receivedCommand == ServerProtocol.START_UPDATE_PLAYERS){
-                receivedCommand = updatePlayers();
+                updatePlayers();
                 setCardOnTop();//When other player end turn need to update cardOnTop
+                //each statement is updating all players information and ending turn of one player
+            }else if(receivedCommand == ServerProtocol.TURN_STARTED){
+                while(!properties.isTurnEnded()){
+                    Card cardToSend = properties.getCard();
+                    if(cardToSend != null){
+                        if(cardToSend.getFunction().getFunctionID() == Function.ORDER_CARD
+                                || cardToSend.getFunction().getFunctionID() == Function.CHANGE_COLOR){
+                            // TODO: 22.03.2016 Send order card to server
+                        }else{
+                            // TODO: 22.03.2016 Send normal card to server
+                        }
+                    }
+                }
             }
 
-            receivedObject = fromServer.readObject();
+            /**receivedObject = fromServer.readObject();
             if((receivedObject instanceof Integer) &&
                     (Integer) receivedObject == ServerProtocol.TURN_STARTED ){
                 //poczatek tury postronie klienta
@@ -182,24 +174,22 @@ public class Client implements Runnable{
 
                 toServer.writeObject(ServerProtocol.TURN_ENDED);
                 properties.updateGame();
-            }
+            }**/
         }
     }
 
-    private int updatePlayers() throws IOException, ClassNotFoundException{
-        Object receivedObject;
+    private void updatePlayers() throws IOException, ClassNotFoundException{
         int receivedCommand = -1;
         while(receivedCommand != ServerProtocol.END_UPDATE_PLAYERS){
-            receivedObject = fromServer.readObject();
+            Object receivedObject = fromServer.readObject();
 
             if(receivedObject instanceof Integer){
-                receivedCommand = (Integer) receivedObject;
+                receivedCommand = (int) receivedObject;
             }else if(receivedObject instanceof Player){
                 properties.setPlayerToUpdate((Player) receivedObject);
                 properties.updateGame();
             }
         }
-        return receivedCommand;
     }
 
     private void setCardOnTop() throws IOException, ClassNotFoundException{
