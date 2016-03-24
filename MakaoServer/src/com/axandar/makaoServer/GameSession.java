@@ -14,7 +14,7 @@ import java.util.List;
  * Created by Axandar on 11.02.2016.
  */
 public class GameSession implements Runnable{
-
+    // TODO: 24.03.2016 find way to show server ip to user
     private List<Thread> clientsThreads = new ArrayList<>();
     private List<ClientConnectObject> clients = new ArrayList<>();
 
@@ -41,6 +41,7 @@ public class GameSession implements Runnable{
         try {
             sSocket = new ServerSocket(port);
             Logger.logConsole("Starting server", "Server started at: " + new Date() + " at port: " + port);
+            Logger.logConsole("Starting server", "Server started at ip:" + sSocket.getInetAddress().toString());
 
             settingUpPlayers(sSocket);
             waitForPlayersGetReady();

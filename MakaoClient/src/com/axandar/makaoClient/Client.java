@@ -36,6 +36,16 @@ public class Client implements Runnable{
 
     }
 
+    @Override
+    public void run(){
+        if(startConnection()) try{
+            setNickname();
+            handleCommand();
+        }catch(IOException | ClassNotFoundException | InterruptedException e){
+            logError(e);
+        }
+    }
+
     private boolean startConnection(){
         try{
             connectionToServer = new Socket(ip, port);
@@ -47,16 +57,6 @@ public class Client implements Runnable{
             e.printStackTrace();
         }
         return false;
-    }
-
-    @Override
-    public void run(){
-        if(startConnection()) try{
-            setNickname();
-            handleCommand();
-        }catch(IOException | ClassNotFoundException | InterruptedException e){
-            logError(e);
-        }
     }
 
     private void setNickname() throws IOException{
@@ -119,6 +119,7 @@ public class Client implements Runnable{
                 setCardOnTop();//When other player end turn need to update cardOnTop
                 //each statement is updating all players information and ending turn of one player
             }else if(receivedCommand == ServerProtocol.TURN_STARTED){
+                properties.startTurn();
                 while(!properties.isTurnEnded()){
                     Card cardToSend = properties.getCardToPut();
                     if(cardToSend != null){
@@ -138,8 +139,10 @@ public class Client implements Runnable{
                                             properties.setCardToPut(null);
                                             //ON CLIENT "if cardToPut is null && cardAccepted = true => then can delete card from hand"
                                             properties.setCardAccepted(true);
+                                            properties.updateGame();
                                         }else if(receivedCommand == ServerProtocol.CARD_NOTACCEPTED){
                                             properties.setCardAccepted(false);
+                                            properties.updateGame();
                                         }
                                     }
                                 }
@@ -152,8 +155,10 @@ public class Client implements Runnable{
                                 if(receivedCommand == ServerProtocol.CARD_ACCEPTED){
                                     properties.setCardToPut(null);
                                     properties.setCardAccepted(true);
+                                    properties.updateGame();
                                 }else if(receivedCommand == ServerProtocol.CARD_NOTACCEPTED){
                                     properties.setCardAccepted(false);
+                                    properties.updateGame();
                                 }
                             }
                         }
@@ -169,6 +174,7 @@ public class Client implements Runnable{
                 receivedObject = fromServer.readObject();
                 if(receivedObject instanceof Player){
                     properties.setPlayer((Player) receivedObject);
+                    properties.updateGame();
                 }
 
             }
@@ -205,7 +211,10 @@ public class Client implements Runnable{
             int receivedCommand = (int) receivedObject;
             if(receivedCommand != ServerProtocol.GOT_CMD){
                 setMakao();
+            }else{
+                properties.updateGame();
             }
+
         }
     }
 

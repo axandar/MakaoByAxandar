@@ -88,7 +88,7 @@ public class ClientProperties{
         return requestedCard;
     }
 
-    public void setRequestedCard(Card requestedCard){
+    public void setOrderedCard(Card requestedCard){
         this.requestedCard = requestedCard;
     }
 
@@ -121,7 +121,7 @@ public class ClientProperties{
     }
     
     public void addPlayerToList(Player player){
-        players.add(player.getPlayerID(), player); // TODO: 17.03.2016 Check if players are in order
+        players.add(player.getPlayerID(), player);
     }
 
     public void endTurn(){

@@ -4,15 +4,18 @@ import com.axandar.makaoClient.Client;
 import com.axandar.makaoClient.ClientProperties;
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Deck;
+import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
+import com.axandar.makaoCore.utils.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,16 +25,18 @@ import java.util.List;
  */
 public class GameController {
 
+    private final String TAG = "Client side";
+
     private volatile ClientProperties clientProperties;
     private Deck deckInHand = new Deck();
     private Player player;
-    private Card clickedCard;
-    private Card orderedCard;
+    private Card clickedCard = null;
+    private Card orderedCard = null;
 
     private List<String> imageViewsIDs = new ArrayList<>();
 
     @FXML
-    private FlowPane cardsInHand;
+    private HBox cardsInHand;
 
     @FXML
     private ListView<String> playersList;
@@ -49,29 +54,39 @@ public class GameController {
 
      dialogStage.showAndWait();**/
 
-    @FXML // TODO: 12.03.2016 przeniesc do miejsca w menu, gdzie startuje gra
-    private void startGame(){
+    @FXML
+    public void startGame(){
+        Logger.logConsole(TAG, "Game started");
         clientProperties = new ClientProperties();
+        clientProperties.setIp("0.0.0.0");
+        clientProperties.setPort(5000);
+        clientProperties.setNickName("Axandar");
         Client client = new Client(clientProperties);
         Thread clientThread = new Thread(client);
         // TODO: 17.03.2016 Adding TableClient in another Thread or do all in Controller?
         Runnable updateGUI = () -> {
             player = clientProperties.getPlayer();
-            // TODO: 12.03.2016 aktualizacja calego gui wedlug wytycznych z clientProperties BEZ PETLI
-            //dodawanie nowych kart do ręki
-            List<Card> cardsToAdd = getNewCards();
-            cardsToAdd.forEach(this::addCardToHandGUI);
+            if(clientProperties.isCardAccepted()){
+                removeCardFromHand(clientProperties.getCardToPut());
+            }else{
+                // TODO: 24.03.2016 Show communicate about failure of putting card
+            }
 
-            //aktualizacja ilosc kart u innych graczy
-            Player playerToUpdate = clientProperties.getPlayerToUpdate();
-            for(Object objectFromList : playersList.getItems()){
-                String playerStats = (String) objectFromList;
-                if(playerStats.contains(playerToUpdate.getPlayerName())){
-                    playerStats = playerToUpdate.getPlayerName() + " - " + playerToUpdate.getCardsInHand().size();
-                    int indexToChange = playersList.getItems().indexOf(objectFromList);
-                    playersList.getItems().remove(indexToChange);
-                    playersList.getItems().add(indexToChange, playerStats);
+            if(cardsInHand.getChildren().size() == 0){
+                //player.getCardsInHand().forEach(this::addCardToHandGUI);
+                for(Card card:player.getCardsInHand()){
+                    Logger.logConsole(TAG, "Added card to hand:" + card.getIdColor() + " - " +
+                        card.getIdType());
+                    addCardToHandGUI(card);
                 }
+            }else{
+                List<Card> cardsToAdd = getNewCards();
+                cardsToAdd.forEach(this::addCardToHandGUI);
+            }
+
+            List<Player> listOfRestPlayers = clientProperties.getPlayers();
+            for(Player player:listOfRestPlayers){
+                playersList.getItems().add(player.getPlayerName());
             }
 
         };
@@ -113,6 +128,38 @@ public class GameController {
         return newCards;
     }
 
+    @FXML
+    public void sendCardToServer(){
+        if(clickedCard != null){
+            clientProperties.setCardToPut(clickedCard);
+            if(clickedCard.getFunction().getFunctionID() == Function.ORDER_CARD
+                    || clickedCard.getFunction().getFunctionID() == Function.CHANGE_COLOR){
+                if(orderedCard != null){
+                    clientProperties.setOrderedCard(orderedCard);
+                }else clientProperties.setOrderedCard(new Card(1, 1, new Function(4, 0)));
+            }
+        }
+    }
+
+    private void removeCardFromHand(Card card){
+        String cardFileName = card.getIdType() + "-" + card.getIdColor();
+        for(Node node:cardsInHand.getChildren()){
+            if(node.getId().equals(cardFileName)){
+                cardsInHand.getChildren().remove(node);
+                break;
+            }
+        }
+    }
+
+    @FXML
+    public void endTurn(){
+        clientProperties.endTurn();
+
+        addCardToHandGUI(new Card(1, 1, new Function(6, 0)));
+        addCardToHandGUI(new Card(2, 2, new Function(6, 0)));
+        addCardToHandGUI(new Card(3, 3, new Function(6, 0)));
+    }
+
     private void addCardToHandGUI(Card card){
         int cardColor = card.getIdColor();
         int cardType = card.getIdType();
@@ -132,7 +179,9 @@ public class GameController {
             for(Card cardFromPlayer : player.getCardsInHand()){
                 String cardName = cardFromPlayer.getIdType() + "-" + cardFromPlayer.getIdColor();
                 if(clickedImage.getId().equals(cardName)){
-                    clickedCard = cardFromPlayer;
+                    if(clickedCard != null){
+                        orderedCard = cardFromPlayer;
+                    }else  clickedCard = cardFromPlayer;
                     break;
                 }
             }
@@ -142,6 +191,7 @@ public class GameController {
 
         if(deckInHand.deckLength() > 1){
             Separator separator = new Separator();
+            separator.setId(cardFileName);
             separator.setPrefHeight(150);
 
             cardsInHand.getChildren().add(separator);
@@ -151,62 +201,7 @@ public class GameController {
 
     @FXML
     private void initialize() {
-        /**clientMain = new Client();
-        Label label = new Label("");
-        cardsInHand.getChildren().add(label);
-        Thread t = new Thread(clientMain);
-        t.start();
-        Task task = new Task<Void>() {
-            @Override
-            public Void call() throws Exception {
-                while(clientMain.isClientRunning()){
 
-                    if(clientMain.isGameUpdate()){//Sprawdza czy byla aktualizacja klienta
-                        Platform.runLater(new Runnable() {
-                            public void run() {
-                                label.setText(clientMain.isGameUpdate()+"");
-                                System.out.println(clientMain.isGameUpdate());
-                                //aktualizacja interfejsu
-                            }
-                        });
-                    }
-                    Thread.sleep(2000);
-                }
-                return null;
-            }
-        };
-        Thread th = new Thread(task);
-        th.setDaemon(true);
-        th.start();**/
     }
-
-
-   /** private void putCardInHand(Card card){
-        int cardColor = card.getIdColor();
-        int cardType = card.getIdType();
-        String cardFileName = cardType + "-" + cardColor;
-
-        ImageView imageView = new ImageView();
-        Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
-        imageView.setImage(image);
-        imageView.setFitWidth(96);
-        imageView.setFitHeight(150);
-        imageView.setId(cardFileName);
-        imageViewsIDs.add(cardFileName);
-
-        imageView.setOnMouseClicked(event -> {
-            ImageView clickedImage = (ImageView) event.getSource();
-            System.out.println(cardsInHand.getChildren().indexOf(clickedImage));
-        });
-
-        cardsInHand.getChildren().add(imageView);
-
-        if(deckInHand.deckLength() > 1){
-            Separator separator = new Separator();
-            separator.setPrefHeight(150);
-
-            cardsInHand.getChildren().add(separator);
-        }
-    }**/
 
 }
