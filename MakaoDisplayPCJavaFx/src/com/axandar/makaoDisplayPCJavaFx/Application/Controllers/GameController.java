@@ -65,18 +65,19 @@ public class GameController {
         Thread clientThread = new Thread(client);
         // TODO: 17.03.2016 Adding TableClient in another Thread or do all in Controller?
         Runnable updateGUI = () -> {
+            Logger.logConsole(TAG, "Updated GUI");
+
             player = clientProperties.getPlayer();
-            if(clientProperties.isCardAccepted()){
+            if(clientProperties.isCardAccepted() && clientProperties.getCardToPut() != null){
                 removeCardFromHand(clientProperties.getCardToPut());
-            }else{
+            }else if(clientProperties.getCardToPut() != null){
                 // TODO: 24.03.2016 Show communicate about failure of putting card
             }
-
+            Logger.logConsole(TAG, cardsInHand.getChildren().size()+"");
             if(cardsInHand.getChildren().size() == 0){
-                //player.getCardsInHand().forEach(this::addCardToHandGUI);
+                Logger.logConsole(TAG, "Started adding cards");
                 for(Card card:player.getCardsInHand()){
-                    Logger.logConsole(TAG, "Added card to hand:" + card.getIdColor() + " - " +
-                        card.getIdType());
+                    Logger.logConsole(TAG, "Added card to hand:" + card.getIdType() + "-" + card.getIdColor());
                     addCardToHandGUI(card);
                 }
             }else{
@@ -85,6 +86,7 @@ public class GameController {
             }
 
             List<Player> listOfRestPlayers = clientProperties.getPlayers();
+            playersList.getItems().remove(0, playersList.getItems().size());
             for(Player player:listOfRestPlayers){
                 playersList.getItems().add(player.getPlayerName());
             }
@@ -109,7 +111,7 @@ public class GameController {
 
 
 
-        clientThread.setDaemon(true);//aby w razie problemu dokonczylo komunikacje z serwerem
+        //clientThread.setDaemon(true);//aby w razie problemu dokonczylo komunikacje z serwerem
         clientThread.start();
         updatingGUI.start();
     }
@@ -139,6 +141,7 @@ public class GameController {
                 }else clientProperties.setOrderedCard(new Card(1, 1, new Function(4, 0)));
             }
         }
+        // TODO: 25.03.2016 BUG: endless loop for update gui after send and not receiving accept
     }
 
     private void removeCardFromHand(Card card){
@@ -164,7 +167,7 @@ public class GameController {
         int cardColor = card.getIdColor();
         int cardType = card.getIdType();
         String cardFileName = cardType + "-" + cardColor;
-
+        Logger.logConsole(TAG, "File name of card to add in hand: " + cardFileName);
         ImageView imageView = new ImageView();
         Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
         imageView.setImage(image);

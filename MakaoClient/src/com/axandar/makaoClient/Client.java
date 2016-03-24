@@ -3,6 +3,7 @@ package com.axandar.makaoClient;
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
+import com.axandar.makaoCore.utils.Logger;
 import com.axandar.makaoCore.utils.ServerProtocol;
 
 import java.io.IOException;
@@ -18,6 +19,8 @@ import static com.axandar.makaoCore.utils.Logger.logError;
 public class Client implements Runnable{
 
     // TODO: 22.03.2016 make handle error in "instanceof" statements(some kind of error handling)
+
+    private final String TAG = "Client backend";
 
     private String ip;
     private int port;
@@ -38,6 +41,8 @@ public class Client implements Runnable{
 
     @Override
     public void run(){
+        Logger.logConsole(TAG, "Started client backend");
+        properties.clientStarted();
         if(startConnection()) try{
             setNickname();
             handleCommand();
@@ -65,15 +70,18 @@ public class Client implements Runnable{
 
     private void handleCommand() throws IOException, ClassNotFoundException, InterruptedException{
         Object objectFromServer = fromServer.readObject();
-
         if(objectFromServer instanceof Integer){
+            Logger.logConsole(TAG, "Received command as:" + (int) objectFromServer);
             int receivedCommand = (int) objectFromServer;
             if(receivedCommand == ServerProtocol.ACCEPTED_NICK){
                 handleCommand();
             }else if(receivedCommand == ServerProtocol.GAME_STARTED){
+                Logger.logConsole(TAG, "Game started at backend");
                 getPlayerObject();
                 getRestPlayersInfo();
                 startGame();
+            }else{
+                handleCommand();
             }
         }
     }
@@ -82,6 +90,7 @@ public class Client implements Runnable{
         Object objectFromServer = fromServer.readObject();
         if(objectFromServer instanceof Player){
             properties.setPlayer((Player) objectFromServer);
+            Logger.logConsole(TAG, "Received new player object");
             properties.updateGame();
         }
     }

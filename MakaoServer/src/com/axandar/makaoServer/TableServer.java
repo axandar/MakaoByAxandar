@@ -14,6 +14,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * Created by Axandar on 25.01.2016.
  */
 public class TableServer {
+
+    private final String TAG = "TableServer on server";
+
     // TODO: 15.03.2016 refactoring
     public static int NUMBER_OF_DECKS = 0;
     public static List<List<Function>> functionsList;
@@ -45,6 +48,7 @@ public class TableServer {
         deck = new Deck(NUMBER_OF_DECKS, functionsList);
 
         cardOnTop = deck.getCardFromDeck();
+        Logger.logConsole(TAG, "Card on top: " + cardOnTop.getIdType() + "-" + cardOnTop.getIdColor());
         givePlayersCards();
         //updatePlayersInfo(); // TODO: 15.03.2016 raczej niepotrzebne???
 
