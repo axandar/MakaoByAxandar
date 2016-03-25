@@ -50,14 +50,12 @@ public class TableServer {
         cardOnTop = deck.getCardFromDeck();
         Logger.logConsole(TAG, "Card on top: " + cardOnTop.getIdType() + "-" + cardOnTop.getIdColor());
         givePlayersCards();
-        //updatePlayersInfo(); // TODO: 15.03.2016 raczej niepotrzebne???
 
         int firstPlayerID =  ThreadLocalRandom.current().nextInt(0, players.size());
         Logger.logConsole("server initializing", "first player id: " + firstPlayerID);
-        actualPlayer = players.get(firstPlayerID);// TODO: 14.02.2016 dodac losowa kolejnosc graczy w liscie
+        actualPlayer = players.get(firstPlayerID);
         sessionInfo.setJustEndedTurnPlayerId(actualPlayer.getPlayerID());
         sessionInfo.setGameStarted(true);
-        // TODO: 24.02.2016 inicjalizacja zmienne justEndedTurnPlayerId w sessionInfo na pierwszego grcza w tabeli
     }
 
     private void givePlayersCards(){
@@ -70,25 +68,22 @@ public class TableServer {
         }
     }
 
-    public boolean putCardOnTable(Card card, Player player){
+    public boolean putCardOnTable(Card card){
         // TODO: 22.03.2016 checking if is oredered card, for how many turns and remember to make possibility of change order
         if(isFunctionCorrectly(card, Function.CAMELEON_CARD)){
             graveyard.addCardToDeck(cardOnTop);
             cardOnTop = card;
-            player.setWasPuttedCard(true);
             return true;
         }else if(isFunctionCorrectly(card, Function.ORDER_CARD)){
             if(isTypeCorrectly(card)){
                 graveyard.addCardToDeck(cardOnTop);
                 cardOnTop = card;
-                player.setWasPuttedCard(true);
                 return true;
             }else return false;
         }else if(isFunctionCorrectly(card, Function.CHANGE_COLOR)){
             if(isColorCorrectly(card)){
                 graveyard.addCardToDeck(cardOnTop);
                 cardOnTop = card;
-                player.setWasPuttedCard(true);
                 return true;
             }else return false;
         }else if(isFunctionCorrectly(card, Function.GET_CARDS_BACKWARD)
@@ -96,7 +91,6 @@ public class TableServer {
             if(isTypeCorrectly(card) || isColorCorrectly(card)){
                 graveyard.addCardToDeck(cardOnTop);
                 cardOnTop = card;
-                player.setWasPuttedCard(true);
                 quantityCardsToTake += card.getFunction().getFunctionValue();
                 if(isFunctionCorrectly(card, Function.GET_CARDS_BACKWARD)){
                     isNextPlayerFroward = false;
@@ -107,7 +101,6 @@ public class TableServer {
             if(isTypeCorrectly(card) || isColorCorrectly(card)){
                 graveyard.addCardToDeck(cardOnTop);
                 cardOnTop = card;
-                player.setWasPuttedCard(true);
                 quanityTurnsToWait += card.getFunction().getFunctionValue();
                 return true;
             }else return false;
@@ -115,15 +108,16 @@ public class TableServer {
             if(isTypeCorrectly(card) || isColorCorrectly(card)){
                 graveyard.addCardToDeck(cardOnTop);
                 cardOnTop = card;
-                player.setWasPuttedCard(true);
                 return true;
             }else return false;
         }else return false;
         // TODO: 18.02.2016 dodac warunek gdy jest zadanie kart ??specjalna funkcja karty jako zazadna??
+        // TODO: 25.03.2016 BUG when order is empty, cant put normal card
+        // TODO: 25.03.2016 Fix whole function
     }
 
-    public boolean putOrderCardOnTable(Card card, Card _orderedCard, Player player){
-        if(putCardOnTable(card, player)){
+    public boolean putOrderCardOnTable(Card card, Card _orderedCard){
+        if(putCardOnTable(card)){
             // TODO: 21.03.2016 exception when ordered card have functions
             orderedCard = _orderedCard;
             return true;

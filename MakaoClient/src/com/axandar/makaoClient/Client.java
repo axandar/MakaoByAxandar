@@ -134,7 +134,6 @@ public class Client implements Runnable{
                     if(cardToSend != null){
                         if(cardToSend.getFunction().getFunctionID() == Function.ORDER_CARD
                                 || cardToSend.getFunction().getFunctionID() == Function.CHANGE_COLOR){
-                            // TODO: 22.03.2016 Send order card to server
                             toServer.writeObject(cardToSend);
                             receivedObject = fromServer.readObject();
                             if(receivedObject instanceof Integer){
@@ -145,11 +144,17 @@ public class Client implements Runnable{
                                     if(receivedObject instanceof Integer){
                                         receivedCommand = (int) receivedObject;
                                         if(receivedCommand == ServerProtocol.CARD_ACCEPTED){
+                                            Logger.logConsole(TAG, "Order card accepted");
                                             properties.setCardToPut(null);
                                             //ON CLIENT "if cardToPut is null && cardAccepted = true => then can delete card from hand"
                                             properties.setCardAccepted(true);
+                                            Player player = properties.getPlayer();
+                                            player.removeCardFromHand(cardToSend);
+                                            properties.setPlayer(player);
                                             properties.updateGame();
                                         }else if(receivedCommand == ServerProtocol.CARD_NOTACCEPTED){
+                                            Logger.logConsole(TAG, "Order card not accepted");
+                                            properties.setCardToPut(null);
                                             properties.setCardAccepted(false);
                                             properties.updateGame();
                                         }
@@ -162,16 +167,23 @@ public class Client implements Runnable{
                             if(receivedObject instanceof Integer){
                                 receivedCommand = (int) receivedObject;
                                 if(receivedCommand == ServerProtocol.CARD_ACCEPTED){
+                                    Logger.logConsole(TAG, "Card accepted");
                                     properties.setCardToPut(null);
                                     properties.setCardAccepted(true);
+                                    Player player = properties.getPlayer();
+                                    player.removeCardFromHand(cardToSend);
+                                    properties.setPlayer(player);
                                     properties.updateGame();
                                 }else if(receivedCommand == ServerProtocol.CARD_NOTACCEPTED){
+                                    Logger.logConsole(TAG, "Card not accepted");
+                                    properties.setCardToPut(null);
                                     properties.setCardAccepted(false);
                                     properties.updateGame();
                                 }
                             }
                         }
                     }
+                    Thread.sleep(2000);
                 }
 
                 if(properties.isMakaoSet()){

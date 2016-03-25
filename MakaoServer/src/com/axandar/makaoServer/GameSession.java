@@ -41,7 +41,7 @@ public class GameSession implements Runnable{
         try {
             sSocket = new ServerSocket(port);
             Logger.logConsole("Starting server", "Server started at: " + new Date() + " at port: " + port);
-            Logger.logConsole("Starting server", "Server started at ip:" + sSocket.getInetAddress().toString());
+            Logger.logConsole("Starting server", "Server started at ip: " + sSocket.getInetAddress().toString());
 
             settingUpPlayers(sSocket);
             waitForPlayersGetReady();

@@ -1,5 +1,7 @@
 package com.axandar.makaoCore.logic;
 
+import com.axandar.makaoCore.utils.Logger;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +76,11 @@ public class Player implements Serializable {
 
     public void setCardsInHand(List<Card> cardsInHand) {
         this.cardsInHand = cardsInHand;
+    }
+
+    public void removeCardFromHand(Card card){
+        Logger.logConsole("Operation on player", "Removed card: " + card.getIdType() + "-" + card.getIdColor());
+        cardsInHand.remove(card);
     }
 
     public void addCardToHand(Card card){

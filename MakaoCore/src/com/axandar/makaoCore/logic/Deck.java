@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Deck implements Serializable {
 
     private List<Card> deck = new ArrayList<>();
+    private final String TAG = "Operation on deck";
 
     public Deck(){
 
@@ -22,7 +23,7 @@ public class Deck implements Serializable {
         for (int x = 0; x < _numberOfDecks; x++) {
             for (int i = 0; i < 13; i++) {
                 for (int j = 0; j < 4; j++) {
-                    deck.add(new Card(j, i, functionsList.get(i).get(j)));
+                    deck.add(new Card(j, i+1, functionsList.get(i).get(j)));
                 }
             }
         }
@@ -34,8 +35,9 @@ public class Deck implements Serializable {
 
     public Card getCardFromDeck(){
         int cardIndex =  ThreadLocalRandom.current().nextInt(0, deck.size());
-        Logger.logConsole("Operation on Deck", "taked card from deck with index: " + cardIndex);
+        Logger.logConsole(TAG, "Take card from deck with index: " + cardIndex);
         Card card = deck.get(cardIndex);
+        Logger.logConsole(TAG, "Take card from deck with name: " + card.getIdType() + "-" + card.getIdColor());
         deck.remove(cardIndex);
         return card;
     }

@@ -16,7 +16,7 @@ public class Main {
 
         initializeFunctions();
 
-        GameSession gs = new GameSession(1, 2, functions, 5000);
+        GameSession gs = new GameSession(1, 1, functions, 5000);
         Thread gameSessionThread = new Thread(gs);
         gameSessionThread.start();
 

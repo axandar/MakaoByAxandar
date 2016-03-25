@@ -73,11 +73,11 @@ public class GameController {
             }else if(clientProperties.getCardToPut() != null){
                 // TODO: 24.03.2016 Show communicate about failure of putting card
             }
-            Logger.logConsole(TAG, cardsInHand.getChildren().size()+"");
+            Logger.logConsole(TAG, "Number of cards in hand on view: " + cardsInHand.getChildren().size());
+            Logger.logConsole(TAG, "Number of cards in hand in player object: " + player.getCardsInHand().size());
             if(cardsInHand.getChildren().size() == 0){
                 Logger.logConsole(TAG, "Started adding cards");
                 for(Card card:player.getCardsInHand()){
-                    Logger.logConsole(TAG, "Added card to hand:" + card.getIdType() + "-" + card.getIdColor());
                     addCardToHandGUI(card);
                 }
             }else{
@@ -133,6 +133,8 @@ public class GameController {
     @FXML
     public void sendCardToServer(){
         if(clickedCard != null){
+            String cardName = clickedCard.getIdType() + "-" + clickedCard.getIdColor();
+            Logger.logConsole(TAG, "Send card: " + cardName);
             clientProperties.setCardToPut(clickedCard);
             if(clickedCard.getFunction().getFunctionID() == Function.ORDER_CARD
                     || clickedCard.getFunction().getFunctionID() == Function.CHANGE_COLOR){
@@ -157,10 +159,6 @@ public class GameController {
     @FXML
     public void endTurn(){
         clientProperties.endTurn();
-
-        addCardToHandGUI(new Card(1, 1, new Function(6, 0)));
-        addCardToHandGUI(new Card(2, 2, new Function(6, 0)));
-        addCardToHandGUI(new Card(3, 3, new Function(6, 0)));
     }
 
     private void addCardToHandGUI(Card card){
@@ -182,9 +180,11 @@ public class GameController {
             for(Card cardFromPlayer : player.getCardsInHand()){
                 String cardName = cardFromPlayer.getIdType() + "-" + cardFromPlayer.getIdColor();
                 if(clickedImage.getId().equals(cardName)){
-                    if(clickedCard != null){
+                    if(clickedCard != null && (clickedCard.getFunction().getFunctionID() == Function.ORDER_CARD
+                            || clickedCard.getFunction().getFunctionID() == Function.CHANGE_COLOR)){
                         orderedCard = cardFromPlayer;
                     }else  clickedCard = cardFromPlayer;
+                    Logger.logConsole(TAG, "Clicked card: " + cardName);
                     break;
                 }
             }

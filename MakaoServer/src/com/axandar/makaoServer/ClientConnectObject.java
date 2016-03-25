@@ -54,9 +54,9 @@ public class ClientConnectObject implements Runnable {
             sendUpdatedPlayersInformation(sessionInfo.getPlayers());
             while(!sessionInfo.isGameExited()){
                 runningGame();
-                if(sessionInfo.getPlayers().size() == 1){
+                /**if(sessionInfo.getPlayers().size() == 1){
                     sessionInfo.setGameExited(true);
-                }
+                }**/// TODO: 25.03.2016 Stay for debug only
             }
 
             closeSockets();
@@ -162,6 +162,7 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void receivedCard(Card card) throws IOException, ClassNotFoundException{
+        Logger.logConsole(TAG, "Server received card: " + card.getIdType() + "-" + card.getIdColor());
         if(isOrderCard(card)){
             gotOrderCard(card);
         }else{
@@ -178,8 +179,9 @@ public class ClientConnectObject implements Runnable {
         Object receivedObject = inputStream.readObject();
         if(receivedObject instanceof Card){
             Card orderedCard = (Card) receivedObject;
-            if(table.putOrderCardOnTable(orderingCard, orderedCard, threadPlayer)){
+            if(table.putOrderCardOnTable(orderingCard, orderedCard)){
                 outputStream.writeObject(ServerProtocol.CARD_ACCEPTED);
+                threadPlayer.removeCardFromHand(orderingCard);
                 threadPlayer.setWasPuttedCard(true);
             }else{
                 outputStream.writeObject(ServerProtocol.CARD_NOTACCEPTED);
@@ -190,11 +192,13 @@ public class ClientConnectObject implements Runnable {
 
     private void gotNormalCard(Card card) throws IOException{
         outputStream.writeObject(ServerProtocol.GOT_CARD);
-        if(table.putCardOnTable(card, threadPlayer)){
+        if(table.putCardOnTable(card)){
             outputStream.writeObject(ServerProtocol.CARD_ACCEPTED);
+            threadPlayer.removeCardFromHand(card);
             threadPlayer.setWasPuttedCard(true);
         }else{
             outputStream.writeObject(ServerProtocol.CARD_NOTACCEPTED);
+            threadPlayer.setWasPuttedCard(false);
         }
     }
 
