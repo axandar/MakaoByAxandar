@@ -57,13 +57,15 @@ public class GameController {
     @FXML
     public void startGame(){
         Logger.logConsole(TAG, "Game started");
+
         clientProperties = new ClientProperties();
         clientProperties.setIp("0.0.0.0");
         clientProperties.setPort(5000);
         clientProperties.setNickName("Axandar");
+
         Client client = new Client(clientProperties);
         Thread clientThread = new Thread(client);
-        // TODO: 17.03.2016 Adding TableClient in another Thread or do all in Controller?
+
         Runnable updateGUI = () -> {
             Logger.logConsole(TAG, "Updated GUI");
 
@@ -113,9 +115,6 @@ public class GameController {
 
         Thread updatingGUI = new Thread(taskToUpdateGUI);
 
-
-
-        //clientThread.setDaemon(true);//aby w razie problemu dokonczylo komunikacje z serwerem
         clientThread.start();
         updatingGUI.start();
     }
@@ -175,6 +174,16 @@ public class GameController {
         int cardColor = card.getIdColor();
         int cardType = card.getIdType();
         String cardFileName = cardType + "-" + cardColor;
+
+        if(deckInHand.deckLength() > 1){
+            Separator separator = new Separator();
+            separator.setId(cardFileName);
+            separator.setPrefHeight(150);
+            separator.getStyleClass().add("betweenCardsSeparator");
+
+            cardsInHand.getChildren().add(separator);
+        }
+
         Logger.logConsole(TAG, "File name of card to add in hand: " + cardFileName);
         ImageView imageView = new ImageView();
         Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
@@ -201,21 +210,6 @@ public class GameController {
         });
 
         cardsInHand.getChildren().add(imageView);
-
-        if(deckInHand.deckLength() > 1){
-            Separator separator = new Separator();
-            separator.setId(cardFileName);
-            separator.setPrefHeight(150);
-            separator.setStyle("");
-
-            cardsInHand.getChildren().add(separator);
-        }
-    }
-
-
-    @FXML
-    private void initialize() {
-
     }
 
 }

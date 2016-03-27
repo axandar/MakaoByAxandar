@@ -1,0 +1,16 @@
+.betweenCardsSeparator{
+    -fx-orientation: vertical;
+    -fx-pref-width: 5px;
+    -fx-max-width: 5px;
+    -fx-min-width: 5px;
+    -fx-alignment: center;
+}
+
+.scroll-pane{
+    -fx-background-color: darkgreen;
+    -fx-border-color: red;
+}
+
+.hbox{
+    -fx-background-color: yellowgreen;
+}

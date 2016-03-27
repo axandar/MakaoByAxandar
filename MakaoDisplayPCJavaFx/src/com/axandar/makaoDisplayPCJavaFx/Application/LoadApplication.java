@@ -28,6 +28,9 @@ public class LoadApplication extends Application{
             loader.setLocation(LoadApplication.class.getResource("GUIFiles/Game" + gameResolution + ".fxml"));
             BorderPane gameView = loader.load();
             Scene scene = new Scene(gameView);
+            scene.getStylesheets().add(this.getClass().getResource("/CSS/style.css").toExternalForm());
+            scene.getStylesheets().add(this.getClass().getResource("/CSS/cardsInHand.css").toExternalForm());
+
             primaryStage.setTitle("Makao PCJavaFX " + gameResolution);
             primaryStage.setScene(scene);
             primaryStage.show();

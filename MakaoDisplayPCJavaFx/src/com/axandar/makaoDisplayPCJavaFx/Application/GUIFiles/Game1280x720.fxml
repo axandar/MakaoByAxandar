@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane maxHeight="720.0" maxWidth="1280.0" minHeight="720.0" minWidth="1280.0" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.71" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.axandar.makaoDisplayPCJavaFx.Application.Controllers.GameController">
+<BorderPane maxHeight="720.0" maxWidth="1280.0" minHeight="720.0" minWidth="1280.0" prefHeight="720.0" prefWidth="1280.0" stylesheets="@../../../../../../resources/CSS/cardsInHand.css" xmlns="http://javafx.com/javafx/8.0.72" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.axandar.makaoDisplayPCJavaFx.Application.Controllers.GameController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
@@ -47,13 +47,13 @@
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" />
         </columnConstraints>
         <rowConstraints>
-          <RowConstraints maxHeight="150.0" minHeight="150.0" prefHeight="150.0" vgrow="SOMETIMES" />
-            <RowConstraints maxHeight="15.0" minHeight="15.0" prefHeight="15.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="168.0" minHeight="168.0" prefHeight="168.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="10.0" minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <ScrollPane prefHeight="150.0" vbarPolicy="NEVER" GridPane.columnIndex="1">
                <content>
-                  <HBox fx:id="cardsInHand" prefHeight="165.0" prefWidth="200.0" />
+                  <HBox fx:id="cardsInHand" prefHeight="165.0" prefWidth="1180.0" />
                </content>
             </ScrollPane>
          </children>
@@ -73,7 +73,7 @@
             <Button layoutX="69.0" layoutY="450.0" mnemonicParsing="false" onAction="#endTurn" text="End turn" />
             <Button layoutX="63.0" layoutY="404.0" mnemonicParsing="false" text="Say Makao" />
             <Button layoutX="65.0" layoutY="353.0" mnemonicParsing="false" onAction="#sendCardToServer" text="Send Card" />
-            <Button layoutX="63.0" layoutY="45.0" mnemonicParsing="false" onAction="#startGame" text="Start game" />
+            <Button layoutX="63.0" layoutY="50.0" mnemonicParsing="false" onAction="#startGame" text="Start game" />
          </children>
       </AnchorPane>
    </left>
