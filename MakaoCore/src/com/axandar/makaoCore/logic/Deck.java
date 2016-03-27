@@ -35,11 +35,14 @@ public class Deck implements Serializable {
 
     public Card getCardFromDeck(){
         int cardIndex =  ThreadLocalRandom.current().nextInt(0, deck.size());
-        Logger.logConsole(TAG, "Take card from deck with index: " + cardIndex);
         Card card = deck.get(cardIndex);
         Logger.logConsole(TAG, "Take card from deck with name: " + card.getIdType() + "-" + card.getIdColor());
         deck.remove(cardIndex);
         return card;
+    }
+
+    public void removeCardFromDeck(Card card){
+        deck.remove(card);
     }
 
     public int deckLength(){

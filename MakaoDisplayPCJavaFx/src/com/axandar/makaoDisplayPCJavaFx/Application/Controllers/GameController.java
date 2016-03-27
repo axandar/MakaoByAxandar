@@ -78,11 +78,15 @@ public class GameController {
             if(cardsInHand.getChildren().size() == 0){
                 Logger.logConsole(TAG, "Started adding cards");
                 for(Card card:player.getCardsInHand()){
+                    deckInHand.addCardToDeck(card);
                     addCardToHandGUI(card);
                 }
             }else{
                 List<Card> cardsToAdd = getNewCards();
-                cardsToAdd.forEach(this::addCardToHandGUI);
+                for(Card card:cardsToAdd){
+                    deckInHand.addCardToDeck(card);
+                    addCardToHandGUI(card);
+                }
             }
 
             List<Player> listOfRestPlayers = clientProperties.getPlayers();
@@ -143,10 +147,10 @@ public class GameController {
                 }else clientProperties.setOrderedCard(new Card(1, 1, new Function(4, 0)));
             }
         }
-        // TODO: 25.03.2016 BUG: endless loop for update gui after send and not receiving accept
     }
 
     private void removeCardFromHand(Card card){
+        deckInHand.removeCardFromDeck(card);
         String cardFileName = card.getIdType() + "-" + card.getIdColor();
         for(Node node:cardsInHand.getChildren()){
             if(node.getId().equals(cardFileName)){
@@ -158,7 +162,13 @@ public class GameController {
 
     @FXML
     public void endTurn(){
-        clientProperties.endTurn();
+        //clientProperties.endTurn();
+        deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
+        addCardToHandGUI(new Card(1, 1, new Function(6, 0)));
+        deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
+        addCardToHandGUI(new Card(2, 2, new Function(6, 0)));
+        deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
+        addCardToHandGUI(new Card(3, 3, new Function(6, 0)));
     }
 
     private void addCardToHandGUI(Card card){
@@ -196,6 +206,7 @@ public class GameController {
             Separator separator = new Separator();
             separator.setId(cardFileName);
             separator.setPrefHeight(150);
+            separator.setStyle("");
 
             cardsInHand.getChildren().add(separator);
         }
