@@ -8,7 +8,14 @@
 
 .scroll-pane{
     -fx-background-color: darkgreen;
+    -fx-border-color: brown;
+}
+
+.separator .line {
+    -fx-border-style: segments(0.166667em, 0.166667em);
+    -fx-border-width: 0.083333em; /* 1 */
     -fx-border-color: red;
+    -fx-padding: 0.25em 0.0em 0.0em 0.0em; /* 1 0 0 0 */
 }
 
 .hbox{

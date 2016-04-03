@@ -38,6 +38,5 @@ public class LoadApplication extends Application{
             Logger.logError(e);
         }
 
-
     }
 }

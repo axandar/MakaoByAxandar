@@ -30,7 +30,7 @@ public class TableServer {
     private Card cardOnTop;
     private Card orderedCard;
     private int quantityCardsToTake = 0;
-    private int quanityTurnsToWait = 0;
+    private int quantityTurnsToWait = 0;
     private boolean isNextPlayerFroward = true;
 
     public TableServer() {
@@ -69,59 +69,68 @@ public class TableServer {
     }
 
     public boolean putCardOnTable(Card card){
-        // TODO: 22.03.2016 checking if is oredered card, for how many turns and remember to make possibility of change order
-        if(isFunctionCorrectly(card, Function.CAMELEON_CARD)){
-            graveyard.addCardToDeck(cardOnTop);
-            cardOnTop = card;
-            return true;
-        }else if(isFunctionCorrectly(card, Function.ORDER_CARD)){
-            if(isTypeCorrectly(card)){
-                graveyard.addCardToDeck(cardOnTop);
-                cardOnTop = card;
+        if(orderedCard == null && quantityCardsToTake == 0 && quantityTurnsToWait == 0){
+            if(isTypeCorrectly(card) || isColorCorrectly(card) ||
+                    (card.getFunction().getFunctionID() == Function.CAMELEON_CARD
+                            || cardOnTop.getFunction().getFunctionID() == Function.CAMELEON_CARD)){
+                putCard(card);
                 return true;
             }else return false;
-        }else if(isFunctionCorrectly(card, Function.CHANGE_COLOR)){
-            if(isColorCorrectly(card)){
-                graveyard.addCardToDeck(cardOnTop);
-                cardOnTop = card;
+        }else if(orderedCard != null && quantityTurnsToWait == 0 && quantityCardsToTake == 0){
+            if(cardOnTop.getFunction().getFunctionID() == card.getFunction().getFunctionID() &&
+                    (isColorCorrectly(card) || isTypeCorrectly(card))){
+                putCard(card);
+                return true;
+            }else if(cardOnTop.getFunction().getFunctionID() == Function.CHANGE_COLOR && isColorCorrectly(card)){
+                putCard(card);
+                return true;
+            }else if(cardOnTop.getFunction().getFunctionID() == Function.ORDER_CARD && isTypeCorrectly(card)){
+                putCard(card);
                 return true;
             }else return false;
-        }else if(isFunctionCorrectly(card, Function.GET_CARDS_BACKWARD)
-                || (isFunctionCorrectly(card, Function.GET_CARDS_FORWARD))){
-            if(isTypeCorrectly(card) || isColorCorrectly(card)){
-                graveyard.addCardToDeck(cardOnTop);
-                cardOnTop = card;
-                quantityCardsToTake += card.getFunction().getFunctionValue();
-                if(isFunctionCorrectly(card, Function.GET_CARDS_BACKWARD)){
-                    isNextPlayerFroward = false;
-                }
+        }else if(quantityTurnsToWait != 0){
+            if(card.getFunction().getFunctionID() == Function.WAIT_TURNS &&
+                    (isTypeCorrectly(card) || isColorCorrectly(card))){
+                putCard(card);
                 return true;
             }else return false;
-        }else if(isFunctionCorrectly(card, Function.WAIT_TURNS)){
-            if(isTypeCorrectly(card) || isColorCorrectly(card)){
-                graveyard.addCardToDeck(cardOnTop);
-                cardOnTop = card;
-                quanityTurnsToWait += card.getFunction().getFunctionValue();
+        }else if(quantityCardsToTake != 0){
+            if(card.getFunction().getFunctionID() == Function.GET_CARDS_FORWARD &&
+                    (isTypeCorrectly(card) || isColorCorrectly(card))){
+                putCard(card);
+                return true;
+            }else if(card.getFunction().getFunctionID() == Function.GET_CARDS_BACKWARD &&
+                    (isTypeCorrectly(card) || isColorCorrectly(card))){
+                putCard(card);
                 return true;
             }else return false;
-        }else if(isFunctionCorrectly(card, Function.NOTHING)){
-            if(isTypeCorrectly(card) || isColorCorrectly(card)){
-                graveyard.addCardToDeck(cardOnTop);
-                cardOnTop = card;
-                return true;
-            }else return false;
-        }else return false;
-        // TODO: 18.02.2016 dodac warunek gdy jest zadanie kart ??specjalna funkcja karty jako zazadna??
-        // TODO: 25.03.2016 BUG when order is empty, cant put normal card
-        // TODO: 25.03.2016 Fix whole function
+        }else{
+            Logger.logConsole("TableServer: ", "Error in putting card on table");
+            return false;
+        }
     }
 
     public boolean putOrderCardOnTable(Card card, Card _orderedCard){
         if(putCardOnTable(card)){
-            // TODO: 21.03.2016 exception when ordered card have functions
             orderedCard = _orderedCard;
             return true;
         }else return false;
+    }
+
+    private void putCard(Card card){
+        if(card.getFunction().getFunctionID() == Function.GET_CARDS_FORWARD){
+            quantityCardsToTake += card.getFunction().getFunctionValue();
+            isNextPlayerFroward = true;
+        }else if(card.getFunction().getFunctionID() == Function.GET_CARDS_BACKWARD){
+            quantityCardsToTake += card.getFunction().getFunctionValue();
+            isNextPlayerFroward = false;
+        }else if(card.getFunction().getFunctionID() == Function.WAIT_TURNS){
+            quantityTurnsToWait += card.getFunction().getFunctionValue();
+            isNextPlayerFroward = true;
+        }else{
+            Logger.logConsole(TAG, "Error in putting card");
+        }
+        cardOnTop = card;
     }
 
     public void giveCardToPlayer(Player player, int quanity){
@@ -136,11 +145,6 @@ public class TableServer {
 
     public void setPlayerToWaitTurns(Player player, int quanity){
         player.setToWaitTurns(quanity);
-    }
-
-    private boolean isFunctionCorrectly(Card card, int function){
-        return (cardOnTop.getFunction().getFunctionID() == function)
-                && (card.getFunction().getFunctionID() == function);
     }
 
     private boolean isColorCorrectly(Card card) {
@@ -175,7 +179,6 @@ public class TableServer {
             sessionInfo.setJustEndedTurnPlayerId(previousPlayer.getPlayerID());
             setActualPlayer(previousPlayer);
         }
-        // TODO: 22.02.2016 dla kazdego polaczenia wysylanie zaktualizowanej listy graczy
     }
 
     public Player getNextPlayer(Player player){
@@ -223,16 +226,16 @@ public class TableServer {
         return quantityCardsToTake;
     }
 
-    public void setQuantityCardsToTake(int quantityCardsToTake){
-        this.quantityCardsToTake = quantityCardsToTake;
+    public void setQuantityCardsToTakeToZero(){
+        this.quantityCardsToTake = 0;
     }
 
     public int getQuantityTurnsToWait(){
-        return quanityTurnsToWait;
+        return quantityTurnsToWait;
     }
 
-    public void setQuantityTurnsToWait(int quanityTurnsToWait){
-        this.quanityTurnsToWait = quanityTurnsToWait;
+    public void setQuantityTurnsToWait(int quantityTurnsToWait){
+        this.quantityTurnsToWait = quantityTurnsToWait;
     }
 
     public Card getCardOnTop(){

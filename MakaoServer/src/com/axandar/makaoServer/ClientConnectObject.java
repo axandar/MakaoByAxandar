@@ -19,8 +19,6 @@ public class ClientConnectObject implements Runnable {
 
     // TODO: 22.03.2016 Add option for call "stop makao" on another player
 
-    private String TAG = "Server";
-
     private Socket socket;
     private int id;
     private ObjectOutputStream outputStream = null;
@@ -29,6 +27,8 @@ public class ClientConnectObject implements Runnable {
     private SessionInfo sessionInfo;
     private TableServer table;
     private Player threadPlayer;
+
+    private String TAG = "Server";
 
     public ClientConnectObject(Socket _socket, int _id, SessionInfo _sessionInfo, TableServer _table){
         socket = _socket;
@@ -88,6 +88,7 @@ public class ClientConnectObject implements Runnable {
             Logger.logConsole(TAG, playerName);
             threadPlayer = new Player(playerName, playerIp, id);
             sessionInfo.addPlayer(threadPlayer);
+            TAG = "ClientObjectOnServer " + threadPlayer.getPlayerName();
 
             outputStream.writeObject(ServerProtocol.ACCEPTED_NICK);
             sessionInfo.decreasePlayersNotReady();
@@ -100,11 +101,11 @@ public class ClientConnectObject implements Runnable {
             Thread.sleep(1000);
         }// TODO: 24.02.2016 mozliwy blad // sprawdzic poprawnosc
         sendUpdatedPlayersInformation(sessionInfo.getPlayers());
-        sendUpdatedCardOnTop();
     }
 
     private void sendUpdatedPlayersInformation(List<Player> players) throws IOException{
         outputStream.writeObject(ServerProtocol.START_UPDATE_PLAYERS);
+        sendUpdatedCardOnTop();
         for(Player player:players){
             outputStream.writeObject(player);
         }
@@ -127,6 +128,7 @@ public class ClientConnectObject implements Runnable {
 
     private void turnStarted() throws IOException, ClassNotFoundException {
         outputStream.writeObject(ServerProtocol.TURN_STARTED);
+        outputStream.writeObject(table.getCardOnTop());
         turnProcessing();
 
         if(!threadPlayer.wasPuttedCard()){
@@ -229,7 +231,7 @@ public class ClientConnectObject implements Runnable {
 
     private void playerGetCards(){
         table.giveCardToPlayer(threadPlayer, table.getQuantityCardsToTake());
-        table.setQuantityCardsToTake(0);
+        table.setQuantityCardsToTakeToZero();
         threadPlayer.setMakao(false);
     }
 

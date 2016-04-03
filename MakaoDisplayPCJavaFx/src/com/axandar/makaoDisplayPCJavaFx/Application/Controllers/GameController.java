@@ -35,11 +35,9 @@ public class GameController {
 
     private List<String> imageViewsIDs = new ArrayList<>();
 
-    @FXML
-    private HBox cardsInHand;
-
-    @FXML
-    private ListView<String> playersList;
+    @FXML private HBox cardsInHand;
+    @FXML private ListView<String> playersList;
+    @FXML private ImageView cardOnTop;
 
     /**Stage dialogStage = new Stage();
      dialogStage.setTitle(rb.getString("AddingNewSupplierOrder"));
@@ -61,7 +59,7 @@ public class GameController {
         clientProperties = new ClientProperties();
         clientProperties.setIp("0.0.0.0");
         clientProperties.setPort(5000);
-        clientProperties.setNickName("Axandar");
+        clientProperties.setNickName("Axandar2");
 
         Client client = new Client(clientProperties);
         Thread clientThread = new Thread(client);
@@ -71,11 +69,12 @@ public class GameController {
 
             player = clientProperties.getPlayer();
             if(clientProperties.isCardAccepted() && clientProperties.getCardToPut() != null){
+                Logger.logConsole(TAG, "Card accepted and removing");
                 removeCardFromHand(clientProperties.getCardToPut());
             }else if(clientProperties.getCardToPut() != null){
-                // TODO: 24.03.2016 Show communicate about failure of putting card
+                Logger.logConsole(TAG, "Card not accepted");
             }
-            Logger.logConsole(TAG, "Number of cards in hand on view: " + cardsInHand.getChildren().size());
+            Logger.logConsole(TAG, "Number of cards in hand on view: " + (int)(cardsInHand.getChildren().size()/2));
             Logger.logConsole(TAG, "Number of cards in hand in player object: " + player.getCardsInHand().size());
             if(cardsInHand.getChildren().size() == 0){
                 Logger.logConsole(TAG, "Started adding cards");
@@ -90,6 +89,8 @@ public class GameController {
                     addCardToHandGUI(card);
                 }
             }
+
+            setCardOnTopTexture(clientProperties.getCardOnTop());
 
             List<Player> listOfRestPlayers = clientProperties.getPlayers();
             playersList.getItems().remove(0, playersList.getItems().size());
@@ -154,6 +155,7 @@ public class GameController {
         for(Node node:cardsInHand.getChildren()){
             if(node.getId().equals(cardFileName)){
                 cardsInHand.getChildren().remove(node);
+                // TODO: 03.04.2016 not working removing from gui
                 break;
             }
         }
@@ -161,13 +163,13 @@ public class GameController {
 
     @FXML
     public void endTurn(){
-        //clientProperties.endTurn();
-        deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
+        clientProperties.endTurn();
+        /**deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
         addCardToHandGUI(new Card(1, 1, new Function(6, 0)));
         deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
         addCardToHandGUI(new Card(2, 2, new Function(6, 0)));
         deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
-        addCardToHandGUI(new Card(3, 3, new Function(6, 0)));
+        addCardToHandGUI(new Card(3, 3, new Function(6, 0)));**/
     }
 
     private void addCardToHandGUI(Card card){
@@ -210,6 +212,16 @@ public class GameController {
         });
 
         cardsInHand.getChildren().add(imageView);
+    }
+
+    private void setCardOnTopTexture(Card card){
+        int cardColor = card.getIdColor();
+        int cardType = card.getIdType();
+        String cardFileName = cardType + "-" + cardColor;
+        Logger.logConsole(TAG, "File name of card texture to add on top: " + cardFileName);
+
+        Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
+        cardOnTop.setImage(image);
     }
 
 }

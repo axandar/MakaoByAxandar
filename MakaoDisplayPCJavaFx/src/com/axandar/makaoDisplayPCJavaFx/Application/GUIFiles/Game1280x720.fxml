@@ -80,7 +80,7 @@
    <center>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <ImageView fx:id="cardOnTable" fitHeight="300.0" fitWidth="192.0" layoutX="344.0" layoutY="115.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="cardOnTop" fitHeight="300.0" fitWidth="192.0" layoutX="344.0" layoutY="115.0" pickOnBounds="true" preserveRatio="true" />
          </children>
       </AnchorPane>
    </center>

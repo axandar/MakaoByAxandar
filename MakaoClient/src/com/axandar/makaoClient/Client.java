@@ -124,11 +124,12 @@ public class Client implements Runnable{
             }
 
             if(receivedCommand == ServerProtocol.START_UPDATE_PLAYERS){
-                updatePlayers();
                 setCardOnTop();//When other player end turn need to update cardOnTop
+                updatePlayers();
                 //each statement is updating all players information and ending turn of one player
             }else if(receivedCommand == ServerProtocol.TURN_STARTED){
                 properties.startTurn();
+                setCardOnTop();
                 while(!properties.isTurnEnded()){
                     Card cardToSend = properties.getCardToPut();
                     if(cardToSend != null){

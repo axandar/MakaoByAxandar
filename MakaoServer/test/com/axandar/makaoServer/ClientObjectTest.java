@@ -101,6 +101,9 @@ public class ClientObjectTest{
         receivedComand = (int) receivedFromServer;
         assertEquals("Turn started", ServerProtocol.TURN_STARTED, receivedComand);
 
+        Object cardOnTopFromServer = inputStream.readObject();
+        assertEquals("Received Card on top", true, cardOnTopFromServer instanceof Card);
+
         Card cardOnTopOnTable = table.getCardOnTop();
         outputStream.writeObject(cardOnTopOnTable);
         receivedFromServer = inputStream.readObject();
