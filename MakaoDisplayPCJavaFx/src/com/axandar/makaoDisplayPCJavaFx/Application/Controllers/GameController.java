@@ -215,6 +215,7 @@ public class GameController {
     }
 
     private void setCardOnTopTexture(Card card){
+        Logger.logConsole(TAG, "Received card on top");
         int cardColor = card.getIdColor();
         int cardType = card.getIdType();
         String cardFileName = cardType + "-" + cardColor;

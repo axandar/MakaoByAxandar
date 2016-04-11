@@ -30,11 +30,10 @@ public class ClientConnectObject implements Runnable {
 
     private String TAG = "Server";
 
-    public ClientConnectObject(Socket _socket, int _id, SessionInfo _sessionInfo, TableServer _table){
+    public ClientConnectObject(Socket _socket, int _id, SessionInfo _sessionInfo){
         socket = _socket;
         id =_id;
         sessionInfo = _sessionInfo;
-        table = _table;
     }
 
 
@@ -48,6 +47,7 @@ public class ClientConnectObject implements Runnable {
             initStreams();
             settingUpPlayer(playerIp);
             waitForGameStart();
+            table = sessionInfo.getTable();
             outputStream.writeObject(ServerProtocol.GAME_STARTED);
             outputStream.writeObject(threadPlayer);//aktualizacja kart w reku
 
@@ -63,16 +63,6 @@ public class ClientConnectObject implements Runnable {
         } catch (IOException | ClassNotFoundException | InterruptedException e) {
             Logger.logError(e);
         }
-    }
-
-    private void runningGame() throws IOException, InterruptedException, ClassNotFoundException{
-        //rest players ending theirs turns
-        while(!(sessionInfo.getJustEndedTurnPlayerId() == threadPlayer.getPlayerID())){
-            handleAnotherPlayersTurns();
-        }
-        waitForTurn(); // TODO: 08.03.2016 is needed?
-        turnStarted();
-        table.endTurn(threadPlayer);
     }
 
     private void initStreams() throws IOException{
@@ -95,25 +85,42 @@ public class ClientConnectObject implements Runnable {
         }
     }
 
-    private void handleAnotherPlayersTurns() throws InterruptedException, IOException{
-        int savedJustEndedTurnPlayerId = sessionInfo.getJustEndedTurnPlayerId();
-        while(savedJustEndedTurnPlayerId == sessionInfo.getJustEndedTurnPlayerId()){
-            Thread.sleep(1000);
-        }// TODO: 24.02.2016 mozliwy blad // sprawdzic poprawnosc
-        sendUpdatedPlayersInformation(sessionInfo.getPlayers());
-    }
-
     private void sendUpdatedPlayersInformation(List<Player> players) throws IOException{
         outputStream.writeObject(ServerProtocol.START_UPDATE_PLAYERS);
-        sendUpdatedCardOnTop();
         for(Player player:players){
             outputStream.writeObject(player);
         }
+        sendUpdatedCardOnTop();
         outputStream.writeObject(ServerProtocol.END_UPDATE_PLAYERS);
     }
 
     private void sendUpdatedCardOnTop() throws IOException{
-        outputStream.writeObject(table.getCardOnTop());
+        Logger.logConsole(TAG, "Send card on top to player");
+        boolean isTableNULL = table == null;
+        Logger.logConsole(TAG, "is table null: " + isTableNULL);
+        Card card = table.getCardOnTop();
+        outputStream.writeObject(card);// TODO: 06.04.2016 error when sending card on top
+    }
+
+    private void runningGame() throws IOException, InterruptedException, ClassNotFoundException{
+        //rest players ending theirs turns
+        while(!(sessionInfo.getJustEndedTurnPlayerId() == threadPlayer.getPlayerID())){
+            Logger.logConsole(TAG, "Handle another player turn");
+            handleAnotherPlayersTurns();
+        }
+        waitForTurn(); // TODO: 08.03.2016 is needed?
+        Logger.logConsole(TAG, "Player started turn");
+        turnStarted();
+        table.endTurn(threadPlayer);
+        Logger.logConsole(TAG, "Player ended turn");
+    }
+
+    private void handleAnotherPlayersTurns() throws InterruptedException, IOException{
+        int savedJustEndedTurnPlayerId = sessionInfo.getJustEndedTurnPlayerId();
+        sendUpdatedPlayersInformation(sessionInfo.getPlayers());
+        while(savedJustEndedTurnPlayerId == sessionInfo.getJustEndedTurnPlayerId()){
+            Thread.sleep(1000);
+        }// TODO: 24.02.2016 mozliwy blad // sprawdzic poprawnosc
     }
 
     private void waitForGameStart(){
@@ -138,7 +145,7 @@ public class ClientConnectObject implements Runnable {
         if(threadPlayer.getCardsInHand().size() == 0){
             playerEndedGame();
         }
-
+        Logger.logConsole(TAG, "Updating player data");
         outputStream.writeObject(threadPlayer);
         table.endTurn(threadPlayer);
     }
@@ -147,7 +154,7 @@ public class ClientConnectObject implements Runnable {
         int receivedCommand = 0;
         threadPlayer.setWasPuttedCard(false);
         while(isTurnNotEnded(receivedCommand)){
-            Object receivedObject = inputStream.readObject();
+            Object receivedObject = inputStream.readObject();///////////////////////////////////////
             if(receivedObject instanceof Integer){
                 outputStream.writeObject(ServerProtocol.GOT_CMD);
                 receivedCommand = (int) receivedObject;
@@ -195,10 +202,12 @@ public class ClientConnectObject implements Runnable {
     private void gotNormalCard(Card card) throws IOException{
         outputStream.writeObject(ServerProtocol.GOT_CARD);
         if(table.putCardOnTable(card)){
+            Logger.logConsole(TAG, "Received card accepted");
             outputStream.writeObject(ServerProtocol.CARD_ACCEPTED);
             threadPlayer.removeCardFromHand(card);
             threadPlayer.setWasPuttedCard(true);
         }else{
+            Logger.logConsole(TAG, "Received card not accepted");
             outputStream.writeObject(ServerProtocol.CARD_NOTACCEPTED);
             threadPlayer.setWasPuttedCard(false);
         }
@@ -220,6 +229,7 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void playerNotPuttedCard(){
+        Logger.logConsole(TAG, "Player did not putted card");
         if(table.getQuantityCardsToTake() > 0){
             playerGetCards();
         }else if(table.getQuantityTurnsToWait() > 0){

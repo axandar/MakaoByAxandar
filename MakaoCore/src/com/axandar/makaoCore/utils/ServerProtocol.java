@@ -30,5 +30,9 @@ public class ServerProtocol {
     //Client commands
     public static int SEND_CARD_NORMAL = 0x301;
     //public static int SEND_CARD_ORDER = 0x302;
+
+    //Errors
+    public static int PLAYER_DISCONNECTED = 0x402;
+
     
 }

@@ -14,7 +14,7 @@ import java.util.List;
  * Created by Axandar on 11.02.2016.
  */
 public class GameSession implements Runnable{
-    // TODO: 24.03.2016 find way to show server ip to user
+
     private List<Thread> clientsThreads = new ArrayList<>();
     private List<ClientConnectObject> clients = new ArrayList<>();
 
@@ -46,7 +46,9 @@ public class GameSession implements Runnable{
             settingUpPlayers(sSocket);
             waitForPlayersGetReady();
             Logger.logConsole("Server", sessionInfo.getPlayers().size()+"");
+            sessionInfo.setTable(table);
             table.initializeGame(numberOfDecks, sessionInfo.getPlayers(), functions, sessionInfo);
+
 
         } catch(IOException | InterruptedException e) {
             Logger.logError(e);
@@ -59,7 +61,7 @@ public class GameSession implements Runnable{
             sessionInfo.increasePlayersNotReady();
             Socket socket = serverSocket.accept();
 
-            ClientConnectObject clientConnectionObject = new ClientConnectObject(socket, actualId, sessionInfo, table);
+            ClientConnectObject clientConnectionObject = new ClientConnectObject(socket, actualId, sessionInfo);
             clients.add(clientConnectionObject);
             actualId++;
 

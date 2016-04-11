@@ -89,6 +89,9 @@ public class ClientObjectTest{
         receivedFromServer = inputStream.readObject();
         assertEquals("Received player to update in client", true, receivedFromServer instanceof Player);
 
+        Object cardOnTopFromServer = inputStream.readObject();
+        assertEquals("Received Card on top", true, cardOnTopFromServer instanceof Card);
+
         receivedFromServer = inputStream.readObject();
         assertEquals("Received command to end updating players", true,
                 receivedFromServer instanceof Integer);
@@ -101,7 +104,7 @@ public class ClientObjectTest{
         receivedComand = (int) receivedFromServer;
         assertEquals("Turn started", ServerProtocol.TURN_STARTED, receivedComand);
 
-        Object cardOnTopFromServer = inputStream.readObject();
+        cardOnTopFromServer = inputStream.readObject();
         assertEquals("Received Card on top", true, cardOnTopFromServer instanceof Card);
 
         Card cardOnTopOnTable = table.getCardOnTop();
