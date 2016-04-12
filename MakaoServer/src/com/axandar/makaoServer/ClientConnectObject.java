@@ -154,7 +154,7 @@ public class ClientConnectObject implements Runnable {
         int receivedCommand = 0;
         threadPlayer.setWasPuttedCard(false);
         while(isTurnNotEnded(receivedCommand)){
-            Object receivedObject = inputStream.readObject();///////////////////////////////////////
+            Object receivedObject = inputStream.readObject();
             if(receivedObject instanceof Integer){
                 outputStream.writeObject(ServerProtocol.GOT_CMD);
                 receivedCommand = (int) receivedObject;

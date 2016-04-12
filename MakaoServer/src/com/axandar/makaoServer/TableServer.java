@@ -41,49 +41,58 @@ public class TableServer {
         givePlayersCards();
 
         int firstPlayerID =  ThreadLocalRandom.current().nextInt(0, numberOfPlayers);
-        Logger.logConsole("server initializing", "first player id: " + firstPlayerID);
-        sessionInfo.setActualTurnPlayer(sessionInfo.getPlayerObject(firstPlayerID));
-        sessionInfo.setLastTurnEndedPlayer(sessionInfo.getFirstPlayer());
-        sessionInfo.setGameStarted(true);
+        Logger.logConsole(TAG, "First player id: " + firstPlayerID);
+
+        Player firstPlayer = sessionInfo.getPlayerObject(firstPlayerID);
+        sessionInfo.setActualTurnPlayer(firstPlayer);
+        int lastPlayerId = sessionInfo.getPreviousPlayerId(firstPlayer);
+        sessionInfo.setLastTurnEndedPlayer(sessionInfo.getPlayerObject(lastPlayerId));
+
+        sessionInfo.setTable(this);//update object for all players
+        sessionInfo.setGameStarted(true);// TODO: 11.04.2016 Wszystko jest co potrzebne?
     }
 
     private void givePlayersCards(){
-        for (Player player: players) {
+        for (Player player: sessionInfo.getPlayersObjectsInOrder()) {
             List<Card> cardsToAdd = new ArrayList<>();
             for(int i = 0; i < 5; i++){
-                cardsToAdd.add(deck.getCardFromDeck());
+                cardsToAdd.add(sessionInfo.getDeckOnTable().getCardFromDeck());
             }
             player.setCardsInHand(cardsToAdd);
         }
     }
 
     public boolean putCardOnTable(Card card){
-        if(orderedCard == null && quantityCardsToTake == 0 && quantityTurnsToWait == 0){
+        if(sessionInfo.getOrderedCard() == null && sessionInfo.getQuantityCardsToTake() == 0
+                && sessionInfo.getQuantityTurnsToWait() == 0){
             if(isTypeCorrectly(card) || isColorCorrectly(card) ||
                     (card.getFunction().getFunctionID() == Function.CAMELEON_CARD
-                            || cardOnTop.getFunction().getFunctionID() == Function.CAMELEON_CARD)){
+                            || sessionInfo.getCardOnTop().getFunction().getFunctionID() == Function.CAMELEON_CARD)){
                 putCard(card);
                 return true;
             }else return false;
-        }else if(orderedCard != null && quantityTurnsToWait == 0 && quantityCardsToTake == 0){
-            if(cardOnTop.getFunction().getFunctionID() == card.getFunction().getFunctionID() &&
+        }else if(sessionInfo.getOrderedCard() != null && sessionInfo.getQuantityTurnsToWait() == 0
+                && sessionInfo.getQuantityCardsToTake() == 0){
+            if(sessionInfo.getOrderingCard().getFunction().getFunctionID() == card.getFunction().getFunctionID() &&
                     (isColorCorrectly(card) || isTypeCorrectly(card))){
                 putCard(card);
                 return true;
-            }else if(cardOnTop.getFunction().getFunctionID() == Function.CHANGE_COLOR && isColorCorrectly(card)){
+            }else if(sessionInfo.getOrderingCard().getFunction().getFunctionID() == Function.CHANGE_COLOR
+                    && isColorCorrectly(card)){
                 putCard(card);
                 return true;
-            }else if(cardOnTop.getFunction().getFunctionID() == Function.ORDER_CARD && isTypeCorrectly(card)){
+            }else if(sessionInfo.getOrderingCard().getFunction().getFunctionID() == Function.ORDER_CARD
+                    && isTypeCorrectly(card)){
                 putCard(card);
                 return true;
             }else return false;
-        }else if(quantityTurnsToWait != 0){
+        }else if(sessionInfo.getQuantityTurnsToWait() != 0){
             if(card.getFunction().getFunctionID() == Function.WAIT_TURNS &&
                     (isTypeCorrectly(card) || isColorCorrectly(card))){
                 putCard(card);
                 return true;
             }else return false;
-        }else if(quantityCardsToTake != 0){
+        }else if(sessionInfo.getQuantityCardsToTake() != 0){
             if(card.getFunction().getFunctionID() == Function.GET_CARDS_FORWARD &&
                     (isTypeCorrectly(card) || isColorCorrectly(card))){
                 putCard(card);
@@ -101,77 +110,85 @@ public class TableServer {
 
     public boolean putOrderCardOnTable(Card card, Card _orderedCard){
         if(putCardOnTable(card)){
-            orderedCard = _orderedCard;
+            sessionInfo.setOrderedCard(_orderedCard);
+            sessionInfo.setOrderingCard(card);
             return true;
         }else return false;
     }
 
     private void putCard(Card card){
         if(card.getFunction().getFunctionID() == Function.GET_CARDS_FORWARD){
-            quantityCardsToTake += card.getFunction().getFunctionValue();
-            isNextPlayerFroward = true;
+            sessionInfo.setQuantityCardsToTake(sessionInfo.getQuantityCardsToTake()
+                    + card.getFunction().getFunctionValue());
+            sessionInfo.setNextPlayerForward(true);
         }else if(card.getFunction().getFunctionID() == Function.GET_CARDS_BACKWARD){
-            quantityCardsToTake += card.getFunction().getFunctionValue();
-            isNextPlayerFroward = false;
+            sessionInfo.setQuantityCardsToTake(sessionInfo.getQuantityCardsToTake()
+                    + card.getFunction().getFunctionValue());
+            sessionInfo.setNextPlayerForward(false);
         }else if(card.getFunction().getFunctionID() == Function.WAIT_TURNS){
-            quantityTurnsToWait += card.getFunction().getFunctionValue();
-            isNextPlayerFroward = true;
+            sessionInfo.setQuantityTurnsToWait(sessionInfo.getQuantityTurnsToWait()
+                    + card.getFunction().getFunctionValue());
+            sessionInfo.setNextPlayerForward(true);
         }else{
-            isNextPlayerFroward = true;
+            sessionInfo.setNextPlayerForward(true);
         }
-        cardOnTop = card;
+        sessionInfo.setCardOnTop(card);
     }
 
-    public void giveCardToPlayer(Player player, int quanity){
-        for(int i = 0; i < quanity; i++){
-            if(deck.deckLength() == 0){
-                deck = graveyard;
-                graveyard = new Deck();
+    public void giveCardToPlayer(Player player, int quantity){
+        for(int i = 0; i < quantity; i++){
+            if(sessionInfo.getDeckOnTable().deckLength() == 0){
+                sessionInfo.setDeckOnTable(sessionInfo.getGraveyard());
+                sessionInfo.setGraveyard(new Deck());
             }
-            player.addCardToHand(deck.getCardFromDeck());
+            player.addCardToHand(sessionInfo.getDeckOnTable().getCardFromDeck());
         }
     }
 
-    public void setPlayerToWaitTurns(Player player, int quanity){
-        player.setToWaitTurns(quanity);
+    public void setPlayerToWaitTurns(Player player, int quantity){
+        player.setToWaitTurns(quantity);
     }
 
     private boolean isColorCorrectly(Card card) {
-        return cardOnTop.getIdColor() == card.getIdColor();
+        return sessionInfo.getCardOnTop().getIdColor() == card.getIdColor();
     }
 
     private boolean isTypeCorrectly(Card card) {
-        return cardOnTop.getIdType() == card.getIdType();
+        return sessionInfo.getCardOnTop().getIdType() == card.getIdType();
     }
 
     public void endTurn(Player player){
         if(player.isMakao()){
-            players.remove(player);
-            if(players.size() == 1){
+            sessionInfo.getPlayersObjectsInOrder().remove(player);
+            if(sessionInfo.getPlayersObjectsInOrder().size() == 1){
                 endGame();
             }
         }
-        if(isNextPlayerFroward){
-            Player nextPlayer = getNextPlayer(player);
+        if(sessionInfo.isNextPlayerForward()){
+            int nextPlayerId = sessionInfo.getNextPlayerId(player);
+            Player nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextPlayerId);
             while(nextPlayer.getToWaitTurns() != 0){
-                nextPlayer = getPreviousPlayer(nextPlayer);
+                nextPlayer.setToWaitTurns(nextPlayer.getToWaitTurns() - 1);
+                int nextNextPlayerId = sessionInfo.getNextPlayerId(player);
+                nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextNextPlayerId);
             }
-            isNextPlayerFroward = false;
-            sessionInfo.setJustEndedTurnPlayerId(nextPlayer.getPlayerID());
-            setActualPlayer(nextPlayer);
+            sessionInfo.setLastTurnEndedPlayer(player);
+            sessionInfo.setActualTurnPlayer(nextPlayer);
         }else{
-            Player previousPlayer = getPreviousPlayer(player);
+            int previousPlayerId = sessionInfo.getPreviousPlayerId(player);
+            Player previousPlayer = sessionInfo.getPlayersObjectsInOrder().get(previousPlayerId);
             while(previousPlayer.getToWaitTurns() != 0){
-                previousPlayer.setToWaitTurns(previousPlayer.getToWaitTurns() - 1);
-                previousPlayer = getPreviousPlayer(previousPlayer);
+                int nextPreviousPlayerId = sessionInfo.getPreviousPlayerId(player);
+                previousPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextPreviousPlayerId);
             }
-            sessionInfo.setJustEndedTurnPlayerId(previousPlayer.getPlayerID());
-            setActualPlayer(previousPlayer);
+            sessionInfo.setNextPlayerForward(true);
+            sessionInfo.setLastTurnEndedPlayer(player);
+            sessionInfo.setActualTurnPlayer(previousPlayer);
         }
     }
 
 
     private void endGame(){
-        sessionInfo.setGameExited(true);
+        sessionInfo.setGameExiting(true);
     }
 }

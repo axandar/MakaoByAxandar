@@ -45,10 +45,7 @@ public class GameSession implements Runnable{
 
             settingUpPlayers(sSocket);
             waitForPlayersGetReady();
-            Logger.logConsole("Server", sessionInfo.getPlayers().size()+"");
-            sessionInfo.setTable(table);
-            table.initializeGame(numberOfDecks, sessionInfo.getPlayers(), functions, sessionInfo);
-
+            table.initializeGame();
 
         } catch(IOException | InterruptedException e) {
             Logger.logError(e);
@@ -72,7 +69,7 @@ public class GameSession implements Runnable{
     }
 
     private void waitForPlayersGetReady() throws InterruptedException{
-        while(sessionInfo.getNumberOfPlayersNotReady() > 0){
+        while(sessionInfo.getPlayersNotReady() > 0){
             Thread.sleep(1000);
         }
     }
@@ -86,6 +83,6 @@ public class GameSession implements Runnable{
     }
 
     public TableServer setTableServer(){
-        return new TableServer();
+        return new TableServer(sessionInfo, numberOfPlayers, numberOfDecks, functions);
     }
 }

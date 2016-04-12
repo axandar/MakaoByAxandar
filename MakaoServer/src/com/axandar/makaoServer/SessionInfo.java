@@ -23,7 +23,7 @@ public class SessionInfo {
     private Card orderedCard;
     private int quantityTurnsToWait = 0;
     private int quantityCardsToTake = 0;
-    private boolean isNextPlayerForWard;
+    private boolean isNextPlayerForward;
     private StopMakao lastSaid;
     private Player lastTurnEndedPlayer;
     private Player actualTurnPlayer;
@@ -31,6 +31,7 @@ public class SessionInfo {
     private boolean isGameExiting;
     private Deck graveyard;
     private Deck deckOnTable;
+    private TableServer table;
 
     public int getPlayersNotReady(){
         return playersNotReady;
@@ -74,10 +75,6 @@ public class SessionInfo {
         if(playersObjectsInOrder.indexOf(player) == 0){
             return playersObjectsInOrder.size();
         }else return playersObjectsInOrder.indexOf(player);
-    }
-
-    public Player getFirstPlayer(){
-        return playersObjectsInOrder.get(0);
     }
 
     public List<Card> getLastPlacedCards(){
@@ -152,12 +149,12 @@ public class SessionInfo {
         quantityCardsToTake += value;
     }
 
-    public boolean isNextPlayerForWard(){
-        return isNextPlayerForWard;
+    public boolean isNextPlayerForward(){
+        return isNextPlayerForward;
     }
 
-    public void setNextPlayerForWard(boolean nextPlayerForWard){
-        isNextPlayerForWard = nextPlayerForWard;
+    public void setNextPlayerForward(boolean nextPlayerForWard){
+        isNextPlayerForward = nextPlayerForWard;
     }
 
     public StopMakao getLastSaid(){
@@ -230,5 +227,13 @@ public class SessionInfo {
             listOfCard.add(deckOnTable.getCardFromDeck());
         }
         return listOfCard;
+    }
+
+    public TableServer getTable(){
+        return table;
+    }
+
+    public void setTable(TableServer table){
+        this.table = table;
     }
 }
