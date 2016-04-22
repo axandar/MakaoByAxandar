@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * Created by Axandar on 06.02.2016.
@@ -144,6 +145,7 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void turnStarted(){
+        sessionInfo.setLastPlacedCards(new ArrayList<>());
         send(ServerProtocol.TURN_STARTED);
         turnProcessing();
 

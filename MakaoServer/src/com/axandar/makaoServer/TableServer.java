@@ -45,11 +45,11 @@ public class TableServer {
 
         Player firstPlayer = sessionInfo.getPlayerObject(firstPlayerID);
         sessionInfo.setActualTurnPlayer(firstPlayer);
-        int lastPlayerId = sessionInfo.getPreviousPlayerId(firstPlayer);
+        int lastPlayerId = sessionInfo.getPreviousPlayerIndex(firstPlayer);
         sessionInfo.setLastTurnEndedPlayer(sessionInfo.getPlayerObject(lastPlayerId));
 
         sessionInfo.setTable(this);//update object for all players
-        sessionInfo.setGameStarted(true);// TODO: 11.04.2016 Wszystko jest co potrzebne?
+        sessionInfo.setGameStarted(true);
     }
 
     private void givePlayersCards(){
@@ -138,7 +138,7 @@ public class TableServer {
         }else{
             sessionInfo.setNextPlayerForward(true);
         }
-
+        sessionInfo.addLastPlacedCard(card);
         sessionInfo.addCardToGraveyard(sessionInfo.getCardOnTop());
         sessionInfo.setCardOnTop(card);
     }
@@ -168,7 +168,6 @@ public class TableServer {
     }
 
     public void endTurn(Player player){
-        // TODO: 22.04.2016 complication with players id??
         if(player.isMakao()){
             sessionInfo.getPlayersObjectsInOrder().remove(player);
             if(sessionInfo.getPlayersObjectsInOrder().size() == 1){
@@ -176,29 +175,27 @@ public class TableServer {
             }
         }
         if(sessionInfo.isNextPlayerForward()){
-            int nextPlayerId = sessionInfo.getNextPlayerId(player);
+            int nextPlayerId = sessionInfo.getNextPlayerIndex(player);
             Player nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextPlayerId);
             while(nextPlayer.getToWaitTurns() != 0){
                 nextPlayer.setToWaitTurns(nextPlayer.getToWaitTurns() - 1);
-                int nextNextPlayerId = sessionInfo.getNextPlayerId(player);
+                int nextNextPlayerId = sessionInfo.getNextPlayerIndex(player);
                 nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextNextPlayerId);
             }
             sessionInfo.setLastTurnEndedPlayer(player);
             sessionInfo.setActualTurnPlayer(nextPlayer);
         }else{
-            int previousPlayerId = sessionInfo.getPreviousPlayerId(player);
+            int previousPlayerId = sessionInfo.getPreviousPlayerIndex(player);
             Player previousPlayer = sessionInfo.getPlayersObjectsInOrder().get(previousPlayerId);
             while(previousPlayer.getToWaitTurns() != 0){
-                int nextPreviousPlayerId = sessionInfo.getPreviousPlayerId(player);
+                int nextPreviousPlayerId = sessionInfo.getPreviousPlayerIndex(player);
                 previousPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextPreviousPlayerId);
             }
             sessionInfo.setNextPlayerForward(true);
             sessionInfo.setLastTurnEndedPlayer(player);
             sessionInfo.setActualTurnPlayer(previousPlayer);
         }
-
     }
-
 
     private void endGame(){
         sessionInfo.setGameExiting(true);

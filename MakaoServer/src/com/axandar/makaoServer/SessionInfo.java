@@ -51,11 +51,6 @@ public class SessionInfo {
         return playersObjectsInOrder.get(index);
     }
 
-    // TODO: 23.04.2016 check for ordering players in list
-    public void setPlayersObjectsInOrder(List<Player> playersObjectsInOrder){
-        this.playersObjectsInOrder = playersObjectsInOrder;
-    }
-
     public void addPlayerObjectToList(Player player){
         playersObjectsInOrder.add(player);
     }
@@ -64,13 +59,13 @@ public class SessionInfo {
         playersObjectsInOrder.remove(player);
     }
 
-    public int getNextPlayerId(Player player){
+    public int getNextPlayerIndex(Player player){
         if(playersObjectsInOrder.indexOf(player) == playersObjectsInOrder.size()){
             return 0;
         }else return playersObjectsInOrder.indexOf(player) + 1;
     }
 
-    public int getPreviousPlayerId(Player player){
+    public int getPreviousPlayerIndex(Player player){
         if(playersObjectsInOrder.indexOf(player) == 0){
             return playersObjectsInOrder.size();
         }else return playersObjectsInOrder.indexOf(player);
@@ -80,10 +75,12 @@ public class SessionInfo {
         return lastPlacedCards;
     }
 
-    // TODO: 23.04.2016 when putting card on table add them to this array. on next runt wipe it
-    // TODO: 23.04.2016 when synchronizing data beetwen players send this array too
     public void setLastPlacedCards(List<Card> lastPlacedCards){
         this.lastPlacedCards = lastPlacedCards;
+    }
+
+    public void addLastPlacedCard(Card card){
+        lastPlacedCards.add(card);
     }
 
     public Card getCardOnTop(){
