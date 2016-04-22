@@ -3,7 +3,6 @@ package com.axandar.makaoServer;
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Deck;
 import com.axandar.makaoCore.logic.Player;
-import com.axandar.makaoServer.ErrorHandling.ConnectError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,6 @@ public class SessionInfo {
     private int playersNotReady = 0;
     private List<Player> playersObjectsInOrder = new ArrayList<>();
     private List<Card> lastPlacedCards = new ArrayList<>();
-    private List<ConnectError> connectionErrors;
     private Card cardOnTop;
     private Card orderingCard;
     private Card orderedCard;
@@ -37,10 +35,6 @@ public class SessionInfo {
         return playersNotReady;
     }
 
-    public void setPlayersNotReady(int playersNotReady){
-        this.playersNotReady = playersNotReady;
-    }
-
     public void increasePlayersNotReady(){
         playersNotReady++;
     }
@@ -57,6 +51,7 @@ public class SessionInfo {
         return playersObjectsInOrder.get(index);
     }
 
+    // TODO: 23.04.2016 check for ordering players in list
     public void setPlayersObjectsInOrder(List<Player> playersObjectsInOrder){
         this.playersObjectsInOrder = playersObjectsInOrder;
     }
@@ -85,24 +80,10 @@ public class SessionInfo {
         return lastPlacedCards;
     }
 
+    // TODO: 23.04.2016 when putting card on table add them to this array. on next runt wipe it
+    // TODO: 23.04.2016 when synchronizing data beetwen players send this array too
     public void setLastPlacedCards(List<Card> lastPlacedCards){
         this.lastPlacedCards = lastPlacedCards;
-    }
-
-    public List<ConnectError> getConnectionErrors(){
-        return connectionErrors;
-    }
-
-    public void setConnectionErrors(List<ConnectError> connectionErrors){
-        this.connectionErrors = connectionErrors;
-    }
-
-    public void addConnectionError(ConnectError error){
-        connectionErrors.add(error);
-    }
-
-    public void removeConnectionError(ConnectError error){
-        connectionErrors.remove(error);
     }
 
     public Card getCardOnTop(){
@@ -137,20 +118,12 @@ public class SessionInfo {
         this.quantityTurnsToWait = quantityTurnsToWait;
     }
 
-    public void increaseTurnsToWaitQuantity(int value){
-        quantityTurnsToWait += value;
-    }
-
     public int getQuantityCardsToTake(){
         return quantityCardsToTake;
     }
 
     public void setQuantityCardsToTake(int quantityCardsToTake){
         this.quantityCardsToTake = quantityCardsToTake;
-    }
-
-    public void increaseCardsToTakeQuantity(int value){
-        quantityCardsToTake += value;
     }
 
     public boolean isNextPlayerForward(){
@@ -219,18 +192,6 @@ public class SessionInfo {
 
     public void setDeckOnTable(Deck deckOnTable){
         this.deckOnTable = deckOnTable;
-    }
-
-    public void addCardToDeckOnTable(Card card){
-        deckOnTable.addCardToDeck(card);
-    }
-
-    public List<Card> takeCardsFromDeckTop(int quantity){
-        List<Card> listOfCard = new ArrayList<>();
-        for(int i = 0; i < quantity; i++){
-            listOfCard.add(deckOnTable.getCardFromDeck());
-        }
-        return listOfCard;
     }
 
     public TableServer getTable(){

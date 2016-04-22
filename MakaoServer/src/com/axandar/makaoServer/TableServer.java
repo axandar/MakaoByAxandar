@@ -118,20 +118,28 @@ public class TableServer {
 
     private void putCard(Card card){
         if(card.getFunction().getFunctionID() == Function.GET_CARDS_FORWARD){
+
             sessionInfo.setQuantityCardsToTake(sessionInfo.getQuantityCardsToTake()
                     + card.getFunction().getFunctionValue());
             sessionInfo.setNextPlayerForward(true);
+
         }else if(card.getFunction().getFunctionID() == Function.GET_CARDS_BACKWARD){
+
             sessionInfo.setQuantityCardsToTake(sessionInfo.getQuantityCardsToTake()
                     + card.getFunction().getFunctionValue());
             sessionInfo.setNextPlayerForward(false);
+
         }else if(card.getFunction().getFunctionID() == Function.WAIT_TURNS){
+
             sessionInfo.setQuantityTurnsToWait(sessionInfo.getQuantityTurnsToWait()
                     + card.getFunction().getFunctionValue());
             sessionInfo.setNextPlayerForward(true);
+
         }else{
             sessionInfo.setNextPlayerForward(true);
         }
+
+        sessionInfo.addCardToGraveyard(sessionInfo.getCardOnTop());
         sessionInfo.setCardOnTop(card);
     }
 
