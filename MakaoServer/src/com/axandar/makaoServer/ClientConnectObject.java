@@ -16,8 +16,6 @@ import java.net.Socket;
  */
 public class ClientConnectObject implements Runnable {
 
-    // TODO: 22.03.2016 Add option for call "stop makao" on another player
-
     private Socket socket;
     private int id;
     private Connection conn;
@@ -107,7 +105,6 @@ public class ClientConnectObject implements Runnable {
             }
 
             checkForMakao();
-            // TODO: 22.04.2016 check if player wanted to say makao
         }
         Logger.logConsole(TAG, "Player started turn");
         turnStarted();
