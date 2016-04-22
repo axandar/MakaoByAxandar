@@ -98,14 +98,14 @@ public class Client implements Runnable{
     private void getRestPlayersInfo() throws IOException, ClassNotFoundException{
         Object receivedObject = fromServer.readObject();
         if(receivedObject instanceof Integer){
-            if((int) receivedObject == ServerProtocol.START_UPDATE_PLAYERS){
+            if((int) receivedObject == ServerProtocol.START_UPDATE){
                 boolean isUpdatingPlayers = true;
                 while(isUpdatingPlayers){
                     receivedObject = fromServer.readObject();
                     if(receivedObject instanceof Player){
                         properties.addPlayerToList((Player) receivedObject);
                     }else if(receivedObject instanceof Integer){
-                        if((int) receivedObject == ServerProtocol.END_UPDATE_PLAYERS){
+                        if((int) receivedObject == ServerProtocol.STOP_UPDATE){
                             isUpdatingPlayers = false;
                         }
                     }
@@ -123,7 +123,7 @@ public class Client implements Runnable{
                 receivedCommand = (Integer) receivedObject;
             }
 
-            if(receivedCommand == ServerProtocol.START_UPDATE_PLAYERS){
+            if(receivedCommand == ServerProtocol.START_UPDATE){
                 setCardOnTop();//When other player end turn need to update cardOnTop
                 updatePlayers();
                 //each statement is updating all players information and ending turn of one player
@@ -205,7 +205,7 @@ public class Client implements Runnable{
 
     private void updatePlayers() throws IOException, ClassNotFoundException{
         int receivedCommand = -1;
-        while(receivedCommand != ServerProtocol.END_UPDATE_PLAYERS){
+        while(receivedCommand != ServerProtocol.STOP_UPDATE){
             Object receivedObject = fromServer.readObject();
 
             if(receivedObject instanceof Integer){

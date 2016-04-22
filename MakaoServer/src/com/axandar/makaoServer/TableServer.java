@@ -135,7 +135,7 @@ public class TableServer {
         sessionInfo.setCardOnTop(card);
     }
 
-    public void giveCardToPlayer(Player player, int quantity){
+    public Player giveCardToPlayer(Player player, int quantity){
         for(int i = 0; i < quantity; i++){
             if(sessionInfo.getDeckOnTable().deckLength() == 0){
                 sessionInfo.setDeckOnTable(sessionInfo.getGraveyard());
@@ -143,10 +143,12 @@ public class TableServer {
             }
             player.addCardToHand(sessionInfo.getDeckOnTable().getCardFromDeck());
         }
+        return player;
     }
 
-    public void setPlayerToWaitTurns(Player player, int quantity){
+    public Player setPlayerToWaitTurns(Player player, int quantity){
         player.setToWaitTurns(quantity);
+        return player;
     }
 
     private boolean isColorCorrectly(Card card) {
@@ -158,6 +160,7 @@ public class TableServer {
     }
 
     public void endTurn(Player player){
+        // TODO: 22.04.2016 complication with players id??
         if(player.isMakao()){
             sessionInfo.getPlayersObjectsInOrder().remove(player);
             if(sessionInfo.getPlayersObjectsInOrder().size() == 1){
@@ -185,6 +188,7 @@ public class TableServer {
             sessionInfo.setLastTurnEndedPlayer(player);
             sessionInfo.setActualTurnPlayer(previousPlayer);
         }
+
     }
 
 

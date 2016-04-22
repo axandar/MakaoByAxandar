@@ -45,6 +45,10 @@ public class SessionInfo {
         playersNotReady++;
     }
 
+    public void decreasePlayersNotReady(){
+        playersNotReady--;
+    }
+
     public List<Player> getPlayersObjectsInOrder(){
         return playersObjectsInOrder;
     }
