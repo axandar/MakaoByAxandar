@@ -25,24 +25,22 @@ public class Client implements Runnable{
     private int port;
     private String nickname;
     private ClientProperties properties;
-
     private Connection conn;
 
     public Client(ClientProperties _properties) {
         properties = _properties;
         ip = properties.getIp();
         port = properties.getPort();
-        nickname = properties.getNickName();
+        nickname = properties.getNickname();
 
     }
 
     @Override
     public void run(){
         Logger.logConsole(TAG, "Started client backend");
-        properties.clientStarted();
-        startConnection();
-        setNickname();
-        handleCommand();
+        if(startConnection()){
+            tradingInformations();
+        }
     }
 
     private boolean startConnection(){
@@ -50,61 +48,54 @@ public class Client implements Runnable{
             Socket connectionToServer = new Socket(ip, port);
             conn = new Connection(new ObjectInputStream(connectionToServer.getInputStream()),
                     new ObjectOutputStream(connectionToServer.getOutputStream()));
-            properties.clientStarted();
+            properties.setClientRunning(true);
             return true;
         }catch(IOException e){
-            e.printStackTrace();
+            Logger.logError(e);
         }
         return false;
     }
 
-    private void setNickname(){
-        toServer.writeObject(nickname);
-    }
+    private void tradingInformations(){
+        send(nickname);
 
-    private void handleCommand(){
-        Object objectFromServer = fromServer.readObject();
-        if(objectFromServer instanceof Integer){
-            Logger.logConsole(TAG, "Received command as:" + (int) objectFromServer);
-            int receivedCommand = (int) objectFromServer;
-            if(receivedCommand == ServerProtocol.ACCEPTED_NICK){
-                handleCommand();
-            }else if(receivedCommand == ServerProtocol.GAME_STARTED){
-                Logger.logConsole(TAG, "Game started at backend");
-                getPlayerObject();
-                getRestPlayersInfo();
-                startGame();
-            }else{
-                handleCommand();
+        Object received = receive();
+        if(received instanceof Integer){
+            properties.setEstimatedPlayersNumber((int)received);
+        }
+
+        received = receive();
+        if(received instanceof Integer && (int)received == ServerProtocol.GAME_STARTED){
+            received = receive();
+            if(received instanceof Player){
+                properties.setLocalPlayer((Player)received);
             }
-        }
-    }
 
-    private void getPlayerObject(){
-        Object objectFromServer = fromServer.readObject();
-        if(objectFromServer instanceof Player){
-            properties.setPlayer((Player) objectFromServer);
-            Logger.logConsole(TAG, "Received new player object");
-            properties.updateGame();
-        }
-    }
-
-    private void getRestPlayersInfo(){
-        Object receivedObject = fromServer.readObject();
-        if(receivedObject instanceof Integer){
-            if((int) receivedObject == ServerProtocol.START_UPDATE){
-                boolean isUpdatingPlayers = true;
-                while(isUpdatingPlayers){
-                    receivedObject = fromServer.readObject();
-                    if(receivedObject instanceof Player){
-                        properties.addPlayerToList((Player) receivedObject);
-                    }else if(receivedObject instanceof Integer){
-                        if((int) receivedObject == ServerProtocol.STOP_UPDATE){
-                            isUpdatingPlayers = false;
-                        }
-                    }
+            int i = 0;
+            while(i < properties.getEstimatedPlayersNumber()-1){
+                received = receive();
+                if(received instanceof Player){
+                    i++;
+                    properties.addPlayer((Player)received);
+                    Logger.logConsole(TAG, "Added player: " + ((Player) received).getPlayerName());
                 }
-                properties.updateGame();
+            }
+
+            received = receive();
+            if(received instanceof Card){
+                properties.setCardOnTop((Card)received);
+            }
+
+            handleCommands();
+        }
+
+    }
+
+    private void handleCommands(){
+        while(properties.isClientRunning()){
+            Object received = receive();
+            if(received instanceof Integer){
+
             }
         }
     }
@@ -193,53 +184,6 @@ public class Client implements Runnable{
                     properties.updateGame();
                 }
 
-            }
-        }
-    }
-
-    private void updatePlayers(){
-        int receivedCommand = -1;
-        while(receivedCommand != ServerProtocol.STOP_UPDATE){
-            Object receivedObject = fromServer.readObject();
-
-            if(receivedObject instanceof Integer){
-                receivedCommand = (int) receivedObject;
-            }else if(receivedObject instanceof Player){
-                properties.setPlayerToUpdate((Player) receivedObject);
-                properties.updateGame();
-            }
-        }
-    }
-
-    private void setCardOnTop(){
-        Object receivedObject = fromServer.readObject();
-        if(receivedObject instanceof Card){
-            properties.setCardOnTop((Card) receivedObject);
-            properties.updateGame();
-        }
-    }
-
-    private void setMakao(){
-        toServer.writeObject(ServerProtocol.PLAYER_SET_MAKAO);
-        Object receivedObject = fromServer.readObject();
-        if(receivedObject instanceof Integer){
-            int receivedCommand = (int) receivedObject;
-            if(receivedCommand != ServerProtocol.GOT_CMD){
-                setMakao();
-            }else{
-                properties.updateGame();
-            }
-
-        }
-    }
-
-    private void endTurnOnServer(){
-        toServer.writeObject(ServerProtocol.TURN_ENDED);
-        Object receivedObject = fromServer.readObject();
-        if(receivedObject instanceof Integer){
-            int receivedCommand = (int) receivedObject;
-            if(receivedCommand != ServerProtocol.GOT_CMD){
-                endTurnOnServer();
             }
         }
     }

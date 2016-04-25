@@ -59,7 +59,7 @@ public class GameController {
         clientProperties = new ClientProperties();
         clientProperties.setIp("0.0.0.0");
         clientProperties.setPort(5000);
-        clientProperties.setNickName("Axandar2");
+        clientProperties.setNickname("Axandar2");
 
         Client client = new Client(clientProperties);
         Thread clientThread = new Thread(client);
@@ -92,7 +92,7 @@ public class GameController {
 
             setCardOnTopTexture(clientProperties.getCardOnTop());
 
-            List<Player> listOfRestPlayers = clientProperties.getPlayers();
+            List<Player> listOfRestPlayers = clientProperties.getAditionalPlayers();
             playersList.getItems().remove(0, playersList.getItems().size());
             for(Player player:listOfRestPlayers){
                 playersList.getItems().add(player.getPlayerName());
