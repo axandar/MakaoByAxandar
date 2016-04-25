@@ -1,4 +1,4 @@
-package com.axandar.makaoServer;
+package com.axandar.makaoCore.utils;
 
 import com.axandar.makaoCore.utils.Logger;
 
