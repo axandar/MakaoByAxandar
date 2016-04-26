@@ -51,6 +51,8 @@ public class GameController {
 
      dialogStage.showAndWait();**/
 
+    // TODO: 26.04.2016 add option to say "Makao" and "Stop makao"
+
     @FXML
     public void startGame(){
         Logger.logConsole(TAG, "Game started");
@@ -138,18 +140,6 @@ public class GameController {
 
         return newCards;
     }
-
-    /**if(clickedCard != null){
-     String cardName = clickedCard.getIdType() + "-" + clickedCard.getIdColor();
-     Logger.logConsole(TAG, "Send card: " + cardName);
-     clientProperties.setCardToPut(clickedCard);
-     if(clickedCard.getFunction().getFunctionID() == Function.ORDER_CARD
-     || clickedCard.getFunction().getFunctionID() == Function.CHANGE_COLOR){
-     if(orderedCard != null){
-     clientProperties.setOrderedCard(orderedCard);
-     }else clientProperties.setOrderedCard(new Card(1, 1, new Function(4, 0)));
-     }
-     }**/
 
     @FXML
     public void sendCardToServer(){
