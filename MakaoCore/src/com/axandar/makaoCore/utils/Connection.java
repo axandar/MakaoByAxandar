@@ -1,7 +1,5 @@
 package com.axandar.makaoCore.utils;
 
-import com.axandar.makaoCore.utils.Logger;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

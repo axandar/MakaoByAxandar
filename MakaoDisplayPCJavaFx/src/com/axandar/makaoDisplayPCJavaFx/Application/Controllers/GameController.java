@@ -77,7 +77,7 @@ public class GameController {
             }
 
             if(clientProperties.isCardsRejected()){
-                Logger.logConsole(TAG, "Some ards not accepted");
+                Logger.logConsole(TAG, "Some cards not accepted");
                 // TODO: 26.04.2016 for each notAcceptedCard show alert about failure
             }
 

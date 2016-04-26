@@ -32,6 +32,10 @@ public class SessionInfo {
     private Deck deckOnTable;
     private TableServer table;
 
+    public SessionInfo(){
+
+    }
+
     public int getPlayersNotReady(){
         return playersNotReady;
     }
@@ -68,7 +72,7 @@ public class SessionInfo {
 
     public int getPreviousPlayerIndex(Player player){
         if(playersObjectsInOrder.indexOf(player) == 0){
-            return playersObjectsInOrder.size();
+            return playersObjectsInOrder.size()-1;
         }else return playersObjectsInOrder.indexOf(player);
     }
 

@@ -39,21 +39,33 @@ public class Client implements Runnable{
     public void run(){
         Logger.logConsole(TAG, "Started client backend");
         if(startConnection()){
+            Logger.logConsole(TAG, "Started information trading");
             tradingInformation();
+        }else{
+            Logger.logConsole(TAG, "Error in establishing connection with server");
         }
     }
 
     private boolean startConnection(){
         try{
             Socket connectionToServer = new Socket(ip, port);
+            /**ObjectInputStream obj = new ObjectInputStream(connectionToServer.getInputStream());
             conn = new Connection(new ObjectInputStream(connectionToServer.getInputStream()),
-                    new ObjectOutputStream(connectionToServer.getOutputStream()));
+                    new ObjectOutputStream(connectionToServer.getOutputStream()));**/
+        //WEIRD ERROR, ENDLESS LOOP ON INITIALIZE
+            ObjectOutputStream oos = new ObjectOutputStream(connectionToServer.getOutputStream());
+            oos.flush();
+            ObjectInputStream is = new ObjectInputStream(connectionToServer.getInputStream());
+            conn = new Connection(is, oos);
+
             properties.setClientRunning(true);
+            Logger.logConsole(TAG, "true");
             return true;
         }catch(IOException e){
+            Logger.logConsole(TAG, "false");
             Logger.logError(e);
+            return false;
         }
-        return false;
     }
 
     private void tradingInformation(){
@@ -86,6 +98,7 @@ public class Client implements Runnable{
                 properties.setCardOnTop((Card)received);
             }
 
+            properties.setUpdateGame(true);
             handleCommands();
         }
 

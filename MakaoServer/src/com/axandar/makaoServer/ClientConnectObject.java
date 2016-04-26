@@ -83,6 +83,7 @@ public class ClientConnectObject implements Runnable {
             sessionInfo.addPlayerObjectToList(threadPlayer);
             send(sessionInfo.getPlayersObjectsInOrder().size());
             sessionInfo.decreasePlayersNotReady();
+            Logger.logConsole(TAG, "Set up player");
         }
     }
 
@@ -121,7 +122,7 @@ public class ClientConnectObject implements Runnable {
         Player playerEndedTurnCache = sessionInfo.getLastTurnEndedPlayer();
         while(playerEndedTurnCache.equals(sessionInfo.getLastTurnEndedPlayer())){
             try{
-                wait(1000);
+                Thread.sleep(1000);
             }catch(InterruptedException e){
                 Logger.logError(e);
             }

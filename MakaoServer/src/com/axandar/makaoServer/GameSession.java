@@ -18,6 +18,7 @@ public class GameSession implements Runnable{
     private List<Thread> clientsThreads = new ArrayList<>();
     private List<ClientConnectObject> clients = new ArrayList<>();
 
+    private static final String TAG = "GameSession on server";
     private static List<List<Function>> functions = new ArrayList<>();
     private static int numberOfDecks;
     private static int numberOfPlayers;
@@ -26,7 +27,7 @@ public class GameSession implements Runnable{
     private ServerSocket sSocket;
 
     private volatile SessionInfo sessionInfo;
-    private volatile TableServer table = setTableServer();
+    private volatile TableServer table;
 
     public GameSession(int _numberOfPlayers, int _numberOfDecks, List<List<Function>> _functions, int _port) {
         numberOfPlayers = _numberOfPlayers;
@@ -45,6 +46,7 @@ public class GameSession implements Runnable{
 
             settingUpPlayers(sSocket);
             waitForPlayersGetReady();
+            table = setTableServer();
             table.initializeGame();
 
         } catch(IOException | InterruptedException e) {
@@ -66,12 +68,14 @@ public class GameSession implements Runnable{
             clientsThreads.add(clientThread);
             clientThread.start();
         }
+        Logger.logConsole(TAG, "Ended adding players");
     }
 
     private void waitForPlayersGetReady() throws InterruptedException{
         while(sessionInfo.getPlayersNotReady() > 0){
             Thread.sleep(1000);
         }
+        Logger.logConsole(TAG, "Ended setting up players");
     }
 
     public void closeSocket(){
