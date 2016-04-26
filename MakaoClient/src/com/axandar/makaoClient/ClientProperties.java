@@ -2,6 +2,7 @@ package com.axandar.makaoClient;
 
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Player;
+import com.axandar.makaoCore.logic.StopMakao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +15,22 @@ public class ClientProperties{
     private String nickname;
     private String ip;
     private int port;
-    private boolean isClientRunning;
+    private boolean isClientRunning = false;
     private List<Player> aditionalPlayers = new ArrayList<>();
     private int estimatedPlayersNumber;
     private Player localPlayer;
     private Card cardOnTop;
     private List<Card> puttedCards = new ArrayList<>();
+    private boolean isSaidMakao = false;
+    private StopMakao stopMakao;
+    private boolean isTurnEnded = false;
+    private List<Card> cardsToPut = new ArrayList<>();
+    private Card orderedCard;
+    private List<Card> notAcceptedCards = new ArrayList<>();
+    private boolean isMakao = false;
+    private boolean isGameEnded = false;
+    private boolean isUpdateGame = false;
+    private boolean isCardsRejected = false;
 
     public String getNickname(){
         return nickname;
@@ -99,5 +110,93 @@ public class ClientProperties{
 
     public void addPuttedCard(Card card){
         puttedCards.add(card);
+    }
+
+    public boolean isSaidMakao(){
+        return isSaidMakao;
+    }
+
+    public void setSaidMakao(boolean saidMakao){
+        isSaidMakao = saidMakao;
+    }
+
+    public StopMakao getStopMakao(){
+        return stopMakao;
+    }
+
+    public void setStopMakao(StopMakao stopMakao){
+        this.stopMakao = stopMakao;
+    }
+
+    public boolean isTurnEnded(){
+        return isTurnEnded;
+    }
+
+    public void setTurnEnded(boolean turnEnded){
+        isTurnEnded = turnEnded;
+    }
+
+    public List<Card> getCardsToPut(){
+        return cardsToPut;
+    }
+
+    public void setCardsToPut(List<Card> cardsToPut){
+        this.cardsToPut = cardsToPut;
+    }
+
+    public void addCardToPut(Card card){
+        cardsToPut.add(card);
+    }
+
+    public Card getOrderedCard(){
+        return orderedCard;
+    }
+
+    public void setOrderedCard(Card orderedCard){
+        this.orderedCard = orderedCard;
+    }
+
+    public List<Card> getNotAcceptedCards(){
+        return notAcceptedCards;
+    }
+
+    public void setNotAcceptedCards(List<Card> notAcceptedCards){
+        this.notAcceptedCards = notAcceptedCards;
+    }
+
+    public void addNotAcceptedCard(Card card){
+        notAcceptedCards.add(card);
+    }
+
+    public boolean isMakao(){
+        return isMakao;
+    }
+
+    public void setMakao(boolean makao){
+        isMakao = makao;
+    }
+
+    public boolean isGameEnded(){
+        return isGameEnded;
+    }
+
+    public void setGameEnded(boolean gameEnded){
+        isGameEnded = gameEnded;
+    }
+
+    public boolean isUpdateGame(){
+        return isUpdateGame;
+    }
+
+    public void setUpdateGame(boolean updateGame){
+        isUpdateGame = updateGame;
+    }
+
+    public boolean isCardsRejected(){
+        return isCardsRejected;
+    }
+
+    public void setCardsRejected(boolean cardsRejected){
+        isCardsRejected = cardsRejected;
     }
 }

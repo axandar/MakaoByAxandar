@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-
-import static com.axandar.makaoCore.utils.Logger.logError;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Axandar on 26.01.2016.
@@ -39,7 +39,7 @@ public class Client implements Runnable{
     public void run(){
         Logger.logConsole(TAG, "Started client backend");
         if(startConnection()){
-            tradingInformations();
+            tradingInformation();
         }
     }
 
@@ -56,7 +56,7 @@ public class Client implements Runnable{
         return false;
     }
 
-    private void tradingInformations(){
+    private void tradingInformation(){
         send(nickname);
 
         Object received = receive();
@@ -95,97 +95,129 @@ public class Client implements Runnable{
         while(properties.isClientRunning()){
             Object received = receive();
             if(received instanceof Integer){
+                if((int)received == ServerProtocol.START_UPDATE){
+                    Logger.logConsole(TAG, "Start update players");
+                    updatePlayersInformation();
+                }else if((int)received == ServerProtocol.IS_SAID_STOPMAKAO){
+                    Logger.logConsole(TAG, "is stop makao said there?");
+                    if(properties.isSaidMakao()){
+                        send(ServerProtocol.PLAYER_SAID_STOPMAKAO);
+                        send(properties.getStopMakao());
+                        properties.setSaidMakao(false);
+                    }else send(ServerProtocol.PLAYER_NOT_SAID_STOPMAKAO);
+                }else if((int)received == ServerProtocol.TURN_STARTED){
+                    Logger.logConsole(TAG, "Turn started");
+                    turnProcessing();
 
+                }
             }
         }
     }
 
-    private void startGame(){
-        int receivedCommand = -1;
-        while(properties.isClientRunning()){
-            Object receivedObject = fromServer.readObject();
-            if(receivedObject instanceof Integer){
-                receivedCommand = (Integer) receivedObject;
-            }
-
-            if(receivedCommand == ServerProtocol.START_UPDATE){
-                setCardOnTop();//When other player end turn need to update cardOnTop
-                updatePlayers();
-                //each statement is updating all players information and ending turn of one player
-            }else if(receivedCommand == ServerProtocol.TURN_STARTED){
-                properties.startTurn();
-                setCardOnTop();
-                while(!properties.isTurnEnded()){
-                    Card cardToSend = properties.getCardToPut();
-                    if(cardToSend != null){
-                        if(cardToSend.getFunction().getFunctionID() == Function.ORDER_CARD
-                                || cardToSend.getFunction().getFunctionID() == Function.CHANGE_COLOR){
-                            toServer.writeObject(cardToSend);
-                            receivedObject = fromServer.readObject();
-                            if(receivedObject instanceof Integer){
-                                receivedCommand = (int) receivedObject;
-                                if(receivedCommand == ServerProtocol.GOT_ORDER_CARD){
-                                    toServer.writeObject(properties.getRequestedCard());
-                                    receivedObject = fromServer.readObject();
-                                    if(receivedObject instanceof Integer){
-                                        receivedCommand = (int) receivedObject;
-                                        if(receivedCommand == ServerProtocol.CARD_ACCEPTED){
-                                            Logger.logConsole(TAG, "Order card accepted");
-                                            properties.setCardToPut(null);
-                                            //ON CLIENT "if cardToPut is null && cardAccepted = true => then can delete card from hand"
-                                            properties.setCardAccepted(true);
-                                            Player player = properties.getPlayer();
-                                            player.removeCardFromHand(cardToSend);
-                                            properties.setPlayer(player);
-                                            properties.updateGame();
-                                        }else if(receivedCommand == ServerProtocol.CARD_NOTACCEPTED){
-                                            Logger.logConsole(TAG, "Order card not accepted");
-                                            properties.setCardToPut(null);
-                                            properties.setCardAccepted(false);
-                                            properties.updateGame();
-                                        }
-                                    }
-                                }
-                            }
-                        }else{
-                            toServer.writeObject(cardToSend);
-                            receivedObject = fromServer.readObject();
-                            if(receivedObject instanceof Integer){
-                                receivedCommand = (int) receivedObject;
-                                if(receivedCommand == ServerProtocol.CARD_ACCEPTED){
-                                    Logger.logConsole(TAG, "Card accepted");
-                                    properties.setCardToPut(null);
-                                    properties.setCardAccepted(true);
-                                    Player player = properties.getPlayer();
-                                    player.removeCardFromHand(cardToSend);
-                                    properties.setPlayer(player);
-                                    properties.updateGame();
-                                }else if(receivedCommand == ServerProtocol.CARD_NOTACCEPTED){
-                                    Logger.logConsole(TAG, "Card not accepted");
-                                    properties.setCardToPut(null);
-                                    properties.setCardAccepted(false);
-                                    properties.updateGame();
-                                }
-                            }
-                        }
-                    }
-                    Thread.sleep(2000);
-                }
-
-                if(properties.isMakaoSet()){
-                    setMakao();
-                }
-
-                endTurnOnServer();
-
-                receivedObject = fromServer.readObject();
-                if(receivedObject instanceof Player){
-                    properties.setPlayer((Player) receivedObject);
-                    properties.updateGame();
-                }
-
+    private void updatePlayersInformation(){
+        List<Player> updatedPlayers = new ArrayList<>();
+        Object received = receive();
+        while(!(received instanceof Integer && (int)received == ServerProtocol.STOP_UPDATE)){
+            if(received instanceof Player){
+                Logger.logConsole(TAG, " ---- updated player");
+                if(((Player) received).getPlayerID() != properties.getLocalPlayer().getPlayerID()){
+                    updatedPlayers.add((Player)received);
+                }else properties.setLocalPlayer((Player)received);
+            }else if(received instanceof Card){
+                Logger.logConsole(TAG, " ---- updated card");
+                properties.addPuttedCard((Card)received);
             }
         }
+        properties.setAditionalPlayers(updatedPlayers);
+        int indexOfLastCard = properties.getPuttedCards().size()-1;
+        properties.setCardOnTop(properties.getPuttedCards().get(indexOfLastCard));
+        properties.setUpdateGame(true);
+    }
+
+    private void turnProcessing(){
+        while(!properties.isTurnEnded()){
+            try{
+                Thread.sleep(2000);
+            }catch(InterruptedException e){
+                Logger.logError(e);
+            }
+        }
+        Logger.logConsole(TAG, "Started sending cards");
+        if(properties.getCardsToPut().size() > 0){
+            List<Card> cardsToPut = properties.getCardsToPut();
+            boolean isCardsEquals = true;
+            for(int i = 1; i < cardsToPut.size(); i++){
+                if(!cardsToPut.get(i-1).getFunction().equals(cardsToPut.get(i).getFunction())){
+                    isCardsEquals = false;
+                }
+            }
+
+            if(isCardsEquals){
+                Logger.logConsole(TAG, "Cards equal");
+                for(Card card:cardsToPut){
+                    Object received;
+                    if(isOrderCard(card)){
+                        send(card);
+                        received = receive();
+                        if(received instanceof Integer && (int)received == ServerProtocol.GOT_ORDER_CARD){
+                            send(properties.getOrderedCard());
+                            received = receive();
+                            if(received instanceof Integer && (int)received == ServerProtocol.CARD_NOTACCEPTED){
+                                properties.addNotAcceptedCard(card);
+                            }
+                        }
+                    }else{
+                        send(card);
+                        received = receive();
+                        if(received instanceof Integer && (int)received == ServerProtocol.CARD_NOTACCEPTED){
+                            properties.addNotAcceptedCard(card);
+                        }
+                    }
+                }
+            }else{
+                Logger.logConsole(TAG, "Cards not equal");
+                properties.setTurnEnded(false);
+                properties.setCardsRejected(true);
+                properties.setUpdateGame(true);
+                turnProcessing();
+            }
+        }
+
+
+        if(properties.getNotAcceptedCards().size() > 0){
+            Logger.logConsole(TAG, "Cards rejected");
+            properties.setTurnEnded(false);
+            properties.setCardsRejected(true);
+            properties.setUpdateGame(true);
+            turnProcessing();
+        }else{
+            properties.setCardsRejected(false);
+            endingTurn();
+        }
+    }
+
+    private boolean isOrderCard(Card card){
+        return card.getFunction().getFunctionID() == Function.ORDER_CARD ||
+                card.getFunction().getFunctionID() == Function.CHANGE_COLOR;
+    }
+
+    private void endingTurn(){
+        Logger.logConsole(TAG, "Ending turn");
+        if(properties.getLocalPlayer().isMakao()){
+            Logger.logConsole(TAG, "Setting makao");
+            send(ServerProtocol.PLAYER_SET_MAKAO);
+        }
+        send(ServerProtocol.TURN_ENDED);
+        Object received = receive();
+        if(received instanceof Player){
+            Logger.logConsole(TAG, "Received player object updated after turn ending");
+            properties.setLocalPlayer((Player) received);
+            if(((Player)received).getCardsInHand().size() == 0){
+                Logger.logConsole(TAG, "Player ended turn");
+                properties.setGameEnded(true);
+            }
+        }
+        properties.setUpdateGame(true);
     }
 
     private void send(Object object){

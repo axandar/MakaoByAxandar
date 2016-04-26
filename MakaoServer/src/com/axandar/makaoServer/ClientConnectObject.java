@@ -3,6 +3,7 @@ package com.axandar.makaoServer;
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
+import com.axandar.makaoCore.logic.StopMakao;
 import com.axandar.makaoCore.utils.Connection;
 import com.axandar.makaoCore.utils.Logger;
 import com.axandar.makaoCore.utils.ServerProtocol;
@@ -54,9 +55,10 @@ public class ClientConnectObject implements Runnable {
 
             while(!sessionInfo.isGameExiting()){
                 runningGame();
-                /**if(sessionInfo.getPlayers().size() == 1){
-                 sessionInfo.setGameExited(true);
-                 }**/// TODO: 25.03.2016 Stay for debug only
+
+                if(sessionInfo.getPlayersObjectsInOrder().size() == 1){
+                    sessionInfo.setGameExiting(true);
+                }
             }
 
             closeSockets();
@@ -101,8 +103,9 @@ public class ClientConnectObject implements Runnable {
             waitForNextPlayerEndTurn();
             handleAnotherPlayersTurns();
 
-            if(sessionInfo.getLastSaid().getToWho().equals(threadPlayer) && threadPlayer.getCardsInHand().size() == 1
-                    && !threadPlayer.isMakao()){
+            StopMakao stopMakao = sessionInfo.getLastSaid();
+            if(stopMakao != null && stopMakao.getToWho().equals(threadPlayer) &&
+                    threadPlayer.getCardsInHand().size() == 1 && !threadPlayer.isMakao()){
                 playerGetCards(5);
             }
 
@@ -171,16 +174,15 @@ public class ClientConnectObject implements Runnable {
                 receivedCard((Card) received);
             }else if(received instanceof Integer){
                 command = (int) received;
-            }
-
-            if(command == ServerProtocol.PLAYER_SET_MAKAO && threadPlayer.getCardsInHand().size() == 1){
-                threadPlayer.setMakao(true);
+                if(command == ServerProtocol.PLAYER_SET_MAKAO && threadPlayer.getCardsInHand().size() == 1){
+                    threadPlayer.setMakao(true);
+                }
             }
         }
     }
 
     private boolean isTurnNotEnded(int intToCheck){
-        return !(intToCheck == ServerProtocol.TURN_ENDED || intToCheck == ServerProtocol.PLAYER_SET_MAKAO);
+        return !(intToCheck == ServerProtocol.TURN_ENDED);
     }
 
     private void receivedCard(Card card){
@@ -199,7 +201,7 @@ public class ClientConnectObject implements Runnable {
 
     private void getOrderedCard(Card orderingCard){
         Object received = receive();
-        send(ServerProtocol.GOT_ORDERED_CARD);
+        //send(ServerProtocol.GOT_ORDERED_CARD);
         if(received instanceof Card){
             Card orderedCard = (Card) received;
             if(table.putOrderCardOnTable(orderingCard, orderedCard)){
@@ -214,7 +216,7 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void gotNormalCard(Card card){
-        send(ServerProtocol.GOT_CARD);
+        //send(ServerProtocol.GOT_CARD);
         if(table.putCardOnTable(card)){
             Logger.logConsole(TAG, "Received card accepted");
             send(ServerProtocol.CARD_ACCEPTED);
@@ -261,7 +263,7 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void playerEndedGame(){
-        send(ServerProtocol.GAME_ENDED);
+        //send(ServerProtocol.GAME_ENDED);
         sessionInfo.removePlayerFromList(threadPlayer);
     }
 

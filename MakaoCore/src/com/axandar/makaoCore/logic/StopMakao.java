@@ -1,6 +1,4 @@
-package com.axandar.makaoServer;
-
-import com.axandar.makaoCore.logic.Player;
+package com.axandar.makaoCore.logic;
 
 /**
  * Created by Axandar on 11.04.2016.
