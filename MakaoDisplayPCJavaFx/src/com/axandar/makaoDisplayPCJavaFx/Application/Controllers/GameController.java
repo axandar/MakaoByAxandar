@@ -10,7 +10,6 @@ import com.axandar.makaoCore.utils.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
@@ -30,7 +29,7 @@ public class GameController {
     private volatile ClientProperties clientProperties;
     private Deck deckInHand = new Deck();
     private Player player;
-    private Card clickedCard = null;
+    private List<Card> cardsToPut = new ArrayList<>();
     private Card orderedCard = null;
 
     private List<String> imageViewsIDs = new ArrayList<>();
@@ -67,14 +66,20 @@ public class GameController {
         Runnable updateGUI = () -> {
             Logger.logConsole(TAG, "Updated GUI");
 
-            player = clientProperties.getPlayer();
-            if(clientProperties.isCardAccepted() && clientProperties.getCardToPut() != null){
-                Logger.logConsole(TAG, "Card accepted and removing");
-                removeCardFromHand(clientProperties.getCardToPut());
-            }else if(clientProperties.getCardToPut() != null){
-                Logger.logConsole(TAG, "Card not accepted");
+            player = clientProperties.getLocalPlayer();
+
+            if(clientProperties.getCardsToPut().size() > 0){
+                Logger.logConsole(TAG, "Cards accepted and removing");
+                clientProperties.setCardsToPut(new ArrayList<>());
+                removeCardsFromHand();
             }
-            Logger.logConsole(TAG, "Number of cards in hand on view: " + (int)(cardsInHand.getChildren().size()/2));
+
+            if(clientProperties.isCardsRejected()){
+                Logger.logConsole(TAG, "Some ards not accepted");
+                // TODO: 26.04.2016 for each notAcceptedCard show alert about failure
+            }
+
+            Logger.logConsole(TAG, "Number of cards in hand on view: " + cardsInHand.getChildren().size()/2);
             Logger.logConsole(TAG, "Number of cards in hand in player object: " + player.getCardsInHand().size());
             if(cardsInHand.getChildren().size() == 0){
                 Logger.logConsole(TAG, "Started adding cards");
@@ -93,7 +98,7 @@ public class GameController {
             setCardOnTopTexture(clientProperties.getCardOnTop());
 
             List<Player> listOfRestPlayers = clientProperties.getAditionalPlayers();
-            playersList.getItems().remove(0, playersList.getItems().size());
+            playersList.getItems().remove(0, playersList.getItems().size()-1);
             for(Player player:listOfRestPlayers){
                 playersList.getItems().add(player.getPlayerName());
             }
@@ -104,9 +109,9 @@ public class GameController {
             @Override
             protected Object call() throws Exception{
                 while(clientProperties.isClientRunning()){
-                    if(clientProperties.isGameUpdate()){
+                    if(clientProperties.isUpdateGame()){
                         Platform.runLater(updateGUI);
-                        clientProperties.updatedGame();
+                        clientProperties.setUpdateGame(false);
                     }
                     Thread.sleep(2000);
                 }
@@ -134,23 +139,33 @@ public class GameController {
         return newCards;
     }
 
+    /**if(clickedCard != null){
+     String cardName = clickedCard.getIdType() + "-" + clickedCard.getIdColor();
+     Logger.logConsole(TAG, "Send card: " + cardName);
+     clientProperties.setCardToPut(clickedCard);
+     if(clickedCard.getFunction().getFunctionID() == Function.ORDER_CARD
+     || clickedCard.getFunction().getFunctionID() == Function.CHANGE_COLOR){
+     if(orderedCard != null){
+     clientProperties.setOrderedCard(orderedCard);
+     }else clientProperties.setOrderedCard(new Card(1, 1, new Function(4, 0)));
+     }
+     }**/
+
     @FXML
     public void sendCardToServer(){
-        if(clickedCard != null){
-            String cardName = clickedCard.getIdType() + "-" + clickedCard.getIdColor();
-            Logger.logConsole(TAG, "Send card: " + cardName);
-            clientProperties.setCardToPut(clickedCard);
-            if(clickedCard.getFunction().getFunctionID() == Function.ORDER_CARD
-                    || clickedCard.getFunction().getFunctionID() == Function.CHANGE_COLOR){
-                if(orderedCard != null){
-                    clientProperties.setOrderedCard(orderedCard);
-                }else clientProperties.setOrderedCard(new Card(1, 1, new Function(4, 0)));
-            }
+        clientProperties.setCardsToPut(cardsToPut);
+        if(cardsToPut.get(0).getFunction().getFunctionID() == Function.CHANGE_COLOR ||
+                cardsToPut.get(0).getFunction().getFunctionID() == Function.ORDER_CARD){
+            clientProperties.setOrderedCard(orderedCard); 
         }
+        clientProperties.setTurnEnded(true);
     }
 
-    private void removeCardFromHand(Card card){
-        deckInHand.removeCardFromDeck(card);
+    private void removeCardsFromHand(){
+        //remove only that cards which are not in rejected but are in putted
+
+
+        /**deckInHand.removeCardFromDeck(card);
         String cardFileName = card.getIdType() + "-" + card.getIdColor();
         for(Node node:cardsInHand.getChildren()){
             if(node.getId().equals(cardFileName)){
@@ -158,12 +173,12 @@ public class GameController {
                 // TODO: 03.04.2016 not working removing from gui
                 break;
             }
-        }
+        }**/
     }
 
     @FXML
     public void endTurn(){
-        clientProperties.endTurn();
+        clientProperties.setTurnEnded(true);
         /**deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
         addCardToHandGUI(new Card(1, 1, new Function(6, 0)));
         deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
@@ -197,14 +212,22 @@ public class GameController {
 
         imageView.setOnMouseClicked(event -> {
             ImageView clickedImage = (ImageView) event.getSource();
-
+            // TODO: 26.04.2016 add border when clicked, and remove it when clicked second time
             for(Card cardFromPlayer : player.getCardsInHand()){
                 String cardName = cardFromPlayer.getIdType() + "-" + cardFromPlayer.getIdColor();
                 if(clickedImage.getId().equals(cardName)){
-                    if(clickedCard != null && (clickedCard.getFunction().getFunctionID() == Function.ORDER_CARD
-                            || clickedCard.getFunction().getFunctionID() == Function.CHANGE_COLOR)){
-                        orderedCard = cardFromPlayer;
-                    }else  clickedCard = cardFromPlayer;
+
+                    if(cardsToPut.contains(cardFromPlayer)){
+                        cardsToPut.remove(cardFromPlayer);
+                    }else{
+                        cardsToPut.add(cardFromPlayer);
+                        if(cardFromPlayer.getFunction().getFunctionID() == Function.CHANGE_COLOR ||
+                                cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
+                            // TODO: 26.04.2016 show window where player can choose ordered card
+                            // TODO: 26.04.2016 remember to add otpion for ordering "nothing"
+                        }
+                    }
+
                     Logger.logConsole(TAG, "Clicked card: " + cardName);
                     break;
                 }
