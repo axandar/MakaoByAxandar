@@ -38,7 +38,7 @@ public class GameSession implements Runnable{
 
     public void run(){
         sessionInfo = new SessionInfo();
-
+        sessionInfo.setNumberOfPlayers(numberOfPlayers);
         try {
             sSocket = new ServerSocket(port);
             Logger.logConsole("Starting server", "Server started at: " + new Date() + " at port: " + port);

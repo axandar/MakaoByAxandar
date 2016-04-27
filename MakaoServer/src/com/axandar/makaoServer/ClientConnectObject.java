@@ -83,8 +83,9 @@ public class ClientConnectObject implements Runnable {
         if(received instanceof String){
             threadPlayer = new Player((String)received, playerIp, id);
             sessionInfo.addPlayerObjectToList(threadPlayer);
-            send(sessionInfo.getPlayersObjectsInOrder().size());
+            send(sessionInfo.getNumberOfPlayers());
             sessionInfo.decreasePlayersNotReady();
+            TAG = TAG + " player id: " + id;
             Logger.logConsole(TAG, "Set up player");
         }
     }

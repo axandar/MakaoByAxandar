@@ -150,12 +150,12 @@ public class GameController {
 
     @FXML
     public void sendCardToServer(){
+        Logger.logConsole(TAG, "Requested sending cards");
         clientProperties.setCardsToPut(cardsToPut);
         if(cardsToPut.get(0).getFunction().getFunctionID() == Function.CHANGE_COLOR ||
                 cardsToPut.get(0).getFunction().getFunctionID() == Function.ORDER_CARD){
             clientProperties.setOrderedCard(orderedCard); 
         }
-        clientProperties.setTurnEnded(true);
     }
 
     private void removeCardsFromHand(){
@@ -175,6 +175,7 @@ public class GameController {
 
     @FXML
     public void endTurn(){
+        Logger.logConsole(TAG, "ending turn");
         clientProperties.setTurnEnded(true);
         /**deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
         addCardToHandGUI(new Card(1, 1, new Function(6, 0)));

@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class SessionInfo {
 
-
+    private int numberOfPlayers;
     private int playersNotReady = 0;
     private List<Player> playersObjectsInOrder = new ArrayList<>();
     private List<Card> lastPlacedCards = new ArrayList<>();
@@ -34,6 +34,14 @@ public class SessionInfo {
 
     public SessionInfo(){
 
+    }
+
+    public int getNumberOfPlayers(){
+        return numberOfPlayers;
+    }
+
+    public void setNumberOfPlayers(int numberOfPlayers){
+        this.numberOfPlayers = numberOfPlayers;
     }
 
     public int getPlayersNotReady(){
@@ -65,7 +73,7 @@ public class SessionInfo {
     }
 
     public int getNextPlayerIndex(Player player){
-        if(playersObjectsInOrder.indexOf(player) == playersObjectsInOrder.size()){
+        if(playersObjectsInOrder.indexOf(player) == playersObjectsInOrder.size()-1){
             return 0;
         }else return playersObjectsInOrder.indexOf(player) + 1;
     }

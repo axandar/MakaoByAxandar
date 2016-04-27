@@ -94,7 +94,6 @@ public class Client implements Runnable{
 
             received = receive();
             if(received instanceof Card){
-                Logger.logConsole(TAG, "is card on top null: " + ((Card)received == null));
                 properties.setCardOnTop((Card)received);
             }
             Logger.logConsole(TAG, "First update need");
@@ -129,8 +128,9 @@ public class Client implements Runnable{
 
     private void updatePlayersInformation(){
         List<Player> updatedPlayers = new ArrayList<>();
-        Object received = receive();
-        while(!(received instanceof Integer && (int)received == ServerProtocol.STOP_UPDATE)){
+        int command = -1;
+        while(command != ServerProtocol.STOP_UPDATE){
+            Object received = receive();
             if(received instanceof Player){
                 Logger.logConsole(TAG, " ---- updated player");
                 if(((Player) received).getPlayerID() != properties.getLocalPlayer().getPlayerID()){
@@ -139,16 +139,21 @@ public class Client implements Runnable{
             }else if(received instanceof Card){
                 Logger.logConsole(TAG, " ---- updated card");
                 properties.addPuttedCard((Card)received);
+            }else if(received instanceof Integer){
+                command = (int)received;
             }
         }
         properties.setAditionalPlayers(updatedPlayers);
-        int indexOfLastCard = properties.getPuttedCards().size()-1;
-        properties.setCardOnTop(properties.getPuttedCards().get(indexOfLastCard));
+        if(properties.getPuttedCards().size() > 0){
+            int indexOfLastCard = properties.getPuttedCards().size()-1;
+            properties.setCardOnTop(properties.getPuttedCards().get(indexOfLastCard));
+        }
         properties.setUpdateGame(true);
     }
 
     private void turnProcessing(){
         while(!properties.isTurnEnded()){
+            Logger.logConsole(TAG, "waiting for turn end");
             try{
                 Thread.sleep(2000);
             }catch(InterruptedException e){
@@ -164,7 +169,7 @@ public class Client implements Runnable{
                     isCardsEquals = false;
                 }
             }
-
+            // TODO: 27.04.2016 cant send again card when failed at first time
             if(isCardsEquals){
                 Logger.logConsole(TAG, "Cards equal");
                 for(Card card:cardsToPut){
@@ -194,6 +199,9 @@ public class Client implements Runnable{
                 properties.setUpdateGame(true);
                 turnProcessing();
             }
+        }else if(properties.getCardsToPut().size() == 0){
+            properties.setCardsRejected(false);
+            endingTurn();
         }
 
 
