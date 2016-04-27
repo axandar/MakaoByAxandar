@@ -59,10 +59,9 @@ public class Client implements Runnable{
             conn = new Connection(is, oos);
 
             properties.setClientRunning(true);
-            Logger.logConsole(TAG, "true");
+            Logger.logConsole(TAG, "Client fully running");
             return true;
         }catch(IOException e){
-            Logger.logConsole(TAG, "false");
             Logger.logError(e);
             return false;
         }
@@ -83,8 +82,8 @@ public class Client implements Runnable{
                 properties.setLocalPlayer((Player)received);
             }
 
-            int i = 0;
-            while(i < properties.getEstimatedPlayersNumber()-1){
+            int i = 1;
+            while(i < properties.getEstimatedPlayersNumber()){
                 received = receive();
                 if(received instanceof Player){
                     i++;
@@ -95,9 +94,10 @@ public class Client implements Runnable{
 
             received = receive();
             if(received instanceof Card){
+                Logger.logConsole(TAG, "is card on top null: " + ((Card)received == null));
                 properties.setCardOnTop((Card)received);
             }
-
+            Logger.logConsole(TAG, "First update need");
             properties.setUpdateGame(true);
             handleCommands();
         }

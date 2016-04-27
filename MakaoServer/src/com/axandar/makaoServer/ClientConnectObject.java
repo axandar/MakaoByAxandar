@@ -49,8 +49,10 @@ public class ClientConnectObject implements Runnable {
             send(ServerProtocol.GAME_STARTED);
             send(threadPlayer);
             for(Player player:sessionInfo.getPlayersObjectsInOrder()){
-                send(player);
-            }
+                if(player.getPlayerID() != threadPlayer.getPlayerID()){
+                    send(player);
+                }
+            }//first cient is not saving properly aditional player object
             send(sessionInfo.getCardOnTop());
 
             while(!sessionInfo.isGameExiting()){

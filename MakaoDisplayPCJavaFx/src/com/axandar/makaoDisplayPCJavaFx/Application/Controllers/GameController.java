@@ -66,7 +66,7 @@ public class GameController {
         Thread clientThread = new Thread(client);
 
         Runnable updateGUI = () -> {
-            Logger.logConsole(TAG, "Updated GUI");
+            Logger.logConsole(TAG, "Start updating GUI");
 
             player = clientProperties.getLocalPlayer();
 
@@ -98,20 +98,27 @@ public class GameController {
             }
 
             setCardOnTopTexture(clientProperties.getCardOnTop());
+            // TODO: 27.04.2016 first client is not properly savin aditional player object
 
             List<Player> listOfRestPlayers = clientProperties.getAditionalPlayers();
             playersList.getItems().remove(0, playersList.getItems().size()-1);
             for(Player player:listOfRestPlayers){
                 playersList.getItems().add(player.getPlayerName());
             }
-
+            Logger.logConsole(TAG, "Update ended");
         };
 
         Task taskToUpdateGUI = new Task(){
             @Override
             protected Object call() throws Exception{
+                while(!clientProperties.isClientRunning()){
+                    Thread.sleep(1000);
+                    //waiting for client initialize
+                }
+                Logger.logConsole(TAG, "isClient running");
                 while(clientProperties.isClientRunning()){
                     if(clientProperties.isUpdateGame()){
+                        Logger.logConsole(TAG, "Updated added to runLater()");
                         Platform.runLater(updateGUI);
                         clientProperties.setUpdateGame(false);
                     }
