@@ -106,6 +106,8 @@ public class Client implements Runnable{
     private void handleCommands(){
         while(properties.isClientRunning()){
             Object received = receive();
+            // TODO: 28.04.2016 Posibly error
+            // TODO: 28.04.2016 after some time receiving Player object instead of integer
             if(received instanceof Integer){
                 if((int)received == ServerProtocol.START_UPDATE){
                     Logger.logConsole(TAG, "Start update players");
@@ -161,7 +163,7 @@ public class Client implements Runnable{
             }
         }
         Logger.logConsole(TAG, "Started sending cards");
-        if(properties.getCardsToPut().size() > 0){
+        if(properties.getCardsToPut().size() > 0){// TODO: 28.04.2016 not resetting cards to put
             List<Card> cardsToPut = properties.getCardsToPut();
             boolean isCardsEquals = true;
             for(int i = 1; i < cardsToPut.size(); i++){
@@ -214,7 +216,7 @@ public class Client implements Runnable{
         }else{
             properties.setCardsRejected(false);
             endingTurn();
-        }
+        }// TODO: 28.04.2016 two times player is ending turn
     }
 
     private boolean isOrderCard(Card card){
