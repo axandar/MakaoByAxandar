@@ -11,6 +11,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="MakaoCore" />
     <orderEntry type="module" module-name="MakaoCore" />
+    <orderEntry type="library" scope="TEST" name="junit-4.12" level="application" />
     <orderEntry type="library" scope="TEST" name="junit:junit:4.12" level="application" />
   </component>
 </module>

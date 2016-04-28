@@ -98,7 +98,6 @@ public class GameController {
             }
 
             setCardOnTopTexture(clientProperties.getCardOnTop());
-            // TODO: 27.04.2016 first client is not properly savin aditional player object
 
             List<Player> listOfRestPlayers = clientProperties.getAditionalPlayers();
             playersList.getItems().remove(0, playersList.getItems().size()-1);

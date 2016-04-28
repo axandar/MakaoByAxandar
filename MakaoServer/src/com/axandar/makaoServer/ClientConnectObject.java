@@ -102,7 +102,7 @@ public class ClientConnectObject implements Runnable {
 
     private void runningGame() {
         //rest players ending theirs turns
-        while((!sessionInfo.getActualTurnPlayer().equals(threadPlayer))){
+        while(!(sessionInfo.getActualTurnPlayer().equals(threadPlayer))){
             Logger.logConsole(TAG, "Handle another player turn");
             waitForNextPlayerEndTurn();
             handleAnotherPlayersTurns();
