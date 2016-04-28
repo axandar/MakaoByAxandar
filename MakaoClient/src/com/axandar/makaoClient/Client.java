@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class Client implements Runnable{
 
-    private final String TAG = "Client backend";
+    private String TAG = "Client backend";
 
     private String ip;
     private int port;
@@ -80,6 +80,7 @@ public class Client implements Runnable{
             received = receive();
             if(received instanceof Player){
                 properties.setLocalPlayer((Player)received);
+                TAG = properties.getLocalPlayer().getPlayerID() + " " + TAG;
             }
 
             int i = 1;
@@ -106,8 +107,6 @@ public class Client implements Runnable{
     private void handleCommands(){
         while(properties.isClientRunning()){
             Object received = receive();
-            // TODO: 28.04.2016 Posibly error
-            // TODO: 28.04.2016 after some time receiving Player object instead of integer
             if(received instanceof Integer){
                 if((int)received == ServerProtocol.START_UPDATE){
                     Logger.logConsole(TAG, "Start update players");
@@ -163,7 +162,7 @@ public class Client implements Runnable{
             }
         }
         Logger.logConsole(TAG, "Started sending cards");
-        if(properties.getCardsToPut().size() > 0){// TODO: 28.04.2016 not resetting cards to put
+        if(properties.getCardsToPut().size() > 0){
             List<Card> cardsToPut = properties.getCardsToPut();
             boolean isCardsEquals = true;
             for(int i = 1; i < cardsToPut.size(); i++){
@@ -201,22 +200,20 @@ public class Client implements Runnable{
                 properties.setUpdateGame(true);
                 turnProcessing();
             }
+            if(properties.getNotAcceptedCards().size() > 0){
+                Logger.logConsole(TAG, "Cards rejected");
+                properties.setTurnEnded(false);
+                properties.setCardsRejected(true);
+                properties.setUpdateGame(true);
+                turnProcessing();
+            }else{
+                properties.setCardsRejected(false);
+                endingTurn();
+            }
         }else if(properties.getCardsToPut().size() == 0){
             properties.setCardsRejected(false);
             endingTurn();
         }
-
-
-        if(properties.getNotAcceptedCards().size() > 0){
-            Logger.logConsole(TAG, "Cards rejected");
-            properties.setTurnEnded(false);
-            properties.setCardsRejected(true);
-            properties.setUpdateGame(true);
-            turnProcessing();
-        }else{
-            properties.setCardsRejected(false);
-            endingTurn();
-        }// TODO: 28.04.2016 two times player is ending turn
     }
 
     private boolean isOrderCard(Card card){
@@ -226,6 +223,8 @@ public class Client implements Runnable{
 
     private void endingTurn(){
         Logger.logConsole(TAG, "Ending turn");
+        properties.setCardsToPut(new ArrayList<>());
+        properties.setTurnEnded(false);
         if(properties.getLocalPlayer().isMakao()){
             Logger.logConsole(TAG, "Setting makao");
             send(ServerProtocol.PLAYER_SET_MAKAO);
@@ -239,6 +238,15 @@ public class Client implements Runnable{
                 Logger.logConsole(TAG, "Player ended turn");
                 properties.setGameEnded(true);
             }
+        }else{
+            endingTurn();//experimental
+        }
+        received = receive();
+        if(received instanceof Card){
+            Logger.logConsole(TAG, "Received card object updated after turn ending");
+            properties.setCardOnTop((Card) received);
+        }else{
+            endingTurn();//experimental
         }
         properties.setUpdateGame(true);
     }

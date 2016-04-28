@@ -166,6 +166,7 @@ public class ClientConnectObject implements Runnable {
         }
         Logger.logConsole(TAG, "Updating player data");
         send(threadPlayer);
+        send(sessionInfo.getCardOnTop());
         table.endTurn(threadPlayer);
     }
 
