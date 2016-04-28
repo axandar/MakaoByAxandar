@@ -2,6 +2,7 @@ package com.axandar.makaoClient;
 
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Player;
+import com.axandar.makaoCore.logic.StopMakao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,29 +12,32 @@ import java.util.List;
  */
 public class ClientProperties{
 
-    private volatile String nickName;
-    private volatile String ip;
-    private volatile int port;
+    private String nickname;
+    private String ip;
+    private int port;
+    private boolean isClientRunning = false;
+    private List<Player> aditionalPlayers = new ArrayList<>();
+    private int estimatedPlayersNumber;
+    private Player localPlayer;
+    private Card cardOnTop;
+    private List<Card> puttedCards = new ArrayList<>();
+    private boolean isSaidMakao = false;
+    private StopMakao stopMakao;
+    private boolean isTurnEnded = false;
+    private List<Card> cardsToPut = new ArrayList<>();
+    private Card orderedCard;
+    private List<Card> notAcceptedCards = new ArrayList<>();
+    private boolean isMakao = false;
+    private boolean isGameEnded = false;
+    private boolean isUpdateGame = false;
+    private boolean isCardsRejected = false;
 
-    private volatile boolean isGameUpdate;
-    private volatile boolean isClientRunning;
-    private volatile Card cardOnTop;
-    private volatile Card cardToPut;
-    private volatile Card requestedCard;
-    private volatile Player player;
-    private volatile Player playerToUpdate;
-    private volatile List<Player> players = new ArrayList<>();
-
-    private volatile boolean isTurnEnded;
-    private volatile boolean isCardAccepted;
-    private volatile boolean isMakaoSet;
-
-    public String getNickName(){
-        return nickName;
+    public String getNickname(){
+        return nickname;
     }
 
-    public void setNickName(String nickName){
-        this.nickName = nickName;
+    public void setNickname(String nickname){
+        this.nickname = nickname;
     }
 
     public String getIp(){
@@ -52,60 +56,40 @@ public class ClientProperties{
         this.port = port;
     }
 
-    public boolean isGameUpdate(){
-        return isGameUpdate;
-    }
-
-    public void updateGame(){
-        isGameUpdate = true;
-    }
-
-    public void updatedGame(){
-        isGameUpdate = false;
-    }
-
     public boolean isClientRunning(){
         return isClientRunning;
     }
 
-    public void clientStarted(){
-        isClientRunning = true;
+    public void setClientRunning(boolean clientRunning){
+        isClientRunning = clientRunning;
     }
 
-    public void stopClient(){
-        isClientRunning = false;
+    public List<Player> getAditionalPlayers(){
+        return aditionalPlayers;
     }
 
-    public Card getCardToPut(){
-        return cardToPut;
+    public void setAditionalPlayers(List<Player> aditionalPlayers){
+        this.aditionalPlayers = aditionalPlayers;
     }
 
-    public void setCardToPut(Card cardToPut){
-        this.cardToPut = cardToPut;
+    public void addPlayer(Player player){
+        aditionalPlayers.add(player);
     }
 
-    public Card getRequestedCard(){
-        return requestedCard;
+    public int getEstimatedPlayersNumber(){
+        return estimatedPlayersNumber;
     }
 
-    public void setOrderedCard(Card requestedCard){
-        this.requestedCard = requestedCard;
+    public void setEstimatedPlayersNumber(int estimatedPlayersNumber){
+        this.estimatedPlayersNumber = estimatedPlayersNumber;
     }
 
-    public Player getPlayer(){
-        return player;
+    public Player getLocalPlayer(){
+        return localPlayer;
     }
 
-    public void setPlayer(Player player){
-        this.player = player;
-    }
-
-    public Player getPlayerToUpdate(){
-        return playerToUpdate;
-    }
-
-    public void setPlayerToUpdate(Player playerToUpdate){
-        this.playerToUpdate = playerToUpdate;
+    public void setLocalPlayer(Player localPlayer){
+        this.localPlayer = localPlayer;
     }
 
     public Card getCardOnTop(){
@@ -116,39 +100,103 @@ public class ClientProperties{
         this.cardOnTop = cardOnTop;
     }
 
-    public List<Player> getPlayers(){
-        return players;
-    }
-    
-    public void addPlayerToList(Player player){
-        players.add(player.getPlayerID(), player);
+    public List<Card> getPuttedCards(){
+        return puttedCards;
     }
 
-    public void endTurn(){
-        isTurnEnded = true;
+    public void setPuttedCards(List<Card> puttedCards){
+        this.puttedCards = puttedCards;
     }
 
-    public void startTurn(){
-        isTurnEnded = false;
+    public void addPuttedCard(Card card){
+        puttedCards.add(card);
+    }
+
+    public boolean isSaidMakao(){
+        return isSaidMakao;
+    }
+
+    public void setSaidMakao(boolean saidMakao){
+        isSaidMakao = saidMakao;
+    }
+
+    public StopMakao getStopMakao(){
+        return stopMakao;
+    }
+
+    public void setStopMakao(StopMakao stopMakao){
+        this.stopMakao = stopMakao;
     }
 
     public boolean isTurnEnded(){
         return isTurnEnded;
     }
 
-    public boolean isCardAccepted(){
-        return isCardAccepted;
+    public void setTurnEnded(boolean turnEnded){
+        isTurnEnded = turnEnded;
     }
 
-    public void setCardAccepted(boolean cardAccepted){
-        isCardAccepted = cardAccepted;
+    public List<Card> getCardsToPut(){
+        return cardsToPut;
     }
 
-    public boolean isMakaoSet(){
-        return isMakaoSet;
+    public void setCardsToPut(List<Card> cardsToPut){
+        this.cardsToPut = cardsToPut;
     }
 
-    public void setMakaoSet(boolean makaoSet){
-        isMakaoSet = makaoSet;
+    public void addCardToPut(Card card){
+        cardsToPut.add(card);
+    }
+
+    public Card getOrderedCard(){
+        return orderedCard;
+    }
+
+    public void setOrderedCard(Card orderedCard){
+        this.orderedCard = orderedCard;
+    }
+
+    public List<Card> getNotAcceptedCards(){
+        return notAcceptedCards;
+    }
+
+    public void setNotAcceptedCards(List<Card> notAcceptedCards){
+        this.notAcceptedCards = notAcceptedCards;
+    }
+
+    public void addNotAcceptedCard(Card card){
+        notAcceptedCards.add(card);
+    }
+
+    public boolean isMakao(){
+        return isMakao;
+    }
+
+    public void setMakao(boolean makao){
+        isMakao = makao;
+    }
+
+    public boolean isGameEnded(){
+        return isGameEnded;
+    }
+
+    public void setGameEnded(boolean gameEnded){
+        isGameEnded = gameEnded;
+    }
+
+    public boolean isUpdateGame(){
+        return isUpdateGame;
+    }
+
+    public void setUpdateGame(boolean updateGame){
+        isUpdateGame = updateGame;
+    }
+
+    public boolean isCardsRejected(){
+        return isCardsRejected;
+    }
+
+    public void setCardsRejected(boolean cardsRejected){
+        isCardsRejected = cardsRejected;
     }
 }

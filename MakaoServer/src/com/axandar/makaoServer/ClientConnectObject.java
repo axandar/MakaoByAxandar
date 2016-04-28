@@ -3,6 +3,8 @@ package com.axandar.makaoServer;
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
+import com.axandar.makaoCore.logic.StopMakao;
+import com.axandar.makaoCore.utils.Connection;
 import com.axandar.makaoCore.utils.Logger;
 import com.axandar.makaoCore.utils.ServerProtocol;
 
@@ -10,19 +12,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by Axandar on 06.02.2016.
  */
 public class ClientConnectObject implements Runnable {
 
-    // TODO: 22.03.2016 Add option for call "stop makao" on another player
-
     private Socket socket;
     private int id;
-    private ObjectOutputStream outputStream = null;
-    private ObjectInputStream inputStream = null;
+    private Connection conn;
 
     private SessionInfo sessionInfo;
     private TableServer table;
@@ -30,90 +29,65 @@ public class ClientConnectObject implements Runnable {
 
     private String TAG = "Server";
 
-    public ClientConnectObject(Socket _socket, int _id, SessionInfo _sessionInfo, TableServer _table){
+    public ClientConnectObject(Socket _socket, int _id, SessionInfo _sessionInfo){
         socket = _socket;
         id =_id;
         sessionInfo = _sessionInfo;
-        table = _table;
     }
-
 
     @Override
     public void run() {
         String playerIp = socket.getInetAddress().toString();
         TAG += " " + playerIp;
-        Logger.logConsole(TAG, playerIp);
+        Logger.logConsole(TAG, "Player connected");
 
-        try {
-            initStreams();
+        if(initStreams()){
             settingUpPlayer(playerIp);
             waitForGameStart();
-            outputStream.writeObject(ServerProtocol.GAME_STARTED);
-            outputStream.writeObject(threadPlayer);//aktualizacja kart w reku
+            table = sessionInfo.getTable();
 
-            sendUpdatedPlayersInformation(sessionInfo.getPlayers());
-            while(!sessionInfo.isGameExited()){
+            send(ServerProtocol.GAME_STARTED);
+            send(threadPlayer);
+            for(Player player:sessionInfo.getPlayersObjectsInOrder()){
+                if(player.getPlayerID() != threadPlayer.getPlayerID()){
+                    send(player);
+                }
+            }//first cient is not saving properly aditional player object
+            send(sessionInfo.getCardOnTop());
+
+            while(!sessionInfo.isGameExiting()){
                 runningGame();
-                /**if(sessionInfo.getPlayers().size() == 1){
-                    sessionInfo.setGameExited(true);
-                }**/// TODO: 25.03.2016 Stay for debug only
+
+                if(sessionInfo.getPlayersObjectsInOrder().size() == 1){
+                    sessionInfo.setGameExiting(true);
+                }
             }
 
             closeSockets();
-        } catch (IOException | ClassNotFoundException | InterruptedException e) {
+        }
+    }
+
+    private boolean initStreams(){
+        try{
+            conn = new Connection(new ObjectInputStream(socket.getInputStream()),
+                    new ObjectOutputStream(socket.getOutputStream()));
+            return true;
+        }catch(IOException e){
             Logger.logError(e);
+            return false;
         }
     }
 
-    private void runningGame() throws IOException, InterruptedException, ClassNotFoundException{
-        //rest players ending theirs turns
-        while(!(sessionInfo.getJustEndedTurnPlayerId() == threadPlayer.getPlayerID())){
-            handleAnotherPlayersTurns();
-        }
-        waitForTurn(); // TODO: 08.03.2016 is needed?
-        turnStarted();
-        table.endTurn(threadPlayer);
-    }
-
-    private void initStreams() throws IOException{
-        outputStream = new ObjectOutputStream(socket.getOutputStream());
-        inputStream = new ObjectInputStream(socket.getInputStream());
-    }
-
-    private void settingUpPlayer(String playerIp) throws IOException, ClassNotFoundException{
-        Object receivedFromClient = inputStream.readObject();
-
-        if(receivedFromClient instanceof String){
-            String playerName = (String) receivedFromClient;
-            Logger.logConsole(TAG, playerName);
-            threadPlayer = new Player(playerName, playerIp, id);
-            sessionInfo.addPlayer(threadPlayer);
-            TAG = "ClientObjectOnServer " + threadPlayer.getPlayerName();
-
-            outputStream.writeObject(ServerProtocol.ACCEPTED_NICK);
+    private void settingUpPlayer(String playerIp){
+        Object received = receive();
+        if(received instanceof String){
+            threadPlayer = new Player((String)received, playerIp, id);
+            sessionInfo.addPlayerObjectToList(threadPlayer);
+            send(sessionInfo.getNumberOfPlayers());
             sessionInfo.decreasePlayersNotReady();
+            TAG = TAG + " player id: " + id;
+            Logger.logConsole(TAG, "Set up player");
         }
-    }
-
-    private void handleAnotherPlayersTurns() throws InterruptedException, IOException{
-        int savedJustEndedTurnPlayerId = sessionInfo.getJustEndedTurnPlayerId();
-        while(savedJustEndedTurnPlayerId == sessionInfo.getJustEndedTurnPlayerId()){
-            Thread.sleep(1000);
-        }// TODO: 24.02.2016 mozliwy blad // sprawdzic poprawnosc
-        sendUpdatedPlayersInformation(sessionInfo.getPlayers());
-    }
-
-    private void sendUpdatedPlayersInformation(List<Player> players) throws IOException{
-        outputStream.writeObject(ServerProtocol.START_UPDATE_PLAYERS);
-        sendUpdatedCardOnTop();
-        for(Player player:players){
-            outputStream.writeObject(player);
-        }
-        outputStream.writeObject(ServerProtocol.END_UPDATE_PLAYERS);
-    }
-
-    private void sendUpdatedCardOnTop() throws IOException{
-        outputStream.writeObject(table.getCardOnTop());
     }
 
     private void waitForGameStart(){
@@ -126,9 +100,61 @@ public class ClientConnectObject implements Runnable {
         }
     }
 
-    private void turnStarted() throws IOException, ClassNotFoundException {
-        outputStream.writeObject(ServerProtocol.TURN_STARTED);
-        outputStream.writeObject(table.getCardOnTop());
+    private void runningGame() {
+        //rest players ending theirs turns
+        while(!(sessionInfo.getActualTurnPlayer().equals(threadPlayer))){
+            Logger.logConsole(TAG, "Handle another player turn");
+            waitForNextPlayerEndTurn();
+            handleAnotherPlayersTurns();
+
+            StopMakao stopMakao = sessionInfo.getLastSaid();
+            if(stopMakao != null && stopMakao.getToWho().equals(threadPlayer) &&
+                    threadPlayer.getCardsInHand().size() == 1 && !threadPlayer.isMakao()){
+                playerGetCards(5);
+            }
+
+            checkForMakao();
+        }
+        Logger.logConsole(TAG, "Player started turn");
+        turnStarted();
+        table.endTurn(threadPlayer);
+        Logger.logConsole(TAG, "Player ended turn");
+    }
+
+    private void waitForNextPlayerEndTurn(){
+        Player playerEndedTurnCache = sessionInfo.getLastTurnEndedPlayer();
+        while(playerEndedTurnCache.equals(sessionInfo.getLastTurnEndedPlayer())){
+            try{
+                Thread.sleep(1000);
+            }catch(InterruptedException e){
+                Logger.logError(e);
+            }
+        }
+    }
+
+    private void handleAnotherPlayersTurns(){
+        send(ServerProtocol.START_UPDATE);
+        for(Player player:sessionInfo.getPlayersObjectsInOrder()){
+            send(player);
+        }
+        for(Card card:sessionInfo.getLastPlacedCards()){
+            send(card);
+        }
+        send(ServerProtocol.STOP_UPDATE);
+    }
+
+    private void checkForMakao(){
+        send(ServerProtocol.IS_SAID_STOPMAKAO);
+        Object received = receive();
+        if(received instanceof Integer && (int)received == ServerProtocol.PLAYER_SAID_STOPMAKAO){
+            received = receive();
+            sessionInfo.setLastSaid((StopMakao)received);
+        }
+    }
+
+    private void turnStarted(){
+        sessionInfo.setLastPlacedCards(new ArrayList<>());
+        send(ServerProtocol.TURN_STARTED);
         turnProcessing();
 
         if(!threadPlayer.wasPuttedCard()){
@@ -138,32 +164,33 @@ public class ClientConnectObject implements Runnable {
         if(threadPlayer.getCardsInHand().size() == 0){
             playerEndedGame();
         }
-
-        outputStream.writeObject(threadPlayer);
+        Logger.logConsole(TAG, "Updating player data");
+        send(threadPlayer);
+        send(sessionInfo.getCardOnTop());
         table.endTurn(threadPlayer);
     }
 
-    private void turnProcessing() throws IOException, ClassNotFoundException{
-        int receivedCommand = 0;
+    private void turnProcessing(){
         threadPlayer.setWasPuttedCard(false);
-        while(isTurnNotEnded(receivedCommand)){
-            Object receivedObject = inputStream.readObject();
-            if(receivedObject instanceof Integer){
-                outputStream.writeObject(ServerProtocol.GOT_CMD);
-                receivedCommand = (int) receivedObject;
-            }else if(receivedObject instanceof Card){
-                receivedCard((Card) receivedObject);
+        int command = -1;
+        while(isTurnNotEnded(command)){
+            Object received = receive();
+            if(received instanceof Card){
+                receivedCard((Card) received);
+            }else if(received instanceof Integer){
+                command = (int) received;
+                if(command == ServerProtocol.PLAYER_SET_MAKAO && threadPlayer.getCardsInHand().size() == 1){
+                    threadPlayer.setMakao(true);
+                }
             }
-
-            isCommandMakao(receivedCommand);
         }
     }
 
     private boolean isTurnNotEnded(int intToCheck){
-        return !(intToCheck == ServerProtocol.TURN_ENDED || intToCheck == ServerProtocol.PLAYER_SET_MAKAO);
+        return !(intToCheck == ServerProtocol.TURN_ENDED);
     }
 
-    private void receivedCard(Card card) throws IOException, ClassNotFoundException{
+    private void receivedCard(Card card){
         Logger.logConsole(TAG, "Server received card: " + card.getIdType() + "-" + card.getIdColor());
         if(isOrderCard(card)){
             gotOrderCard(card);
@@ -172,34 +199,37 @@ public class ClientConnectObject implements Runnable {
         }
     }
 
-    private void gotOrderCard(Card card) throws IOException, ClassNotFoundException{
-        outputStream.writeObject(ServerProtocol.GOT_ORDER_CARD);
+    private void gotOrderCard(Card card){
+        send(ServerProtocol.GOT_ORDER_CARD);
         getOrderedCard(card);
     }
 
-    private void getOrderedCard(Card orderingCard) throws IOException, ClassNotFoundException{
-        Object receivedObject = inputStream.readObject();
-        if(receivedObject instanceof Card){
-            Card orderedCard = (Card) receivedObject;
+    private void getOrderedCard(Card orderingCard){
+        Object received = receive();
+        //send(ServerProtocol.GOT_ORDERED_CARD);
+        if(received instanceof Card){
+            Card orderedCard = (Card) received;
             if(table.putOrderCardOnTable(orderingCard, orderedCard)){
-                outputStream.writeObject(ServerProtocol.CARD_ACCEPTED);
+                send(ServerProtocol.CARD_ACCEPTED);
                 threadPlayer.removeCardFromHand(orderingCard);
                 threadPlayer.setWasPuttedCard(true);
             }else{
-                outputStream.writeObject(ServerProtocol.CARD_NOTACCEPTED);
+                send(ServerProtocol.CARD_NOTACCEPTED);
                 threadPlayer.setWasPuttedCard(false);
             }
         }
     }
 
-    private void gotNormalCard(Card card) throws IOException{
-        outputStream.writeObject(ServerProtocol.GOT_CARD);
+    private void gotNormalCard(Card card){
+        //send(ServerProtocol.GOT_CARD);
         if(table.putCardOnTable(card)){
-            outputStream.writeObject(ServerProtocol.CARD_ACCEPTED);
+            Logger.logConsole(TAG, "Received card accepted");
+            send(ServerProtocol.CARD_ACCEPTED);
             threadPlayer.removeCardFromHand(card);
             threadPlayer.setWasPuttedCard(true);
         }else{
-            outputStream.writeObject(ServerProtocol.CARD_NOTACCEPTED);
+            Logger.logConsole(TAG, "Received card not accepted");
+            send(ServerProtocol.CARD_NOTACCEPTED);
             threadPlayer.setWasPuttedCard(false);
         }
     }
@@ -209,62 +239,54 @@ public class ClientConnectObject implements Runnable {
                 || card.getFunction().getFunctionID() == Function.CHANGE_COLOR;
     }
 
-    private void isCommandMakao(int command){
-        if(command == ServerProtocol.PLAYER_SET_MAKAO){
-            if(threadPlayer.getCardsInHand().size() == 1){
-                threadPlayer.setMakao(true);
-            }
-        }/**else if(command == ServerProtocol.PLAYER_CANCEL_MAKAO){
-            threadPlayer.setMakao(false);
-        }**/
-    }
-
     private void playerNotPuttedCard(){
-        if(table.getQuantityCardsToTake() > 0){
-            playerGetCards();
-        }else if(table.getQuantityTurnsToWait() > 0){
+        Logger.logConsole(TAG, "Player did not put card");
+        if(sessionInfo.getQuantityCardsToTake() > 0){
+            playerGetCards(sessionInfo.getQuantityCardsToTake());
+        }else if(sessionInfo.getQuantityTurnsToWait() > 0){
             playerWaitTurns();
         }else{
             playerGetCard();
         }
     }
 
-    private void playerGetCards(){
-        table.giveCardToPlayer(threadPlayer, table.getQuantityCardsToTake());
-        table.setQuantityCardsToTakeToZero();
+    private void playerGetCards(int numberOfCards){
+        //probably not needed returning object
+        threadPlayer = table.giveCardToPlayer(threadPlayer, numberOfCards);
+        sessionInfo.setQuantityCardsToTake(0);
         threadPlayer.setMakao(false);
     }
 
     private void playerWaitTurns(){
-        table.setPlayerToWaitTurns(threadPlayer, table.getQuantityTurnsToWait());
-        table.setQuantityTurnsToWait(0);
+        threadPlayer = table.setPlayerToWaitTurns(threadPlayer, sessionInfo.getQuantityTurnsToWait());
+        sessionInfo.setQuantityTurnsToWait(0);
     }
 
     private void playerGetCard(){
-        table.giveCardToPlayer(threadPlayer, 1);
+        threadPlayer = table.giveCardToPlayer(threadPlayer, 1);
         threadPlayer.setMakao(false);
     }
 
-    private void playerEndedGame() throws IOException{
-        outputStream.writeObject(ServerProtocol.GAME_ENDED);
-        //threadPlayer.setMakao(true);
-        sessionInfo.removePlayer(threadPlayer);
+    private void playerEndedGame(){
+        //send(ServerProtocol.GAME_ENDED);
+        sessionInfo.removePlayerFromList(threadPlayer);
     }
 
-    private void waitForTurn(){
-        while(!(table.getActualPlayer().getPlayerID() == threadPlayer.getPlayerID())){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Logger.logError(e);
-            }
+    private void closeSockets() {
+        Logger.logConsole(TAG, "Closing client socket");
+        conn.close();
+        try{
+            socket.close();
+        }catch(IOException e){
+            e.printStackTrace();
         }
     }
 
-    private void closeSockets() throws IOException{
-        Logger.logConsole(TAG, "Closing client socket");
-        outputStream.close();
-        inputStream.close();
-        socket.close();
+    private void send(Object object){
+        conn.send(object);
+    }
+
+    private Object receive(){
+        return conn.receive();
     }
 }

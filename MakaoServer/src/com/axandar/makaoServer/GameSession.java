@@ -14,10 +14,11 @@ import java.util.List;
  * Created by Axandar on 11.02.2016.
  */
 public class GameSession implements Runnable{
-    // TODO: 24.03.2016 find way to show server ip to user
+
     private List<Thread> clientsThreads = new ArrayList<>();
     private List<ClientConnectObject> clients = new ArrayList<>();
 
+    private static final String TAG = "GameSession on server";
     private static List<List<Function>> functions = new ArrayList<>();
     private static int numberOfDecks;
     private static int numberOfPlayers;
@@ -26,7 +27,7 @@ public class GameSession implements Runnable{
     private ServerSocket sSocket;
 
     private volatile SessionInfo sessionInfo;
-    private volatile TableServer table = setTableServer();
+    private volatile TableServer table;
 
     public GameSession(int _numberOfPlayers, int _numberOfDecks, List<List<Function>> _functions, int _port) {
         numberOfPlayers = _numberOfPlayers;
@@ -37,7 +38,7 @@ public class GameSession implements Runnable{
 
     public void run(){
         sessionInfo = new SessionInfo();
-
+        sessionInfo.setNumberOfPlayers(numberOfPlayers);
         try {
             sSocket = new ServerSocket(port);
             Logger.logConsole("Starting server", "Server started at: " + new Date() + " at port: " + port);
@@ -45,8 +46,8 @@ public class GameSession implements Runnable{
 
             settingUpPlayers(sSocket);
             waitForPlayersGetReady();
-            Logger.logConsole("Server", sessionInfo.getPlayers().size()+"");
-            table.initializeGame(numberOfDecks, sessionInfo.getPlayers(), functions, sessionInfo);
+            table = setTableServer();
+            table.initializeGame();
 
         } catch(IOException | InterruptedException e) {
             Logger.logError(e);
@@ -59,7 +60,7 @@ public class GameSession implements Runnable{
             sessionInfo.increasePlayersNotReady();
             Socket socket = serverSocket.accept();
 
-            ClientConnectObject clientConnectionObject = new ClientConnectObject(socket, actualId, sessionInfo, table);
+            ClientConnectObject clientConnectionObject = new ClientConnectObject(socket, actualId, sessionInfo);
             clients.add(clientConnectionObject);
             actualId++;
 
@@ -67,12 +68,14 @@ public class GameSession implements Runnable{
             clientsThreads.add(clientThread);
             clientThread.start();
         }
+        Logger.logConsole(TAG, "Ended adding players");
     }
 
     private void waitForPlayersGetReady() throws InterruptedException{
-        while(sessionInfo.getNumberOfPlayersNotReady() > 0){
+        while(sessionInfo.getPlayersNotReady() > 0){
             Thread.sleep(1000);
         }
+        Logger.logConsole(TAG, "Ended setting up players");
     }
 
     public void closeSocket(){
@@ -84,6 +87,6 @@ public class GameSession implements Runnable{
     }
 
     public TableServer setTableServer(){
-        return new TableServer();
+        return new TableServer(sessionInfo, numberOfPlayers, numberOfDecks, functions);
     }
 }

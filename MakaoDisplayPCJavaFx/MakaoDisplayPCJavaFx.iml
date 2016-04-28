@@ -11,5 +11,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="MakaoCore" />
     <orderEntry type="module" module-name="MakaoClient" />
+    <orderEntry type="module" module-name="MakaoClient" />
+    <orderEntry type="module" module-name="MakaoCore" />
   </component>
 </module>

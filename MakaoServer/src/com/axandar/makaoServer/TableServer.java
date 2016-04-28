@@ -17,84 +17,82 @@ public class TableServer {
 
     private final String TAG = "TableServer on server";
 
-    // TODO: 15.03.2016 refactoring
-    public static int NUMBER_OF_DECKS = 0;
     public static List<List<Function>> functionsList;
+    private int numberOfDecks;
+    private int numberOfPlayers;
 
     private SessionInfo sessionInfo;
 
-    private Player actualPlayer;
-    private List<Player> players;
-    private Deck graveyard = new Deck();
-    private Deck deck;
-    private Card cardOnTop;
-    private Card orderedCard;
-    private int quantityCardsToTake = 0;
-    private int quantityTurnsToWait = 0;
-    private boolean isNextPlayerFroward = true;
-
-    public TableServer() {
-
+    public TableServer(SessionInfo sessionInfo, int _numberOfPlayers, int _numberOfDecks,
+                       List<List<Function>> _functionList) {
+        this.sessionInfo = sessionInfo;
+        numberOfDecks = _numberOfDecks;
+        numberOfPlayers = _numberOfPlayers;
+        functionsList = _functionList;
     }
 
-    public void initializeGame(int _numberOfDecks, List<Player> _players, List<List<Function>> _functionsList,
-                               SessionInfo _sessionInfo){
-        sessionInfo = _sessionInfo;
+    public void initializeGame(){
+        sessionInfo.setDeckOnTable(new Deck(numberOfDecks, functionsList));
+        sessionInfo.setGraveyard(new Deck());
 
-        NUMBER_OF_DECKS = _numberOfDecks;
-        functionsList = _functionsList;
-        players = _players;
-
-        deck = new Deck(NUMBER_OF_DECKS, functionsList);
-
-        cardOnTop = deck.getCardFromDeck();
-        Logger.logConsole(TAG, "Card on top: " + cardOnTop.getIdType() + "-" + cardOnTop.getIdColor());
+        sessionInfo.setCardOnTop(sessionInfo.getDeckOnTable().getCardFromDeck());
+        Logger.logConsole(TAG, "Card on top: " + sessionInfo.getCardOnTop().getIdType()
+                + "-" + sessionInfo.getCardOnTop().getIdColor());
         givePlayersCards();
 
-        int firstPlayerID =  ThreadLocalRandom.current().nextInt(0, players.size());
-        Logger.logConsole("server initializing", "first player id: " + firstPlayerID);
-        actualPlayer = players.get(firstPlayerID);
-        sessionInfo.setJustEndedTurnPlayerId(actualPlayer.getPlayerID());
+        int firstPlayerID =  ThreadLocalRandom.current().nextInt(0, numberOfPlayers);
+        Logger.logConsole(TAG, "First player id: " + firstPlayerID);
+
+        Player firstPlayer = sessionInfo.getPlayerObject(firstPlayerID);
+        sessionInfo.setActualTurnPlayer(firstPlayer);
+        int lastPlayerId = sessionInfo.getPreviousPlayerIndex(firstPlayer);
+        sessionInfo.setLastTurnEndedPlayer(sessionInfo.getPlayerObject(lastPlayerId));
+
+        sessionInfo.setTable(this);//update object for all players
         sessionInfo.setGameStarted(true);
     }
 
     private void givePlayersCards(){
-        for (Player player: players) {
+        for (Player player: sessionInfo.getPlayersObjectsInOrder()) {
             List<Card> cardsToAdd = new ArrayList<>();
             for(int i = 0; i < 5; i++){
-                cardsToAdd.add(deck.getCardFromDeck());
+                cardsToAdd.add(sessionInfo.getDeckOnTable().getCardFromDeck());
             }
             player.setCardsInHand(cardsToAdd);
         }
     }
 
     public boolean putCardOnTable(Card card){
-        if(orderedCard == null && quantityCardsToTake == 0 && quantityTurnsToWait == 0){
+        if(sessionInfo.getOrderedCard() == null && sessionInfo.getQuantityCardsToTake() == 0
+                && sessionInfo.getQuantityTurnsToWait() == 0){
             if(isTypeCorrectly(card) || isColorCorrectly(card) ||
                     (card.getFunction().getFunctionID() == Function.CAMELEON_CARD
-                            || cardOnTop.getFunction().getFunctionID() == Function.CAMELEON_CARD)){
+                            || sessionInfo.getCardOnTop().getFunction().getFunctionID() == Function.CAMELEON_CARD)){
                 putCard(card);
                 return true;
             }else return false;
-        }else if(orderedCard != null && quantityTurnsToWait == 0 && quantityCardsToTake == 0){
-            if(cardOnTop.getFunction().getFunctionID() == card.getFunction().getFunctionID() &&
+        }else if(sessionInfo.getOrderedCard() != null && sessionInfo.getQuantityTurnsToWait() == 0
+                && sessionInfo.getQuantityCardsToTake() == 0){
+            if(sessionInfo.getOrderingCard().getFunction().getFunctionID() == card.getFunction().getFunctionID() &&
                     (isColorCorrectly(card) || isTypeCorrectly(card))){
                 putCard(card);
                 return true;
-            }else if(cardOnTop.getFunction().getFunctionID() == Function.CHANGE_COLOR && isColorCorrectly(card)){
+            }else if(sessionInfo.getOrderingCard().getFunction().getFunctionID() == Function.CHANGE_COLOR
+                    && isColorCorrectly(card)){
                 putCard(card);
                 return true;
-            }else if(cardOnTop.getFunction().getFunctionID() == Function.ORDER_CARD && isTypeCorrectly(card)){
+            }else if(sessionInfo.getOrderingCard().getFunction().getFunctionID() == Function.ORDER_CARD
+                    && isTypeCorrectly(card)){
                 putCard(card);
                 return true;
             }else return false;
-        }else if(quantityTurnsToWait != 0){
+        }else if(sessionInfo.getQuantityTurnsToWait() != 0){
             if(card.getFunction().getFunctionID() == Function.WAIT_TURNS &&
                     (isTypeCorrectly(card) || isColorCorrectly(card))){
                 putCard(card);
                 return true;
             }else return false;
-        }else if(quantityCardsToTake != 0){
+        }else if(sessionInfo.getQuantityCardsToTake() != 0){
             if(card.getFunction().getFunctionID() == Function.GET_CARDS_FORWARD &&
                     (isTypeCorrectly(card) || isColorCorrectly(card))){
                 putCard(card);
@@ -112,133 +110,94 @@ public class TableServer {
 
     public boolean putOrderCardOnTable(Card card, Card _orderedCard){
         if(putCardOnTable(card)){
-            orderedCard = _orderedCard;
+            sessionInfo.setOrderedCard(_orderedCard);
+            sessionInfo.setOrderingCard(card);
             return true;
         }else return false;
     }
 
     private void putCard(Card card){
         if(card.getFunction().getFunctionID() == Function.GET_CARDS_FORWARD){
-            quantityCardsToTake += card.getFunction().getFunctionValue();
-            isNextPlayerFroward = true;
+
+            sessionInfo.setQuantityCardsToTake(sessionInfo.getQuantityCardsToTake()
+                    + card.getFunction().getFunctionValue());
+            sessionInfo.setNextPlayerForward(true);
+
         }else if(card.getFunction().getFunctionID() == Function.GET_CARDS_BACKWARD){
-            quantityCardsToTake += card.getFunction().getFunctionValue();
-            isNextPlayerFroward = false;
+
+            sessionInfo.setQuantityCardsToTake(sessionInfo.getQuantityCardsToTake()
+                    + card.getFunction().getFunctionValue());
+            sessionInfo.setNextPlayerForward(false);
+
         }else if(card.getFunction().getFunctionID() == Function.WAIT_TURNS){
-            quantityTurnsToWait += card.getFunction().getFunctionValue();
-            isNextPlayerFroward = true;
+
+            sessionInfo.setQuantityTurnsToWait(sessionInfo.getQuantityTurnsToWait()
+                    + card.getFunction().getFunctionValue());
+            sessionInfo.setNextPlayerForward(true);
+
         }else{
-            Logger.logConsole(TAG, "Error in putting card");
+            sessionInfo.setNextPlayerForward(true);
         }
-        cardOnTop = card;
+        sessionInfo.addLastPlacedCard(card);
+        sessionInfo.addCardToGraveyard(sessionInfo.getCardOnTop());
+        sessionInfo.setCardOnTop(card);
     }
 
-    public void giveCardToPlayer(Player player, int quanity){
-        for(int i = 0; i < quanity; i++){
-            if(deck.deckLength() == 0){
-                deck = graveyard;
-                graveyard = new Deck();
+    public Player giveCardToPlayer(Player player, int quantity){
+        for(int i = 0; i < quantity; i++){
+            if(sessionInfo.getDeckOnTable().deckLength() == 0){
+                sessionInfo.setDeckOnTable(sessionInfo.getGraveyard());
+                sessionInfo.setGraveyard(new Deck());
             }
-            player.addCardToHand(deck.getCardFromDeck());
+            player.addCardToHand(sessionInfo.getDeckOnTable().getCardFromDeck());
         }
+        return player;
     }
 
-    public void setPlayerToWaitTurns(Player player, int quanity){
-        player.setToWaitTurns(quanity);
+    public Player setPlayerToWaitTurns(Player player, int quantity){
+        player.setToWaitTurns(quantity);
+        return player;
     }
 
     private boolean isColorCorrectly(Card card) {
-        return cardOnTop.getIdColor() == card.getIdColor();
+        return sessionInfo.getCardOnTop().getIdColor() == card.getIdColor();
     }
 
     private boolean isTypeCorrectly(Card card) {
-        return cardOnTop.getIdType() == card.getIdType();
+        return sessionInfo.getCardOnTop().getIdType() == card.getIdType();
     }
 
     public void endTurn(Player player){
         if(player.isMakao()){
-            players.remove(player);
-            if(players.size() == 1){
+            sessionInfo.getPlayersObjectsInOrder().remove(player);
+            if(sessionInfo.getPlayersObjectsInOrder().size() == 1){
                 endGame();
             }
         }
-        if(isNextPlayerFroward){
-            Player nextPlayer = getNextPlayer(player);
+        if(sessionInfo.isNextPlayerForward()){
+            int nextPlayerId = sessionInfo.getNextPlayerIndex(player);
+            Player nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextPlayerId);
             while(nextPlayer.getToWaitTurns() != 0){
-                nextPlayer = getPreviousPlayer(nextPlayer);
+                nextPlayer.setToWaitTurns(nextPlayer.getToWaitTurns() - 1);
+                int nextNextPlayerId = sessionInfo.getNextPlayerIndex(player);
+                nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextNextPlayerId);
             }
-            isNextPlayerFroward = false;
-            sessionInfo.setJustEndedTurnPlayerId(nextPlayer.getPlayerID());
-            setActualPlayer(nextPlayer);
+            sessionInfo.setLastTurnEndedPlayer(player);
+            sessionInfo.setActualTurnPlayer(nextPlayer);
         }else{
-            Player previousPlayer = getPreviousPlayer(player);
+            int previousPlayerId = sessionInfo.getPreviousPlayerIndex(player);
+            Player previousPlayer = sessionInfo.getPlayersObjectsInOrder().get(previousPlayerId);
             while(previousPlayer.getToWaitTurns() != 0){
-                previousPlayer.setToWaitTurns(previousPlayer.getToWaitTurns() - 1);
-                previousPlayer = getPreviousPlayer(previousPlayer);
+                int nextPreviousPlayerId = sessionInfo.getPreviousPlayerIndex(player);
+                previousPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextPreviousPlayerId);
             }
-            sessionInfo.setJustEndedTurnPlayerId(previousPlayer.getPlayerID());
-            setActualPlayer(previousPlayer);
+            sessionInfo.setNextPlayerForward(true);
+            sessionInfo.setLastTurnEndedPlayer(player);
+            sessionInfo.setActualTurnPlayer(previousPlayer);
         }
     }
 
-    public Player getNextPlayer(Player player){
-        int requestedPlayerID = players.indexOf(player);
-        int nextPlayerID;
-
-        if(requestedPlayerID == players.size()-1){
-            nextPlayerID = 0;
-        }else nextPlayerID = requestedPlayerID + 1;
-
-        Logger.logConsole("Server getNextPlayer()", "players size = " + players.size());
-        Logger.logConsole("Server getNextPlayer()", "requestedPlayerID = " + requestedPlayerID);
-        Logger.logConsole("Server getNextPlayer()", "nextPlayerID = " + nextPlayerID);
-        return players.get(nextPlayerID);
-    }
-
-    private Player getPreviousPlayer(Player player){
-        int requestedPlayerID = players.indexOf(player);
-        int previousPlayerID;
-
-        if(requestedPlayerID == players.size()-1){
-            previousPlayerID = 0;
-        }else previousPlayerID = requestedPlayerID + 1;
-
-        Logger.logConsole("Server getPreviousPlayer()", "players size = " + players.size());
-        Logger.logConsole("Server getPreviousPlayer()", "requestedPlayerID = " + requestedPlayerID);
-        Logger.logConsole("Server getPreviousPlayer()", "previousPlayerID = " + previousPlayerID);
-
-        return players.get(previousPlayerID);
-    }
-
     private void endGame(){
-        sessionInfo.setGameExited(true);
-    }
-
-    public Player getActualPlayer() {
-        return actualPlayer;
-    }
-
-    public void setActualPlayer(Player actualPlayer) {
-        this.actualPlayer = actualPlayer;
-    }
-
-    public int getQuantityCardsToTake(){
-        return quantityCardsToTake;
-    }
-
-    public void setQuantityCardsToTakeToZero(){
-        this.quantityCardsToTake = 0;
-    }
-
-    public int getQuantityTurnsToWait(){
-        return quantityTurnsToWait;
-    }
-
-    public void setQuantityTurnsToWait(int quantityTurnsToWait){
-        this.quantityTurnsToWait = quantityTurnsToWait;
-    }
-
-    public Card getCardOnTop(){
-        return cardOnTop;
+        sessionInfo.setGameExiting(true);
     }
 }
