@@ -183,6 +183,7 @@ public class TableServer {
                 nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextNextPlayerId);
             }
             sessionInfo.setLastTurnEndedPlayer(player);
+            Logger.logConsole(TAG, "Player with id: " + nextPlayer.getPlayerID() + " is next player");
             sessionInfo.setActualTurnPlayer(nextPlayer);
         }else{
             int previousPlayerId = sessionInfo.getPreviousPlayerIndex(player);

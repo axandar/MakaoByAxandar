@@ -16,7 +16,7 @@ public class ClientProperties{
     private String ip;
     private int port;
     private boolean isClientRunning = false;
-    private List<Player> aditionalPlayers = new ArrayList<>();
+    private List<Player> additionalPlayers = new ArrayList<>();
     private int estimatedPlayersNumber;
     private Player localPlayer;
     private Card cardOnTop;
@@ -31,6 +31,7 @@ public class ClientProperties{
     private boolean isGameEnded = false;
     private boolean isUpdateGame = false;
     private boolean isCardsRejected = false;
+    private boolean isTurnStarted = false;
 
     public String getNickname(){
         return nickname;
@@ -64,16 +65,16 @@ public class ClientProperties{
         isClientRunning = clientRunning;
     }
 
-    public List<Player> getAditionalPlayers(){
-        return aditionalPlayers;
+    public List<Player> getAdditionalPlayers(){
+        return additionalPlayers;
     }
 
-    public void setAditionalPlayers(List<Player> aditionalPlayers){
-        this.aditionalPlayers = aditionalPlayers;
+    public void setAdditionalPlayers(List<Player> additionalPlayers){
+        this.additionalPlayers = additionalPlayers;
     }
 
     public void addPlayer(Player player){
-        aditionalPlayers.add(player);
+        additionalPlayers.add(player);
     }
 
     public int getEstimatedPlayersNumber(){
@@ -198,5 +199,13 @@ public class ClientProperties{
 
     public void setCardsRejected(boolean cardsRejected){
         isCardsRejected = cardsRejected;
+    }
+
+    public boolean isTurnStarted(){
+        return isTurnStarted;
+    }
+
+    public void setTurnStarted(boolean turnStarted){
+        isTurnStarted = turnStarted;
     }
 }

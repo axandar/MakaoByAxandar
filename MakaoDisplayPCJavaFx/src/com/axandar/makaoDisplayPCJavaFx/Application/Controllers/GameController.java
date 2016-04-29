@@ -10,6 +10,7 @@ import com.axandar.makaoCore.utils.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
@@ -40,6 +41,8 @@ public class GameController {
     @FXML private HBox cardsInHand;
     @FXML private ListView<String> playersList;
     @FXML private ImageView cardOnTop;
+    @FXML private Button btnEndTurn;
+    @FXML private Button btnSayMakao;
 
     /**Stage dialogStage = new Stage();
      dialogStage.setTitle(rb.getString("AddingNewSupplierOrder"));
@@ -65,6 +68,7 @@ public class GameController {
         clientProperties.setPort(5000);
         clientProperties.setNickname("Axandar2");
 
+        btnEndTurn.setDisable(true);
         Client client = new Client(clientProperties);
         Thread clientThread = new Thread(client);
 
@@ -93,6 +97,7 @@ public class GameController {
                     addCardToHandGUI(card);
                 }
             }else{
+                Logger.logConsole(TAG, "Started adding new cards");
                 List<Card> cardsToAdd = getNewCards();
                 for(Card card:cardsToAdd){
                     deckInHand.addCardToDeck(card);
@@ -102,7 +107,7 @@ public class GameController {
 
             setCardOnTopTexture(clientProperties.getCardOnTop());
 
-            List<Player> listOfRestPlayers = clientProperties.getAditionalPlayers();
+            List<Player> listOfRestPlayers = clientProperties.getAdditionalPlayers();
             playersList.getItems().remove(0, playersList.getItems().size()-1);
             for(Player player:listOfRestPlayers){
                 playersList.getItems().add(player.getPlayerName());
@@ -117,8 +122,15 @@ public class GameController {
                     Thread.sleep(1000);
                     //waiting for client initialize
                 }
-                Logger.logConsole(TAG, "isClient running");
                 while(clientProperties.isClientRunning()){
+                    if(clientProperties.isTurnStarted()){
+                        btnEndTurn.setDisable(false);
+                    }else{
+                        btnEndTurn.setDisable(true);
+                        // TODO: 30.04.2016 enabling button when rejected cards
+                        // TODO: 30.04.2016 add additional runnable for just endTurn button
+                    }
+
                     if(clientProperties.isUpdateGame()){
                         Logger.logConsole(TAG, "Updated added to runLater()");
                         Platform.runLater(updateGUI);
@@ -163,7 +175,6 @@ public class GameController {
     private void removeCardsFromHand(){
         //remove only that cards which are not in rejected but are in putted
 
-
         /**deckInHand.removeCardFromDeck(card);
         String cardFileName = card.getIdType() + "-" + card.getIdColor();
         for(Node node:cardsInHand.getChildren()){
@@ -178,13 +189,9 @@ public class GameController {
     @FXML
     public void endTurn(){
         Logger.logConsole(TAG, "ending turn");
+        btnEndTurn.setDisable(true);
+        clientProperties.setTurnStarted(false);
         clientProperties.setTurnEnded(true);
-        /**deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
-        addCardToHandGUI(new Card(1, 1, new Function(6, 0)));
-        deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
-        addCardToHandGUI(new Card(2, 2, new Function(6, 0)));
-        deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
-        addCardToHandGUI(new Card(3, 3, new Function(6, 0)));**/
     }
 
     private void addCardToHandGUI(Card card){

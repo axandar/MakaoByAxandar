@@ -117,7 +117,7 @@ public class ClientConnectObject implements Runnable {
         }
         Logger.logConsole(TAG, "Player started turn");
         turnStarted();
-        table.endTurn(threadPlayer);
+        //table.endTurn(threadPlayer);
         Logger.logConsole(TAG, "Player ended turn");
     }
 
@@ -167,7 +167,7 @@ public class ClientConnectObject implements Runnable {
         Logger.logConsole(TAG, "Updating player data");
         send(threadPlayer);
         send(sessionInfo.getCardOnTop());
-        //table.endTurn(threadPlayer);
+        table.endTurn(threadPlayer);
     }
 
     private void turnProcessing(){

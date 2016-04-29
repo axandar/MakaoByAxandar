@@ -128,6 +128,7 @@ public class Client implements Runnable{
                     }else send(ServerProtocol.PLAYER_NOT_SAID_STOPMAKAO);
                 }else if((int)received == ServerProtocol.TURN_STARTED){
                     Logger.logConsole(TAG, "Turn started");
+                    properties.setTurnStarted(true);
                     turnProcessing();
 
                 }
@@ -152,7 +153,7 @@ public class Client implements Runnable{
                 command = (int)received;
             }
         }
-        properties.setAditionalPlayers(updatedPlayers);
+        properties.setAdditionalPlayers(updatedPlayers);
         if(properties.getPuttedCards().size() > 0){
             int indexOfLastCard = properties.getPuttedCards().size()-1;
             properties.setCardOnTop(properties.getPuttedCards().get(indexOfLastCard));
@@ -176,6 +177,7 @@ public class Client implements Runnable{
             for(int i = 1; i < cardsToPut.size(); i++){
                 if(!cardsToPut.get(i-1).getFunction().equals(cardsToPut.get(i).getFunction())){
                     isCardsEquals = false;
+                    // TODO: 30.04.2016 clearing cardsToPut
                 }
             }
             // TODO: 27.04.2016 cant send again card when failed at first time
