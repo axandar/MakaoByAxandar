@@ -19,6 +19,13 @@ import java.util.List;
  */
 public class Client implements Runnable{
 
+    // TODO: 29.04.2016 Tests:
+    //1. Makao operation
+    //2. Sending many cards
+    //3. Sending cards after failure
+    //4. More players
+    //5. Ordering cards
+
     private String TAG = "Client backend";
 
     private String ip;
@@ -104,6 +111,7 @@ public class Client implements Runnable{
 
     }
 
+    // TODO: 29.04.2016 When player is not sending cards, next player is not starting turn
     private void handleCommands(){
         while(properties.isClientRunning()){
             Object received = receive();
@@ -138,7 +146,7 @@ public class Client implements Runnable{
                     updatedPlayers.add((Player)received);
                 }else properties.setLocalPlayer((Player)received);
             }else if(received instanceof Card){
-                Logger.logConsole(TAG, " ---- updated card");
+                Logger.logConsole(TAG, " ---- updated putted card");
                 properties.addPuttedCard((Card)received);
             }else if(received instanceof Integer){
                 command = (int)received;

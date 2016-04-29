@@ -24,6 +24,9 @@ import java.util.List;
  */
 public class GameController {
 
+    // TODO: 29.04.2016 TODO
+
+
     private final String TAG = "Client side";
 
     private volatile ClientProperties clientProperties;
