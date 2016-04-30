@@ -16,6 +16,7 @@ import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import org.controlsfx.control.Notifications;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,7 @@ public class GameController {
 
      dialogStage.showAndWait();**/
 
-    // TODO: 26.04.2016 add option to say "Makao" and "Stop makao"
+    // TODO: 26.04.2016 add option to say "Stop makao"
 
     @FXML
     public void startGame(){
@@ -68,7 +69,6 @@ public class GameController {
         clientProperties.setPort(5000);
         clientProperties.setNickname("Axandar2");
 
-        btnEndTurn.setDisable(true);
         Client client = new Client(clientProperties);
         Thread clientThread = new Thread(client);
 
@@ -86,6 +86,9 @@ public class GameController {
             if(clientProperties.isCardsRejected()){
                 Logger.logConsole(TAG, "Some cards not accepted");
                 // TODO: 26.04.2016 for each notAcceptedCard show alert about failure
+                Notifications.create().title("Wrong cards")
+                        .text("Some of cards that you tried to send was incorrect").showWarning();
+
             }
 
             Logger.logConsole(TAG, "Number of cards in hand on view: " + cardsInHand.getChildren().size()/2);
@@ -115,6 +118,12 @@ public class GameController {
             Logger.logConsole(TAG, "Update ended");
         };
 
+        Runnable endTurnBtnLogin = () ->{
+            if(clientProperties.isTurnStarted()){
+                btnEndTurn.setDisable(false);
+            }else btnEndTurn.setDisable(true);
+        };
+
         Task taskToUpdateGUI = new Task(){
             @Override
             protected Object call() throws Exception{
@@ -123,19 +132,13 @@ public class GameController {
                     //waiting for client initialize
                 }
                 while(clientProperties.isClientRunning()){
-                    if(clientProperties.isTurnStarted()){
-                        btnEndTurn.setDisable(false);
-                    }else{
-                        btnEndTurn.setDisable(true);
-                        // TODO: 30.04.2016 enabling button when rejected cards
-                        // TODO: 30.04.2016 add additional runnable for just endTurn button
-                    }
-
+                    Platform.runLater(endTurnBtnLogin);
                     if(clientProperties.isUpdateGame()){
                         Logger.logConsole(TAG, "Updated added to runLater()");
                         Platform.runLater(updateGUI);
                         clientProperties.setUpdateGame(false);
                     }
+                    Platform.runLater(endTurnBtnLogin);
                     Thread.sleep(2000);
                 }
                 return null;
@@ -170,6 +173,7 @@ public class GameController {
                 cardsToPut.get(0).getFunction().getFunctionID() == Function.ORDER_CARD){
             clientProperties.setOrderedCard(orderedCard); 
         }
+        cardsToPut = new ArrayList<>();
     }
 
     private void removeCardsFromHand(){
@@ -189,7 +193,6 @@ public class GameController {
     @FXML
     public void endTurn(){
         Logger.logConsole(TAG, "ending turn");
-        btnEndTurn.setDisable(true);
         clientProperties.setTurnStarted(false);
         clientProperties.setTurnEnded(true);
     }

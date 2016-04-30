@@ -140,6 +140,7 @@ public class Client implements Runnable{
         List<Player> updatedPlayers = new ArrayList<>();
         int command = -1;
         while(command != ServerProtocol.STOP_UPDATE){
+            Logger.logConsole(TAG, "Waiting for command");
             Object received = receive();
             if(received instanceof Player){
                 Logger.logConsole(TAG, " ---- updated player");
@@ -151,7 +152,7 @@ public class Client implements Runnable{
                 properties.addPuttedCard((Card)received);
             }else if(received instanceof Integer){
                 command = (int)received;
-            }
+            }// TODO: 30.04.2016 overwriting player object from server
         }
         properties.setAdditionalPlayers(updatedPlayers);
         if(properties.getPuttedCards().size() > 0){
@@ -177,7 +178,6 @@ public class Client implements Runnable{
             for(int i = 1; i < cardsToPut.size(); i++){
                 if(!cardsToPut.get(i-1).getFunction().equals(cardsToPut.get(i).getFunction())){
                     isCardsEquals = false;
-                    // TODO: 30.04.2016 clearing cardsToPut
                 }
             }
             // TODO: 27.04.2016 cant send again card when failed at first time
@@ -206,6 +206,7 @@ public class Client implements Runnable{
             }else{
                 Logger.logConsole(TAG, "Cards not equal");
                 properties.setTurnEnded(false);
+                properties.setTurnStarted(true);
                 properties.setCardsRejected(true);
                 properties.setUpdateGame(true);
                 turnProcessing();
@@ -233,7 +234,7 @@ public class Client implements Runnable{
 
     private void endingTurn(){
         Logger.logConsole(TAG, "Ending turn");
-        properties.setCardsToPut(new ArrayList<>());
+        //properties.setCardsToPut(new ArrayList<>());
         properties.setTurnEnded(false);
         if(properties.getLocalPlayer().isMakao()){
             Logger.logConsole(TAG, "Setting makao");
@@ -249,14 +250,14 @@ public class Client implements Runnable{
                 properties.setGameEnded(true);
             }
         }else{
-            endingTurn();//experimental
+            endingTurn();
         }
         received = receive();
         if(received instanceof Card){
             Logger.logConsole(TAG, "Received card object updated after turn ending");
             properties.setCardOnTop((Card) received);
         }else{
-            endingTurn();//experimental
+            endingTurn();
         }
         properties.setUpdateGame(true);
     }

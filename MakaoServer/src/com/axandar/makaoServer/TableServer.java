@@ -46,7 +46,8 @@ public class TableServer {
         Player firstPlayer = sessionInfo.getPlayerObject(firstPlayerID);
         sessionInfo.setActualTurnPlayer(firstPlayer);
         int lastPlayerId = sessionInfo.getPreviousPlayerIndex(firstPlayer);
-        sessionInfo.setLastTurnEndedPlayer(sessionInfo.getPlayerObject(lastPlayerId));
+        //sessionInfo.setLastTurnEndedPlayer(sessionInfo.getPlayerObject(lastPlayerId));
+        sessionInfo.setLastTurnEndedPlayer(new Player(null, null, -1));
 
         sessionInfo.setTable(this);//update object for all players
         sessionInfo.setGameStarted(true);

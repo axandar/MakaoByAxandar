@@ -165,7 +165,7 @@ public class ClientConnectObject implements Runnable {
             playerEndedGame();
         }
         Logger.logConsole(TAG, "Updating player data");
-        send(threadPlayer);
+        send(threadPlayer);// TODO: 30.04.2016 did not updating threadPlayer in array which is sending to client
         send(sessionInfo.getCardOnTop());
         table.endTurn(threadPlayer);
     }
