@@ -19,6 +19,13 @@ import java.util.List;
  */
 public class Client implements Runnable{
 
+    // TODO: 29.04.2016 Tests:
+    //1. Makao operation
+    //2. Sending many cards
+    //3. Sending cards after failure
+    //4. More players
+    //5. Ordering cards
+
     private String TAG = "Client backend";
 
     private String ip;
@@ -104,6 +111,7 @@ public class Client implements Runnable{
 
     }
 
+    // TODO: 29.04.2016 When player is not sending cards, next player is not starting turn
     private void handleCommands(){
         while(properties.isClientRunning()){
             Object received = receive();
@@ -120,6 +128,7 @@ public class Client implements Runnable{
                     }else send(ServerProtocol.PLAYER_NOT_SAID_STOPMAKAO);
                 }else if((int)received == ServerProtocol.TURN_STARTED){
                     Logger.logConsole(TAG, "Turn started");
+                    properties.setTurnStarted(true);
                     turnProcessing();
 
                 }
@@ -131,6 +140,7 @@ public class Client implements Runnable{
         List<Player> updatedPlayers = new ArrayList<>();
         int command = -1;
         while(command != ServerProtocol.STOP_UPDATE){
+            Logger.logConsole(TAG, "Waiting for command");
             Object received = receive();
             if(received instanceof Player){
                 Logger.logConsole(TAG, " ---- updated player");
@@ -138,13 +148,13 @@ public class Client implements Runnable{
                     updatedPlayers.add((Player)received);
                 }else properties.setLocalPlayer((Player)received);
             }else if(received instanceof Card){
-                Logger.logConsole(TAG, " ---- updated card");
+                Logger.logConsole(TAG, " ---- updated putted card");
                 properties.addPuttedCard((Card)received);
             }else if(received instanceof Integer){
                 command = (int)received;
-            }
+            }// TODO: 30.04.2016 overwriting player object from server
         }
-        properties.setAditionalPlayers(updatedPlayers);
+        properties.setAdditionalPlayers(updatedPlayers);
         if(properties.getPuttedCards().size() > 0){
             int indexOfLastCard = properties.getPuttedCards().size()-1;
             properties.setCardOnTop(properties.getPuttedCards().get(indexOfLastCard));
@@ -196,6 +206,7 @@ public class Client implements Runnable{
             }else{
                 Logger.logConsole(TAG, "Cards not equal");
                 properties.setTurnEnded(false);
+                properties.setTurnStarted(true);
                 properties.setCardsRejected(true);
                 properties.setUpdateGame(true);
                 turnProcessing();
@@ -223,7 +234,7 @@ public class Client implements Runnable{
 
     private void endingTurn(){
         Logger.logConsole(TAG, "Ending turn");
-        properties.setCardsToPut(new ArrayList<>());
+        //properties.setCardsToPut(new ArrayList<>());
         properties.setTurnEnded(false);
         if(properties.getLocalPlayer().isMakao()){
             Logger.logConsole(TAG, "Setting makao");
@@ -239,14 +250,14 @@ public class Client implements Runnable{
                 properties.setGameEnded(true);
             }
         }else{
-            endingTurn();//experimental
+            endingTurn();
         }
         received = receive();
         if(received instanceof Card){
             Logger.logConsole(TAG, "Received card object updated after turn ending");
             properties.setCardOnTop((Card) received);
         }else{
-            endingTurn();//experimental
+            endingTurn();
         }
         properties.setUpdateGame(true);
     }

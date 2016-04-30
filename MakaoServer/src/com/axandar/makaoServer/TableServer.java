@@ -46,7 +46,8 @@ public class TableServer {
         Player firstPlayer = sessionInfo.getPlayerObject(firstPlayerID);
         sessionInfo.setActualTurnPlayer(firstPlayer);
         int lastPlayerId = sessionInfo.getPreviousPlayerIndex(firstPlayer);
-        sessionInfo.setLastTurnEndedPlayer(sessionInfo.getPlayerObject(lastPlayerId));
+        //sessionInfo.setLastTurnEndedPlayer(sessionInfo.getPlayerObject(lastPlayerId));
+        sessionInfo.setLastTurnEndedPlayer(new Player(null, null, -1));
 
         sessionInfo.setTable(this);//update object for all players
         sessionInfo.setGameStarted(true);
@@ -183,6 +184,7 @@ public class TableServer {
                 nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextNextPlayerId);
             }
             sessionInfo.setLastTurnEndedPlayer(player);
+            Logger.logConsole(TAG, "Player with id: " + nextPlayer.getPlayerID() + " is next player");
             sessionInfo.setActualTurnPlayer(nextPlayer);
         }else{
             int previousPlayerId = sessionInfo.getPreviousPlayerIndex(player);

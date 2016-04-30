@@ -117,7 +117,7 @@ public class ClientConnectObject implements Runnable {
         }
         Logger.logConsole(TAG, "Player started turn");
         turnStarted();
-        table.endTurn(threadPlayer);
+        //table.endTurn(threadPlayer);
         Logger.logConsole(TAG, "Player ended turn");
     }
 
@@ -165,7 +165,7 @@ public class ClientConnectObject implements Runnable {
             playerEndedGame();
         }
         Logger.logConsole(TAG, "Updating player data");
-        send(threadPlayer);
+        send(threadPlayer);// TODO: 30.04.2016 did not updating threadPlayer in array which is sending to client
         send(sessionInfo.getCardOnTop());
         table.endTurn(threadPlayer);
     }
@@ -243,9 +243,12 @@ public class ClientConnectObject implements Runnable {
         Logger.logConsole(TAG, "Player did not put card");
         if(sessionInfo.getQuantityCardsToTake() > 0){
             playerGetCards(sessionInfo.getQuantityCardsToTake());
+            threadPlayer.setWasPuttedCard(false);
         }else if(sessionInfo.getQuantityTurnsToWait() > 0){
+            threadPlayer.setWasPuttedCard(false);
             playerWaitTurns();
         }else{
+            threadPlayer.setWasPuttedCard(false);
             playerGetCard();
         }
     }
@@ -264,6 +267,7 @@ public class ClientConnectObject implements Runnable {
 
     private void playerGetCard(){
         threadPlayer = table.giveCardToPlayer(threadPlayer, 1);
+        Logger.logConsole(TAG, "Player got one card from ending turn without sending");
         threadPlayer.setMakao(false);
     }
 

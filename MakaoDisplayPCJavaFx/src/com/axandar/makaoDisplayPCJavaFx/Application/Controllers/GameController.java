@@ -10,11 +10,13 @@ import com.axandar.makaoCore.utils.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import org.controlsfx.control.Notifications;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,9 @@ import java.util.List;
  * Created by Axandar on 09.03.2016.
  */
 public class GameController {
+
+    // TODO: 29.04.2016 TODO
+
 
     private final String TAG = "Client side";
 
@@ -37,6 +42,8 @@ public class GameController {
     @FXML private HBox cardsInHand;
     @FXML private ListView<String> playersList;
     @FXML private ImageView cardOnTop;
+    @FXML private Button btnEndTurn;
+    @FXML private Button btnSayMakao;
 
     /**Stage dialogStage = new Stage();
      dialogStage.setTitle(rb.getString("AddingNewSupplierOrder"));
@@ -51,7 +58,7 @@ public class GameController {
 
      dialogStage.showAndWait();**/
 
-    // TODO: 26.04.2016 add option to say "Makao" and "Stop makao"
+    // TODO: 26.04.2016 add option to say "Stop makao"
 
     @FXML
     public void startGame(){
@@ -79,6 +86,9 @@ public class GameController {
             if(clientProperties.isCardsRejected()){
                 Logger.logConsole(TAG, "Some cards not accepted");
                 // TODO: 26.04.2016 for each notAcceptedCard show alert about failure
+                Notifications.create().title("Wrong cards")
+                        .text("Some of cards that you tried to send was incorrect").showWarning();
+
             }
 
             Logger.logConsole(TAG, "Number of cards in hand on view: " + cardsInHand.getChildren().size()/2);
@@ -90,6 +100,7 @@ public class GameController {
                     addCardToHandGUI(card);
                 }
             }else{
+                Logger.logConsole(TAG, "Started adding new cards");
                 List<Card> cardsToAdd = getNewCards();
                 for(Card card:cardsToAdd){
                     deckInHand.addCardToDeck(card);
@@ -99,12 +110,18 @@ public class GameController {
 
             setCardOnTopTexture(clientProperties.getCardOnTop());
 
-            List<Player> listOfRestPlayers = clientProperties.getAditionalPlayers();
+            List<Player> listOfRestPlayers = clientProperties.getAdditionalPlayers();
             playersList.getItems().remove(0, playersList.getItems().size()-1);
             for(Player player:listOfRestPlayers){
                 playersList.getItems().add(player.getPlayerName());
             }
             Logger.logConsole(TAG, "Update ended");
+        };
+
+        Runnable endTurnBtnLogin = () ->{
+            if(clientProperties.isTurnStarted()){
+                btnEndTurn.setDisable(false);
+            }else btnEndTurn.setDisable(true);
         };
 
         Task taskToUpdateGUI = new Task(){
@@ -114,13 +131,14 @@ public class GameController {
                     Thread.sleep(1000);
                     //waiting for client initialize
                 }
-                Logger.logConsole(TAG, "isClient running");
                 while(clientProperties.isClientRunning()){
+                    Platform.runLater(endTurnBtnLogin);
                     if(clientProperties.isUpdateGame()){
                         Logger.logConsole(TAG, "Updated added to runLater()");
                         Platform.runLater(updateGUI);
                         clientProperties.setUpdateGame(false);
                     }
+                    Platform.runLater(endTurnBtnLogin);
                     Thread.sleep(2000);
                 }
                 return null;
@@ -155,11 +173,11 @@ public class GameController {
                 cardsToPut.get(0).getFunction().getFunctionID() == Function.ORDER_CARD){
             clientProperties.setOrderedCard(orderedCard); 
         }
+        cardsToPut = new ArrayList<>();
     }
 
     private void removeCardsFromHand(){
         //remove only that cards which are not in rejected but are in putted
-
 
         /**deckInHand.removeCardFromDeck(card);
         String cardFileName = card.getIdType() + "-" + card.getIdColor();
@@ -175,13 +193,8 @@ public class GameController {
     @FXML
     public void endTurn(){
         Logger.logConsole(TAG, "ending turn");
+        clientProperties.setTurnStarted(false);
         clientProperties.setTurnEnded(true);
-        /**deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
-        addCardToHandGUI(new Card(1, 1, new Function(6, 0)));
-        deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
-        addCardToHandGUI(new Card(2, 2, new Function(6, 0)));
-        deckInHand.addCardToDeck(new Card(1, 1, new Function(6, 0)));
-        addCardToHandGUI(new Card(3, 3, new Function(6, 0)));**/
     }
 
     private void addCardToHandGUI(Card card){

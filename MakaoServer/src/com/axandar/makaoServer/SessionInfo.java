@@ -22,7 +22,7 @@ public class SessionInfo {
     private Card orderedCard;
     private int quantityTurnsToWait = 0;
     private int quantityCardsToTake = 0;
-    private boolean isNextPlayerForward;
+    private boolean isNextPlayerForward = true;
     private StopMakao lastSaid;
     private Player lastTurnEndedPlayer;
     private Player actualTurnPlayer;
