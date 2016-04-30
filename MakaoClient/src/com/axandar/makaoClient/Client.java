@@ -111,7 +111,6 @@ public class Client implements Runnable{
 
     }
 
-    // TODO: 29.04.2016 When player is not sending cards, next player is not starting turn
     private void handleCommands(){
         while(properties.isClientRunning()){
             Object received = receive();
@@ -211,6 +210,7 @@ public class Client implements Runnable{
                 properties.setUpdateGame(true);
                 turnProcessing();
             }
+
             if(properties.getNotAcceptedCards().size() > 0){
                 Logger.logConsole(TAG, "Cards rejected");
                 properties.setTurnEnded(false);

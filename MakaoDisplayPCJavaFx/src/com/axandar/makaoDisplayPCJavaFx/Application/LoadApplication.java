@@ -17,12 +17,17 @@ public class LoadApplication extends Application{
 
     private String gameResolution = "1280x720";
 
+    public LoadApplication(String _gameResolution){
+        gameResolution =_gameResolution;
+    }
+
     public static void main(String[] args){
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage){
+        // TODO: 30.04.2016 load all textures to memory???
         try{
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(LoadApplication.class.getResource("GUIFiles/Game" + gameResolution + ".fxml"));

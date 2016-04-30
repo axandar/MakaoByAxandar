@@ -59,6 +59,10 @@ public class GameController {
      dialogStage.showAndWait();**/
 
     // TODO: 26.04.2016 add option to say "Stop makao"
+    // TODO: 30.04.2016 Put initializing threads and properties in LoadApplication
+    public GameController(ClientProperties _clientProperties){
+        clientProperties = _clientProperties;
+    }
 
     @FXML
     public void startGame(){
@@ -83,12 +87,14 @@ public class GameController {
                 removeCardsFromHand();
             }
 
-            if(clientProperties.isCardsRejected()){
+            if(clientProperties.isCardsRejected() && clientProperties.getNotAcceptedCards().size() > 0){
                 Logger.logConsole(TAG, "Some cards not accepted");
-                // TODO: 26.04.2016 for each notAcceptedCard show alert about failure
                 Notifications.create().title("Wrong cards")
                         .text("Some of cards that you tried to send was incorrect").showWarning();
-
+            }else if(clientProperties.isCardsRejected()){
+                Logger.logConsole(TAG, "Cards was not equals");
+                Notifications.create().title("Wrong cards")
+                        .text("Cards which you have tried to send was not equal function").showWarning();
             }
 
             Logger.logConsole(TAG, "Number of cards in hand on view: " + cardsInHand.getChildren().size()/2);
@@ -149,6 +155,20 @@ public class GameController {
 
         clientThread.start();
         updatingGUI.start();
+        int timeout = 20;
+        while(!clientProperties.isClientRunning()){
+            try{
+                Thread.sleep(500);
+                timeout--;
+            }catch(InterruptedException e){
+                Logger.logError(e);
+            }
+            if(timeout <= 0){
+                Notifications.create().title("Connection error")
+                        .text("The program has encountered a problem connecting to the server").showWarning();
+                break;
+            }
+        }
     }
 
     private List<Card> getNewCards(){
