@@ -1,12 +1,12 @@
 package com.axandar.makaoDisplayPCJavaFx;
 
-import com.axandar.makaoDisplayPCJavaFx.Application.LoadApplication;
+import com.axandar.makaoDisplayPCJavaFx.Application.Controllers.MainMenuController;
 
 public class Main{
 
     public static void main(String[] args) {
 
-        LoadApplication.main(args);
+        MainMenuController.launchMenu();
         //launch(args);
     }
 }

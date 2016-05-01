@@ -21,10 +21,6 @@ public class LoadApplication extends Application{
         gameResolution =_gameResolution;
     }
 
-    public static void main(String[] args){
-        launch(args);
-    }
-
     @Override
     public void start(Stage primaryStage){
         // TODO: 30.04.2016 load all textures to memory???
