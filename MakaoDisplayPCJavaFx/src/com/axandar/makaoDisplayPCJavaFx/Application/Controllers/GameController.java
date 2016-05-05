@@ -1,6 +1,5 @@
 package com.axandar.makaoDisplayPCJavaFx.Application.Controllers;
 
-import com.axandar.makaoClient.Client;
 import com.axandar.makaoClient.ClientProperties;
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Deck;
@@ -24,7 +23,7 @@ import java.util.List;
 /**
  * Created by Axandar on 09.03.2016.
  */
-public class GameController {
+public class GameController{
 
     // TODO: 29.04.2016 TODO
 
@@ -59,22 +58,18 @@ public class GameController {
      dialogStage.showAndWait();**/
 
     // TODO: 26.04.2016 add option to say "Stop makao"
-    // TODO: 30.04.2016 Put initializing threads and properties in LoadApplication
     public GameController(ClientProperties _clientProperties){
         clientProperties = _clientProperties;
     }
 
     @FXML
+    private void initialize(){
+
+    }
+
+    @FXML
     public void startGame(){
         Logger.logConsole(TAG, "Game started");
-
-        clientProperties = new ClientProperties();
-        clientProperties.setIp("0.0.0.0");
-        clientProperties.setPort(5000);
-        clientProperties.setNickname("Axandar2");
-
-        Client client = new Client(clientProperties);
-        Thread clientThread = new Thread(client);
 
         Runnable updateGUI = () -> {
             Logger.logConsole(TAG, "Start updating GUI");
@@ -153,22 +148,7 @@ public class GameController {
 
         Thread updatingGUI = new Thread(taskToUpdateGUI);
 
-        clientThread.start();
         updatingGUI.start();
-        int timeout = 20;
-        while(!clientProperties.isClientRunning()){
-            try{
-                Thread.sleep(500);
-                timeout--;
-            }catch(InterruptedException e){
-                Logger.logError(e);
-            }
-            if(timeout <= 0){
-                Notifications.create().title("Connection error")
-                        .text("The program has encountered a problem connecting to the server").showWarning();
-                break;
-            }
-        }
     }
 
     private List<Card> getNewCards(){
@@ -277,5 +257,4 @@ public class GameController {
         Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
         cardOnTop.setImage(image);
     }
-
 }
