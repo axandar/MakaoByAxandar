@@ -14,22 +14,19 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
 
 public class LoadApplication{
 
     private String TAG = "Loading application";
 
-    private Stage primaryStage;
     private String gameResolution;
     private String ip;
     private String port;
     private String nickname;
     private ClientProperties cProperties;
 
-    public LoadApplication(Stage _primaryStage, String _gameResolution, String _ip, String _port, String _nickname){
-        primaryStage = _primaryStage;
+    public LoadApplication(String _gameResolution, String _ip, String _port, String _nickname){
         gameResolution =_gameResolution;
         ip = _ip;
         port = _port;
@@ -71,10 +68,8 @@ public class LoadApplication{
             @Override
             protected Object call() throws Exception{
                 if(!isTimeout(cProperties)){
-                    System.out.println("launch gui");
                     Platform.runLater(launchGameGUI);
                 }else{
-                    System.out.println("notification");
                     Platform.runLater(showNotification);
                     // TODO: 05.05.2016 return to main menu, maybe after notification?
                 }
@@ -104,23 +99,19 @@ public class LoadApplication{
 
     public void launchGameGUI(){
         try{
-            Logger.logConsole(TAG, "Showing game view1");
             GameController gameController = new GameController(cProperties);
-            Logger.logConsole(TAG, "Showing game view2");
+
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(LoadApplication.class.getResource("GUIFiles/Game" + gameResolution + ".fxml"));
             loader.setController(gameController);
             BorderPane gameView = loader.load();
 
-            Logger.logConsole(TAG, "Showing game view3");
             Scene scene = new Scene(gameView);
             scene = Main.loadMainCSS(scene);
             scene.getStylesheets().add(GameController.class.getResource("/CSS/cardsInHand.css").toExternalForm());
-            Logger.logConsole(TAG, "Showing game view4");
 
             Main.getPrimaryStage().setTitle("Makao PCJavaFX " + gameResolution);
             Main.getPrimaryStage().setScene(scene);
-            Logger.logConsole(TAG, "Showing game view");
             Main.getPrimaryStage().show();
         }catch(Exception e){
             Logger.logError(e);

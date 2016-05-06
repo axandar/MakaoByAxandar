@@ -34,6 +34,9 @@ public class Client implements Runnable{
     private ClientProperties properties;
     private Connection conn;
 
+    private int command = -1;
+    private List<Player> updatedPlayers = new ArrayList<>();
+
     public Client(ClientProperties _properties) {
         properties = _properties;
         ip = properties.getIp();
@@ -56,10 +59,6 @@ public class Client implements Runnable{
     private boolean startConnection(){
         try{
             Socket connectionToServer = new Socket(ip, port);
-            /**ObjectInputStream obj = new ObjectInputStream(connectionToServer.getInputStream());
-            conn = new Connection(new ObjectInputStream(connectionToServer.getInputStream()),
-                    new ObjectOutputStream(connectionToServer.getOutputStream()));**/
-        //WEIRD ERROR, ENDLESS LOOP ON INITIALIZE
             ObjectOutputStream oos = new ObjectOutputStream(connectionToServer.getOutputStream());
             oos.flush();
             ObjectInputStream is = new ObjectInputStream(connectionToServer.getInputStream());
@@ -87,7 +86,8 @@ public class Client implements Runnable{
             received = receive();
             if(received instanceof Player){
                 properties.setLocalPlayer((Player)received);
-                TAG = properties.getLocalPlayer().getPlayerID() + " " + TAG;
+                TAG =  properties.getLocalPlayer().getPlayerName() + " with id: " +
+                            properties.getLocalPlayer().getPlayerID() + " " + TAG;
             }
 
             int i = 1;
@@ -136,29 +136,51 @@ public class Client implements Runnable{
     }
 
     private void updatePlayersInformation(){
-        List<Player> updatedPlayers = new ArrayList<>();
-        int command = -1;
+        command = -1;
+        updatedPlayers = new ArrayList<>();
+
         while(command != ServerProtocol.STOP_UPDATE){
-            Logger.logConsole(TAG, "Waiting for command");
-            Object received = receive();
-            if(received instanceof Player){
-                Logger.logConsole(TAG, " ---- updated player");
-                if(((Player) received).getPlayerID() != properties.getLocalPlayer().getPlayerID()){
-                    updatedPlayers.add((Player)received);
-                }else properties.setLocalPlayer((Player)received);
-            }else if(received instanceof Card){
-                Logger.logConsole(TAG, " ---- updated putted card");
-                properties.addPuttedCard((Card)received);
-            }else if(received instanceof Integer){
-                command = (int)received;
-            }// TODO: 30.04.2016 overwriting player object from server
+            handleInput();
         }
         properties.setAdditionalPlayers(updatedPlayers);
+
         if(properties.getPuttedCards().size() > 0){
             int indexOfLastCard = properties.getPuttedCards().size()-1;
             properties.setCardOnTop(properties.getPuttedCards().get(indexOfLastCard));
         }
         properties.setUpdateGame(true);
+    }
+
+    private void handleInput(){
+        Logger.logConsole(TAG, "Waiting for command");
+        Object received = receive();
+        if(received instanceof Player){
+            receivedPlayer((Player) received);
+        }else if(received instanceof Card){
+            receivedCard((Card) received);
+        }else if(received instanceof Integer){
+            receivedCommand((Integer) received);
+        }// TODO: 30.04.2016 overwriting player object from server
+    }
+
+    private void receivedPlayer(Player player){
+        Logger.logConsole(TAG, " ---- updated player");
+        if(player.getPlayerID() != properties.getLocalPlayer().getPlayerID()){
+            updatedPlayers.add(player);
+        }else{
+            properties.setLocalPlayer(player);
+            Logger.logConsole(TAG, "Player object from updating have: "
+                    + player.getCardsInHand().size() + " cards in hand");
+        }
+    }
+
+    private void receivedCard(Card card){
+        Logger.logConsole(TAG, " ---- updated put card");
+        properties.addPuttedCard(card);
+    }
+
+    private void receivedCommand(int received){
+        command = received;
     }
 
     private void turnProcessing(){
@@ -245,6 +267,8 @@ public class Client implements Runnable{
         if(received instanceof Player){
             Logger.logConsole(TAG, "Received player object updated after turn ending");
             properties.setLocalPlayer((Player) received);
+            Logger.logConsole(TAG, "Received player object after ending tunr have: "
+                    + ((Player)received).getCardsInHand().size() + " cards in hand");
             if(((Player)received).getCardsInHand().size() == 0){
                 Logger.logConsole(TAG, "Player ended turn");
                 properties.setGameEnded(true);
@@ -263,10 +287,12 @@ public class Client implements Runnable{
     }
 
     private void send(Object object){
+        //http://stackoverflow.com/a/12341193/5509049
         conn.send(object);
     }
 
     private Object receive(){
+        //http://stackoverflow.com/a/12341193/5509049
         return conn.receive();
     }
 }

@@ -2,7 +2,6 @@ package com.axandar.makaoDisplayPCJavaFx.Application.Controllers;
 
 import com.axandar.makaoClient.ClientProperties;
 import com.axandar.makaoCore.logic.Card;
-import com.axandar.makaoCore.logic.Deck;
 import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
 import com.axandar.makaoCore.utils.Logger;
@@ -31,12 +30,9 @@ public class GameController{
     private final String TAG = "Client side";
 
     private volatile ClientProperties clientProperties;
-    private Deck deckInHand = new Deck();
     private Player player;
     private List<Card> cardsToPut = new ArrayList<>();
     private Card orderedCard = null;
-
-    private List<String> imageViewsIDs = new ArrayList<>();
 
     @FXML private HBox cardsInHand;
     @FXML private ListView<String> playersList;
@@ -109,15 +105,15 @@ public class GameController{
             clientProperties.setCardsToPut(new ArrayList<>());
         }
 
-        isCardsGood();
+        putCardsWasGood();
 
         Logger.logConsole(TAG, "Number of cards in hand on view: " + cardsInHand.getChildren().size()/2);
         Logger.logConsole(TAG, "Number of cards in hand in player object: " + player.getCardsInHand().size());
         // TODO: 06.05.2016 on updating GUI clear cards and put all again
 
         Logger.logConsole(TAG, "Started adding cards");
+        clearCards();
         for(Card card:player.getCardsInHand()){
-            deckInHand.addCardToDeck(card);
             addCardToHandGUI(card);
         }
 
@@ -131,7 +127,7 @@ public class GameController{
         Logger.logConsole(TAG, "Update ended");
     }
 
-    private void isCardsGood(){
+    private void putCardsWasGood(){
         if(clientProperties.isCardsRejected() && clientProperties.getNotAcceptedCards().size() > 0){
             Logger.logConsole(TAG, "Some cards not accepted");
             Notifications.create().title("Wrong cards")
@@ -143,20 +139,27 @@ public class GameController{
         }
     }
 
+    private void clearCards(){
+        cardsInHand.getChildren().clear();
+    }
 
     @FXML
     public void sendCardToServer(){
-        Logger.logConsole(TAG, "Requested sending cards");
-        clientProperties.setCardsToPut(cardsToPut);
-        if(cardsToPut.get(0).getFunction().getFunctionID() == Function.CHANGE_COLOR ||
-                cardsToPut.get(0).getFunction().getFunctionID() == Function.ORDER_CARD){
-            clientProperties.setOrderedCard(orderedCard); 
-        }
-        cardsToPut = new ArrayList<>();
+
     }
 
     @FXML
     public void endTurn(){
+        if(cardsToPut.size() > 0){
+            Logger.logConsole(TAG, "Requested sending cards");
+            clientProperties.setCardsToPut(cardsToPut);
+            if(cardsToPut.get(0).getFunction().getFunctionID() == Function.CHANGE_COLOR ||
+                    cardsToPut.get(0).getFunction().getFunctionID() == Function.ORDER_CARD){
+                clientProperties.setOrderedCard(orderedCard);
+            }
+            cardsToPut = new ArrayList<>();
+        }
+
         Logger.logConsole(TAG, "ending turn");
         clientProperties.setTurnStarted(false);
         clientProperties.setTurnEnded(true);
@@ -167,23 +170,16 @@ public class GameController{
         int cardType = card.getIdType();
         String cardFileName = cardType + "-" + cardColor;
 
-        if(deckInHand.deckLength() > 1){
-            Separator separator = new Separator();
-            separator.setId(cardFileName);
-            separator.setPrefHeight(150);
-            separator.getStyleClass().add("betweenCardsSeparator");
-
-            cardsInHand.getChildren().add(separator);
+        if(cardsInHand.getChildren().size() > 0){
+            addSeparator();
         }
 
-        Logger.logConsole(TAG, "File name of card to add in hand: " + cardFileName);
         ImageView imageView = new ImageView();
         Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
         imageView.setImage(image);
         imageView.setFitWidth(96);
         imageView.setFitHeight(150);
         imageView.setId(cardFileName);
-        imageViewsIDs.add(cardFileName);
 
         imageView.setOnMouseClicked(event -> {
             ImageView clickedImage = (ImageView) event.getSource();
@@ -199,6 +195,8 @@ public class GameController{
                         cardsToPut.add(cardFromPlayer);
                         if(cardFromPlayer.getFunction().getFunctionID() == Function.CHANGE_COLOR ||
                                 cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
+
+
                             // TODO: 26.04.2016 show window where player can choose ordered card
                             // TODO: 26.04.2016 remember to add otpion for ordering "nothing"
                         }
@@ -211,6 +209,14 @@ public class GameController{
         });
 
         cardsInHand.getChildren().add(imageView);
+    }
+
+    private void addSeparator(){
+        Separator separator = new Separator();
+        separator.setPrefHeight(150);
+        separator.getStyleClass().add("betweenCardsSeparator");
+
+        cardsInHand.getChildren().add(separator);
     }
 
     private void setCardOnTopTexture(Card card){

@@ -59,7 +59,7 @@ public class MainMenuController extends Application{
         Stage stage = Main.getPrimaryStage();
         try{
             LoadApplication loadApplication =
-                    new LoadApplication(stage, "1280x720", tfIP.getText(), tfPort.getText(), tfNickname.getText());
+                    new LoadApplication("1280x720", tfIP.getText(), tfPort.getText(), tfNickname.getText());
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(MainMenuController.class.getResource("../GUIFiles/LoadingScreen.fxml"));
             fxmlLoader.setController(loadApplication);

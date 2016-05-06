@@ -20,7 +20,8 @@ public class Connection{
 
     public void send(Object object){
         try{
-            objectOutputStream.writeObject(object);
+            objectOutputStream.writeUnshared(object);
+            objectOutputStream.reset();
         }catch(IOException e){
             if(counter > 0){
                 counter--;
@@ -34,7 +35,7 @@ public class Connection{
 
     public Object receive(){
         try{
-           return objectInputStream.readObject();
+           return objectInputStream.readUnshared();
         }catch(IOException e){
             if(counter > 0){
                 counter--;

@@ -13,6 +13,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Axandar on 06.02.2016.
@@ -52,10 +53,11 @@ public class ClientConnectObject implements Runnable {
                 if(player.getPlayerID() != threadPlayer.getPlayerID()){
                     send(player);
                 }
-            }//first cient is not saving properly aditional player object
+            }
             send(sessionInfo.getCardOnTop());
 
             while(!sessionInfo.isGameExiting()){
+
                 runningGame();
 
                 if(sessionInfo.getPlayersObjectsInOrder().size() == 1){
@@ -164,7 +166,17 @@ public class ClientConnectObject implements Runnable {
         if(threadPlayer.getCardsInHand().size() == 0){
             playerEndedGame();
         }
+
         Logger.logConsole(TAG, "Updating player data");
+        for(Player player:sessionInfo.getPlayersObjectsInOrder()){
+            if(player.getPlayerID() == threadPlayer.getPlayerID()){
+                List<Player> players = sessionInfo.getPlayersObjectsInOrder();
+                int index = players.indexOf(player);
+                players.remove(index);
+                players.add(index, threadPlayer);
+                break;
+            }
+        }
         send(threadPlayer);// TODO: 30.04.2016 did not updating threadPlayer in array which is sending to client
         send(sessionInfo.getCardOnTop());
         table.endTurn(threadPlayer);
@@ -224,9 +236,9 @@ public class ClientConnectObject implements Runnable {
         //send(ServerProtocol.GOT_CARD);
         if(table.putCardOnTable(card)){
             Logger.logConsole(TAG, "Received card accepted");
-            send(ServerProtocol.CARD_ACCEPTED);
             threadPlayer.removeCardFromHand(card);
             threadPlayer.setWasPuttedCard(true);
+            send(ServerProtocol.CARD_ACCEPTED);
         }else{
             Logger.logConsole(TAG, "Received card not accepted");
             send(ServerProtocol.CARD_NOTACCEPTED);
@@ -268,6 +280,7 @@ public class ClientConnectObject implements Runnable {
     private void playerGetCard(){
         threadPlayer = table.giveCardToPlayer(threadPlayer, 1);
         Logger.logConsole(TAG, "Player got one card from ending turn without sending");
+        Logger.logConsole(TAG, "Player have: " + threadPlayer.getCardsInHand().size() + " cards in hand");
         threadPlayer.setMakao(false);
     }
 
@@ -287,10 +300,12 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void send(Object object){
+        //http://stackoverflow.com/a/12341193/5509049
         conn.send(object);
     }
 
     private Object receive(){
+        //http://stackoverflow.com/a/12341193/5509049
         return conn.receive();
     }
 }

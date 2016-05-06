@@ -80,7 +80,14 @@ public class Player implements Serializable {
 
     public void removeCardFromHand(Card card){
         Logger.logConsole("Operation on player", "Removed card: " + card.getIdType() + "-" + card.getIdColor());
-        cardsInHand.remove(card);
+        int index = -1;
+        for(Card cardInHand:cardsInHand){
+            if(cardInHand.getIdColor() == card.getIdColor() && cardInHand.getIdType() == card.getIdType()){
+                index = cardsInHand.indexOf(cardInHand);
+                break;
+            }
+        }
+        cardsInHand.remove(index);
     }
 
     public void addCardToHand(Card card){
