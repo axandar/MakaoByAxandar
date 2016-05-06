@@ -17,9 +17,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
 
-import java.io.IOException;
-
 public class LoadApplication{
+
+    private String TAG = "Loading application";
 
     private Stage primaryStage;
     private String gameResolution;
@@ -34,26 +34,6 @@ public class LoadApplication{
         ip = _ip;
         port = _port;
         nickname = _nickname;
-    }
-
-    public void launchGameGUI(){
-        try{
-            GameController gameController = new GameController(cProperties);
-
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(LoadApplication.class.getResource("GUIFiles/Game" + gameResolution + ".fxml"));
-            loader.setController(gameController);
-            BorderPane gameView = loader.load();
-            Scene scene = new Scene(gameView);
-            scene = Main.loadMainCSS(scene);
-            scene.getStylesheets().add(GameController.class.getResource("/CSS/cardsInHand.css").toExternalForm());
-
-            primaryStage.setTitle("Makao PCJavaFX " + gameResolution);
-            primaryStage.setScene(scene);
-            primaryStage.show();
-        }catch(IOException e){
-            Logger.logError(e);
-        }
     }
 
     public void initializeConnection(){
@@ -85,13 +65,14 @@ public class LoadApplication{
         Thread connectionThread = new Thread(handlingConnectionTask);
         connectionThread.start();
 
+        Runnable launchGameGUI = this::launchGameGUI;
+
         Task isConnectionGood = new Task(){
             @Override
             protected Object call() throws Exception{
-                System.out.println("321314321asdas");
                 if(!isTimeout(cProperties)){
                     System.out.println("launch gui");
-                    launchGameGUI();
+                    Platform.runLater(launchGameGUI);
                 }else{
                     System.out.println("notification");
                     Platform.runLater(showNotification);
@@ -119,5 +100,30 @@ public class LoadApplication{
             }
         }
         return false;
+    }
+
+    public void launchGameGUI(){
+        try{
+            Logger.logConsole(TAG, "Showing game view1");
+            GameController gameController = new GameController(cProperties);
+            Logger.logConsole(TAG, "Showing game view2");
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(LoadApplication.class.getResource("GUIFiles/Game" + gameResolution + ".fxml"));
+            loader.setController(gameController);
+            BorderPane gameView = loader.load();
+
+            Logger.logConsole(TAG, "Showing game view3");
+            Scene scene = new Scene(gameView);
+            scene = Main.loadMainCSS(scene);
+            scene.getStylesheets().add(GameController.class.getResource("/CSS/cardsInHand.css").toExternalForm());
+            Logger.logConsole(TAG, "Showing game view4");
+
+            Main.getPrimaryStage().setTitle("Makao PCJavaFX " + gameResolution);
+            Main.getPrimaryStage().setScene(scene);
+            Logger.logConsole(TAG, "Showing game view");
+            Main.getPrimaryStage().show();
+        }catch(Exception e){
+            Logger.logError(e);
+        }
     }
 }

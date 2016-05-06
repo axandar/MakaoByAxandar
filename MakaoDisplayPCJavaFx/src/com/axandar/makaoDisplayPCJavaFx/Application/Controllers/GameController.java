@@ -64,61 +64,9 @@ public class GameController{
 
     @FXML
     private void initialize(){
-
-    }
-
-    @FXML
-    public void startGame(){
         Logger.logConsole(TAG, "Game started");
 
-        Runnable updateGUI = () -> {
-            Logger.logConsole(TAG, "Start updating GUI");
-
-            player = clientProperties.getLocalPlayer();
-
-            if(clientProperties.getCardsToPut().size() > 0){
-                Logger.logConsole(TAG, "Cards accepted and removing");
-                clientProperties.setCardsToPut(new ArrayList<>());
-                removeCardsFromHand();
-            }
-
-            if(clientProperties.isCardsRejected() && clientProperties.getNotAcceptedCards().size() > 0){
-                Logger.logConsole(TAG, "Some cards not accepted");
-                Notifications.create().title("Wrong cards")
-                        .text("Some of cards that you tried to send was incorrect").showWarning();
-            }else if(clientProperties.isCardsRejected()){
-                Logger.logConsole(TAG, "Cards was not equals");
-                Notifications.create().title("Wrong cards")
-                        .text("Cards which you have tried to send was not equal function").showWarning();
-            }
-
-            Logger.logConsole(TAG, "Number of cards in hand on view: " + cardsInHand.getChildren().size()/2);
-            Logger.logConsole(TAG, "Number of cards in hand in player object: " + player.getCardsInHand().size());
-            if(cardsInHand.getChildren().size() == 0){
-                Logger.logConsole(TAG, "Started adding cards");
-                for(Card card:player.getCardsInHand()){
-                    deckInHand.addCardToDeck(card);
-                    addCardToHandGUI(card);
-                }
-            }else{
-                Logger.logConsole(TAG, "Started adding new cards");
-                List<Card> cardsToAdd = getNewCards();
-                for(Card card:cardsToAdd){
-                    deckInHand.addCardToDeck(card);
-                    addCardToHandGUI(card);
-                }
-            }
-
-            setCardOnTopTexture(clientProperties.getCardOnTop());
-
-            List<Player> listOfRestPlayers = clientProperties.getAdditionalPlayers();
-            playersList.getItems().remove(0, playersList.getItems().size()-1);
-            for(Player player:listOfRestPlayers){
-                playersList.getItems().add(player.getPlayerName());
-            }
-            Logger.logConsole(TAG, "Update ended");
-        };
-
+        Runnable updateGUI = this::updateGUI;
         Runnable endTurnBtnLogin = () ->{
             if(clientProperties.isTurnStarted()){
                 btnEndTurn.setDisable(false);
@@ -145,25 +93,56 @@ public class GameController{
                 return null;
             }
         };
-
         Thread updatingGUI = new Thread(taskToUpdateGUI);
-
         updatingGUI.start();
     }
 
-    private List<Card> getNewCards(){
-        List<Card> newCards = new ArrayList<>();
-        List<Card> cardsFromPlayer = player.getCardsInHand();
+    private void updateGUI(){
+        //remove cards when send
+        //add new cards after turn and when stopmakao
+        Logger.logConsole(TAG, "Start updating GUI");
 
-        for(Card card : cardsFromPlayer){
-            String cardName = card.getIdType() + "-" + card.getIdColor();
-            if(!imageViewsIDs.contains(cardName)){
-                newCards.add(card);
-            }
+        player = clientProperties.getLocalPlayer();
+
+        if(clientProperties.getCardsToPut().size() > 0){
+            Logger.logConsole(TAG, "Cards accepted and removing");
+            clientProperties.setCardsToPut(new ArrayList<>());
         }
 
-        return newCards;
+        isCardsGood();
+
+        Logger.logConsole(TAG, "Number of cards in hand on view: " + cardsInHand.getChildren().size()/2);
+        Logger.logConsole(TAG, "Number of cards in hand in player object: " + player.getCardsInHand().size());
+        // TODO: 06.05.2016 on updating GUI clear cards and put all again
+
+        Logger.logConsole(TAG, "Started adding cards");
+        for(Card card:player.getCardsInHand()){
+            deckInHand.addCardToDeck(card);
+            addCardToHandGUI(card);
+        }
+
+        setCardOnTopTexture(clientProperties.getCardOnTop());
+
+        List<Player> listOfRestPlayers = clientProperties.getAdditionalPlayers();
+        playersList.getItems().remove(0, playersList.getItems().size()-1);
+        for(Player player:listOfRestPlayers){
+            playersList.getItems().add(player.getPlayerName());
+        }
+        Logger.logConsole(TAG, "Update ended");
     }
+
+    private void isCardsGood(){
+        if(clientProperties.isCardsRejected() && clientProperties.getNotAcceptedCards().size() > 0){
+            Logger.logConsole(TAG, "Some cards not accepted");
+            Notifications.create().title("Wrong cards")
+                    .text("Some of cards that you tried to send was incorrect").showWarning();
+        }else if(clientProperties.isCardsRejected()){
+            Logger.logConsole(TAG, "Cards was not equals");
+            Notifications.create().title("Wrong cards")
+                    .text("Cards which you have tried to send was not equal function").showWarning();
+        }
+    }
+
 
     @FXML
     public void sendCardToServer(){
@@ -174,20 +153,6 @@ public class GameController{
             clientProperties.setOrderedCard(orderedCard); 
         }
         cardsToPut = new ArrayList<>();
-    }
-
-    private void removeCardsFromHand(){
-        //remove only that cards which are not in rejected but are in putted
-
-        /**deckInHand.removeCardFromDeck(card);
-        String cardFileName = card.getIdType() + "-" + card.getIdColor();
-        for(Node node:cardsInHand.getChildren()){
-            if(node.getId().equals(cardFileName)){
-                cardsInHand.getChildren().remove(node);
-                // TODO: 03.04.2016 not working removing from gui
-                break;
-            }
-        }**/
     }
 
     @FXML
@@ -222,14 +187,15 @@ public class GameController{
 
         imageView.setOnMouseClicked(event -> {
             ImageView clickedImage = (ImageView) event.getSource();
-            // TODO: 26.04.2016 add border when clicked, and remove it when clicked second time
             for(Card cardFromPlayer : player.getCardsInHand()){
                 String cardName = cardFromPlayer.getIdType() + "-" + cardFromPlayer.getIdColor();
                 if(clickedImage.getId().equals(cardName)){
 
                     if(cardsToPut.contains(cardFromPlayer)){
+                        clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0), 0, 0, 0, 0)");
                         cardsToPut.remove(cardFromPlayer);
                     }else{
+                        clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
                         cardsToPut.add(cardFromPlayer);
                         if(cardFromPlayer.getFunction().getFunctionID() == Function.CHANGE_COLOR ||
                                 cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
