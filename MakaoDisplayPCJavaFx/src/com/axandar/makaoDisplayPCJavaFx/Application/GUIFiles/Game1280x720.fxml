@@ -72,7 +72,6 @@
          <children>
             <Button fx:id="btnEndTurn" layoutX="69.0" layoutY="450.0" mnemonicParsing="false" onAction="#endTurn" text="End turn" />
             <Button layoutX="63.0" layoutY="404.0" mnemonicParsing="false" text="Say Makao" />
-            <Button layoutX="65.0" layoutY="353.0" mnemonicParsing="false" onAction="#sendCardToServer" text="Send Card" />
          </children>
       </AnchorPane>
    </left>

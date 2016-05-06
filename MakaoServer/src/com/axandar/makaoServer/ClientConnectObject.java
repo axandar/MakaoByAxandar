@@ -103,7 +103,6 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void runningGame() {
-        //rest players ending theirs turns
         while(!(sessionInfo.getActualTurnPlayer().equals(threadPlayer))){
             Logger.logConsole(TAG, "Handle another player turn");
             waitForNextPlayerEndTurn();
@@ -119,7 +118,6 @@ public class ClientConnectObject implements Runnable {
         }
         Logger.logConsole(TAG, "Player started turn");
         turnStarted();
-        //table.endTurn(threadPlayer);
         Logger.logConsole(TAG, "Player ended turn");
     }
 
@@ -177,7 +175,7 @@ public class ClientConnectObject implements Runnable {
                 break;
             }
         }
-        send(threadPlayer);// TODO: 30.04.2016 did not updating threadPlayer in array which is sending to client
+        send(threadPlayer);
         send(sessionInfo.getCardOnTop());
         table.endTurn(threadPlayer);
     }

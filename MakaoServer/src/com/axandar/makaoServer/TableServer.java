@@ -176,27 +176,35 @@ public class TableServer {
             }
         }
         if(sessionInfo.isNextPlayerForward()){
-            int nextPlayerId = sessionInfo.getNextPlayerIndex(player);
-            Player nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextPlayerId);
-            while(nextPlayer.getToWaitTurns() != 0){
-                nextPlayer.setToWaitTurns(nextPlayer.getToWaitTurns() - 1);
-                int nextNextPlayerId = sessionInfo.getNextPlayerIndex(player);
-                nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextNextPlayerId);
-            }
-            sessionInfo.setLastTurnEndedPlayer(player);
-            Logger.logConsole(TAG, "Player with id: " + nextPlayer.getPlayerID() + " is next player");
-            sessionInfo.setActualTurnPlayer(nextPlayer);
+            takeForwardPlayer(player);
         }else{
-            int previousPlayerId = sessionInfo.getPreviousPlayerIndex(player);
-            Player previousPlayer = sessionInfo.getPlayersObjectsInOrder().get(previousPlayerId);
-            while(previousPlayer.getToWaitTurns() != 0){
-                int nextPreviousPlayerId = sessionInfo.getPreviousPlayerIndex(player);
-                previousPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextPreviousPlayerId);
-            }
-            sessionInfo.setNextPlayerForward(true);
-            sessionInfo.setLastTurnEndedPlayer(player);
-            sessionInfo.setActualTurnPlayer(previousPlayer);
+            takeBackwardPlayer(player);
         }
+    }
+
+    private void takeForwardPlayer(Player player){
+        int nextPlayerId = sessionInfo.getNextPlayerIndex(player);
+        Player nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextPlayerId);
+        while(nextPlayer.getToWaitTurns() != 0){
+            nextPlayer.setToWaitTurns(nextPlayer.getToWaitTurns() - 1);
+            int nextNextPlayerId = sessionInfo.getNextPlayerIndex(nextPlayer);
+            nextPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextNextPlayerId);
+        }
+        sessionInfo.setLastTurnEndedPlayer(player);
+        Logger.logConsole(TAG, "Player with id: " + nextPlayer.getPlayerID() + " is next player");
+        sessionInfo.setActualTurnPlayer(nextPlayer);
+    }
+
+    private void takeBackwardPlayer(Player player){
+        int previousPlayerId = sessionInfo.getPreviousPlayerIndex(player);
+        Player previousPlayer = sessionInfo.getPlayersObjectsInOrder().get(previousPlayerId);
+        while(previousPlayer.getToWaitTurns() != 0){
+            int nextPreviousPlayerId = sessionInfo.getPreviousPlayerIndex(player);
+            previousPlayer = sessionInfo.getPlayersObjectsInOrder().get(nextPreviousPlayerId);
+        }
+        sessionInfo.setNextPlayerForward(true);
+        sessionInfo.setLastTurnEndedPlayer(player);
+        sessionInfo.setActualTurnPlayer(previousPlayer);
     }
 
     private void endGame(){

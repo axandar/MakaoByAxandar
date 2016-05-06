@@ -25,6 +25,7 @@ import java.util.List;
 public class GameController{
 
     // TODO: 29.04.2016 TODO
+    //player wait turns --- not working
 
 
     private final String TAG = "Client side";
@@ -94,23 +95,13 @@ public class GameController{
     }
 
     private void updateGUI(){
-        //remove cards when send
-        //add new cards after turn and when stopmakao
         Logger.logConsole(TAG, "Start updating GUI");
 
         player = clientProperties.getLocalPlayer();
-
         if(clientProperties.getCardsToPut().size() > 0){
-            Logger.logConsole(TAG, "Cards accepted and removing");
             clientProperties.setCardsToPut(new ArrayList<>());
         }
-
         putCardsWasGood();
-
-        Logger.logConsole(TAG, "Number of cards in hand on view: " + cardsInHand.getChildren().size()/2);
-        Logger.logConsole(TAG, "Number of cards in hand in player object: " + player.getCardsInHand().size());
-        // TODO: 06.05.2016 on updating GUI clear cards and put all again
-
         Logger.logConsole(TAG, "Started adding cards");
         clearCards();
         for(Card card:player.getCardsInHand()){
@@ -141,11 +132,6 @@ public class GameController{
 
     private void clearCards(){
         cardsInHand.getChildren().clear();
-    }
-
-    @FXML
-    public void sendCardToServer(){
-
     }
 
     @FXML
@@ -183,29 +169,7 @@ public class GameController{
 
         imageView.setOnMouseClicked(event -> {
             ImageView clickedImage = (ImageView) event.getSource();
-            for(Card cardFromPlayer : player.getCardsInHand()){
-                String cardName = cardFromPlayer.getIdType() + "-" + cardFromPlayer.getIdColor();
-                if(clickedImage.getId().equals(cardName)){
-
-                    if(cardsToPut.contains(cardFromPlayer)){
-                        clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0), 0, 0, 0, 0)");
-                        cardsToPut.remove(cardFromPlayer);
-                    }else{
-                        clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-                        cardsToPut.add(cardFromPlayer);
-                        if(cardFromPlayer.getFunction().getFunctionID() == Function.CHANGE_COLOR ||
-                                cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
-
-
-                            // TODO: 26.04.2016 show window where player can choose ordered card
-                            // TODO: 26.04.2016 remember to add otpion for ordering "nothing"
-                        }
-                    }
-
-                    Logger.logConsole(TAG, "Clicked card: " + cardName);
-                    break;
-                }
-            }
+            handleClickOnCard(clickedImage);
         });
 
         cardsInHand.getChildren().add(imageView);
@@ -217,6 +181,38 @@ public class GameController{
         separator.getStyleClass().add("betweenCardsSeparator");
 
         cardsInHand.getChildren().add(separator);
+    }
+
+    private void handleClickOnCard(ImageView clickedImage){
+        for(Card cardFromPlayer : player.getCardsInHand()){
+            String cardName = cardFromPlayer.getIdType() + "-" + cardFromPlayer.getIdColor();
+            if(clickedImage.getId().equals(cardName)){
+                changeClickedCardState(clickedImage, cardFromPlayer);
+                Logger.logConsole(TAG, "Clicked card: " + cardName);
+                break;
+            }
+        }
+    }
+
+    private void changeClickedCardState(ImageView clickedImage, Card cardFromPlayer){
+        if(cardsToPut.contains(cardFromPlayer)){
+            clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0), 0, 0, 0, 0)");
+            cardsToPut.remove(cardFromPlayer);
+            btnEndTurn.setDisable(false);
+        }else{
+            clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+            cardsToPut.add(cardFromPlayer);
+            if(cardFromPlayer.getFunction().getFunctionID() == Function.CHANGE_COLOR ||
+                    cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
+                btnEndTurn.setDisable(true);
+
+                //show available cards to order when trying to end turn
+
+                //after player choose card to order set btnEndTurn.setDisable(false)
+                // TODO: 26.04.2016 show window where player can choose ordered card
+                // TODO: 26.04.2016 remember to add otpion for ordering "nothing"
+            }
+        }
     }
 
     private void setCardOnTopTexture(Card card){
