@@ -54,6 +54,11 @@ public class ClientConnectObject implements Runnable {
                     send(player);
                 }
             }
+
+            for(Integer suitableCard:sessionInfo.getSuitableCardsToOrder()){
+                send(suitableCard);
+            }
+
             send(sessionInfo.getCardOnTop());
 
             while(!sessionInfo.isGameExiting()){

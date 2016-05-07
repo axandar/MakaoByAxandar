@@ -99,12 +99,15 @@ public class Client implements Runnable{
                     Logger.logConsole(TAG, "Added player: " + ((Player) received).getPlayerName());
                 }
             }
-
             received = receive();
+            while(received instanceof Integer){
+                properties.addSuitableCardsToOrder((Integer) received);
+                received = receive();
+            }
+
             if(received instanceof Card){
                 properties.setCardOnTop((Card)received);
             }
-            Logger.logConsole(TAG, "First update need");
             properties.setUpdateGame(true);
             handleCommands();
         }
@@ -160,7 +163,7 @@ public class Client implements Runnable{
             receivedCard((Card) received);
         }else if(received instanceof Integer){
             receivedCommand((Integer) received);
-        }// TODO: 30.04.2016 overwriting player object from server
+        }
     }
 
     private void receivedPlayer(Player player){

@@ -26,13 +26,15 @@ public class GameController{
 
     // TODO: 29.04.2016 TODO
     //player wait turns --- not working
+    //show to player last puttedCards and clear that array
 
 
     private final String TAG = "Client side";
 
-    private volatile ClientProperties clientProperties;
+    private volatile ClientProperties properties;
     private Player player;
     private List<Card> cardsToPut = new ArrayList<>();
+    private List<Integer> suitableCardstoPut = new ArrayList<>();
     private Card orderedCard = null;
 
     @FXML private HBox cardsInHand;
@@ -41,22 +43,9 @@ public class GameController{
     @FXML private Button btnEndTurn;
     @FXML private Button btnSayMakao;
 
-    /**Stage dialogStage = new Stage();
-     dialogStage.setTitle(rb.getString("AddingNewSupplierOrder"));
-     dialogStage.initModality(Modality.WINDOW_MODAL);
-     dialogStage.initOwner(getPrimaryStage());
-     Scene scene = new Scene(page);
-     dialogStage.setScene(scene);
-
-     ShowAddingNewSupplierOrderController controller = loader.getController();
-     controller.setDialogStage(dialogStage);
-     controller.setData();
-
-     dialogStage.showAndWait();**/
-
     // TODO: 26.04.2016 add option to say "Stop makao"
     public GameController(ClientProperties _clientProperties){
-        clientProperties = _clientProperties;
+        properties = _clientProperties;
     }
 
     @FXML
@@ -65,7 +54,7 @@ public class GameController{
 
         Runnable updateGUI = this::updateGUI;
         Runnable endTurnBtnLogin = () ->{
-            if(clientProperties.isTurnStarted()){
+            if(properties.isTurnStarted()){
                 btnEndTurn.setDisable(false);
             }else btnEndTurn.setDisable(true);
         };
@@ -73,16 +62,16 @@ public class GameController{
         Task taskToUpdateGUI = new Task(){
             @Override
             protected Object call() throws Exception{
-                while(!clientProperties.isClientRunning()){
+                while(!properties.isClientRunning()){
                     Thread.sleep(1000);
                     //waiting for client initialize
                 }
-                while(clientProperties.isClientRunning()){
+                while(properties.isClientRunning()){
                     Platform.runLater(endTurnBtnLogin);
-                    if(clientProperties.isUpdateGame()){
+                    if(properties.isUpdateGame()){
                         Logger.logConsole(TAG, "Updated added to runLater()");
                         Platform.runLater(updateGUI);
-                        clientProperties.setUpdateGame(false);
+                        properties.setUpdateGame(false);
                     }
                     Platform.runLater(endTurnBtnLogin);
                     Thread.sleep(2000);
@@ -97,9 +86,11 @@ public class GameController{
     private void updateGUI(){
         Logger.logConsole(TAG, "Start updating GUI");
 
-        player = clientProperties.getLocalPlayer();
-        if(clientProperties.getCardsToPut().size() > 0){
-            clientProperties.setCardsToPut(new ArrayList<>());
+        suitableCardstoPut = properties.getSuitableCardsToOrder();
+
+        player = properties.getLocalPlayer();
+        if(properties.getCardsToPut().size() > 0){
+            properties.setCardsToPut(new ArrayList<>());
         }
         putCardsWasGood();
         Logger.logConsole(TAG, "Started adding cards");
@@ -108,9 +99,9 @@ public class GameController{
             addCardToHandGUI(card);
         }
 
-        setCardOnTopTexture(clientProperties.getCardOnTop());
+        setCardOnTopTexture(properties.getCardOnTop());
 
-        List<Player> listOfRestPlayers = clientProperties.getAdditionalPlayers();
+        List<Player> listOfRestPlayers = properties.getAdditionalPlayers();
         playersList.getItems().remove(0, playersList.getItems().size()-1);
         for(Player player:listOfRestPlayers){
             playersList.getItems().add(player.getPlayerName());
@@ -119,11 +110,11 @@ public class GameController{
     }
 
     private void putCardsWasGood(){
-        if(clientProperties.isCardsRejected() && clientProperties.getNotAcceptedCards().size() > 0){
+        if(properties.isCardsRejected() && properties.getNotAcceptedCards().size() > 0){
             Logger.logConsole(TAG, "Some cards not accepted");
             Notifications.create().title("Wrong cards")
                     .text("Some of cards that you tried to send was incorrect").showWarning();
-        }else if(clientProperties.isCardsRejected()){
+        }else if(properties.isCardsRejected()){
             Logger.logConsole(TAG, "Cards was not equals");
             Notifications.create().title("Wrong cards")
                     .text("Cards which you have tried to send was not equal function").showWarning();
@@ -138,17 +129,17 @@ public class GameController{
     public void endTurn(){
         if(cardsToPut.size() > 0){
             Logger.logConsole(TAG, "Requested sending cards");
-            clientProperties.setCardsToPut(cardsToPut);
+            properties.setCardsToPut(cardsToPut);
             if(cardsToPut.get(0).getFunction().getFunctionID() == Function.CHANGE_COLOR ||
                     cardsToPut.get(0).getFunction().getFunctionID() == Function.ORDER_CARD){
-                clientProperties.setOrderedCard(orderedCard);
+                properties.setOrderedCard(orderedCard);
             }
             cardsToPut = new ArrayList<>();
         }
 
         Logger.logConsole(TAG, "ending turn");
-        clientProperties.setTurnStarted(false);
-        clientProperties.setTurnEnded(true);
+        properties.setTurnStarted(false);
+        properties.setTurnEnded(true);
     }
 
     private void addCardToHandGUI(Card card){
@@ -206,8 +197,8 @@ public class GameController{
                     cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
                 btnEndTurn.setDisable(true);
 
-                //show available cards to order when trying to end turn
 
+                //show available cards to order when trying to end turn
                 //after player choose card to order set btnEndTurn.setDisable(false)
                 // TODO: 26.04.2016 show window where player can choose ordered card
                 // TODO: 26.04.2016 remember to add otpion for ordering "nothing"

@@ -31,6 +31,7 @@ public class SessionInfo {
     private Deck graveyard;
     private Deck deckOnTable;
     private TableServer table;
+    private List<Integer> suitableCardsToOrder = new ArrayList<>();
 
     public SessionInfo(){
 
@@ -210,5 +211,13 @@ public class SessionInfo {
 
     public void setTable(TableServer table){
         this.table = table;
+    }
+
+    public List<Integer> getSuitableCardsToOrder(){
+        return suitableCardsToOrder;
+    }
+
+    public void addSuitableCardsToOrder(Integer suitableCardsToOrder){
+        this.suitableCardsToOrder.add(suitableCardsToOrder);
     }
 }

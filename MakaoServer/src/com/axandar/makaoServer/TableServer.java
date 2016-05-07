@@ -33,6 +33,7 @@ public class TableServer {
 
     public void initializeGame(){
         sessionInfo.setDeckOnTable(new Deck(numberOfDecks, functionsList));
+        setCardsProperlyToOrder();
         sessionInfo.setGraveyard(new Deck());
 
         sessionInfo.setCardOnTop(sessionInfo.getDeckOnTable().getCardFromDeck());
@@ -45,12 +46,26 @@ public class TableServer {
 
         Player firstPlayer = sessionInfo.getPlayerObject(firstPlayerID);
         sessionInfo.setActualTurnPlayer(firstPlayer);
-        int lastPlayerId = sessionInfo.getPreviousPlayerIndex(firstPlayer);
-        //sessionInfo.setLastTurnEndedPlayer(sessionInfo.getPlayerObject(lastPlayerId));
         sessionInfo.setLastTurnEndedPlayer(new Player(null, null, -1));
 
         sessionInfo.setTable(this);//update object for all players
         sessionInfo.setGameStarted(true);
+    }
+
+    private void setCardsProperlyToOrder(){
+        int index = 0;
+        for(List<Function> functionList:functionsList){
+            int i = 0;
+            for(Function fucntion:functionList){
+                if(fucntion.getFunctionID() == Function.NOTHING){
+                    i++;
+                }
+            }
+            if(i == 4){
+                sessionInfo.addSuitableCardsToOrder(index);
+            }
+            index++;
+        }
     }
 
     private void givePlayersCards(){

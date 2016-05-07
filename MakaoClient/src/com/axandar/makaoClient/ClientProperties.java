@@ -32,6 +32,7 @@ public class ClientProperties{
     private boolean isUpdateGame = false;
     private boolean isCardsRejected = false;
     private boolean isTurnStarted = false;
+    private List<Integer> suitableCardsToOrder = new ArrayList<>();
 
     public String getNickname(){
         return nickname;
@@ -207,5 +208,13 @@ public class ClientProperties{
 
     public void setTurnStarted(boolean turnStarted){
         isTurnStarted = turnStarted;
+    }
+
+    public List<Integer> getSuitableCardsToOrder(){
+        return suitableCardsToOrder;
+    }
+
+    public void addSuitableCardsToOrder(Integer suitableCardsToOrder){
+        this.suitableCardsToOrder.add(suitableCardsToOrder);
     }
 }
