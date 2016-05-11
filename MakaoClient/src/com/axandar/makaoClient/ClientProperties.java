@@ -217,4 +217,8 @@ public class ClientProperties{
     public void addSuitableCardsToOrder(Integer suitableCardsToOrder){
         this.suitableCardsToOrder.add(suitableCardsToOrder);
     }
+
+    public void setSuitableCardsToOrder(List<Integer> suitableCardsToOrder){
+        this.setSuitableCardsToOrder(suitableCardsToOrder);
+    }
 }

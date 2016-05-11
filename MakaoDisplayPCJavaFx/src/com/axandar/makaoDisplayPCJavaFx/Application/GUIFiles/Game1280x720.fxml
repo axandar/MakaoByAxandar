@@ -94,13 +94,13 @@
                      <children>
                         <Pane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
                            <children>
-                              <Button layoutX="181.0" layoutY="13.0" mnemonicParsing="false" text="Order" />
-                              <Button layoutX="374.0" layoutY="13.0" mnemonicParsing="false" text="Cancel" />
+                              <Button fx:id="btnOrder" layoutX="181.0" layoutY="13.0" mnemonicParsing="false" text="Order" />
+                              <Button fx:id="btnCancel" layoutX="374.0" layoutY="13.0" mnemonicParsing="false" text="Cancel" />
                            </children>
                         </Pane>
-                        <ScrollPane fx:id="spCardsTypesordering" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS">
+                        <ScrollPane fx:id="spCardsTypeOrdering" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS">
                            <content>
-                              <VBox prefHeight="200.0" prefWidth="585.0">
+                              <VBox fx:id="imageViewsType" prefHeight="200.0" prefWidth="585.0">
                                  <children>
                                     <HBox prefHeight="150.0" prefWidth="200.0">
                                        <children>

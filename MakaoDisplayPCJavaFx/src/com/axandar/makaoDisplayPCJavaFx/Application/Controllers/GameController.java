@@ -10,10 +10,13 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import org.controlsfx.control.Notifications;
 
 import java.util.ArrayList;
@@ -34,14 +37,25 @@ public class GameController{
     private volatile ClientProperties properties;
     private Player player;
     private List<Card> cardsToPut = new ArrayList<>();
-    private List<Integer> suitableCardstoPut = new ArrayList<>();
+    private List<Integer> suitableCardsTypeToPut = new ArrayList<>();
     private Card orderedCard = null;
+    private Card ordered = null;
 
     @FXML private HBox cardsInHand;
     @FXML private ListView<String> playersList;
     @FXML private ImageView cardOnTop;
     @FXML private Button btnEndTurn;
     @FXML private Button btnSayMakao;
+    @FXML private AnchorPane apOrderingCards;
+    @FXML private ScrollPane spCardsTypeOrdering;
+    @FXML private AnchorPane apColorCardsOrdering;
+    @FXML private Button btnOrder;
+    @FXML private Button btnCancel;
+    @FXML private VBox imageViewsType;
+    @FXML private ImageView ivCaro;
+    @FXML private ImageView ivKier;
+    @FXML private ImageView ivTrefl;
+    @FXML private ImageView ivPik;
 
     // TODO: 26.04.2016 add option to say "Stop makao"
     public GameController(ClientProperties _clientProperties){
@@ -86,7 +100,8 @@ public class GameController{
     private void updateGUI(){
         Logger.logConsole(TAG, "Start updating GUI");
 
-        suitableCardstoPut = properties.getSuitableCardsToOrder();
+        suitableCardsTypeToPut = properties.getSuitableCardsToOrder();
+        properties.setSuitableCardsToOrder(new ArrayList<>());
 
         player = properties.getLocalPlayer();
         if(properties.getCardsToPut().size() > 0){
@@ -191,17 +206,79 @@ public class GameController{
             cardsToPut.remove(cardFromPlayer);
             btnEndTurn.setDisable(false);
         }else{
-            clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-            cardsToPut.add(cardFromPlayer);
             if(cardFromPlayer.getFunction().getFunctionID() == Function.CHANGE_COLOR ||
                     cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
                 btnEndTurn.setDisable(true);
 
+                btnCancel.setOnMouseClicked(event -> {
+                    apOrderingCards.setVisible(false);
+                    apColorCardsOrdering.setVisible(false);
+                    spCardsTypeOrdering.setVisible(false);
+                });
+
+                btnOrder.setOnMouseClicked(event -> {
+                    if(ordered != null){
+                        orderedCard = ordered;
+                        ordered = null;
+                        apOrderingCards.setVisible(false);
+                        apColorCardsOrdering.setVisible(false);
+                        spCardsTypeOrdering.setVisible(false);
+                        clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+                        cardsToPut.add(cardFromPlayer);
+
+                        imageViewsType.getChildren().clear();
+
+                        btnEndTurn.setDisable(false);
+                    }
+                });
+
+                if(cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
+                    apColorCardsOrdering.setVisible(false);
+                    apOrderingCards.setVisible(true);
+                    spCardsTypeOrdering.setVisible(true);
+
+                    for(Integer suitableCard: suitableCardsTypeToPut) {
+                        ImageView ivCard = new ImageView();
+                        Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + suitableCard + ".png"));
+                        ivCard.setImage(image);
+                        ivCard.setFitWidth(96);
+                        ivCard.setFitHeight(150);
+                        ivCard.setId(suitableCard+"");
+
+                        ivCard.setOnMouseClicked(event -> {
+                            ImageView clickedImageOrder = (ImageView) event.getSource();
+
+                            for(Integer suitableCardOnClicked: suitableCardsTypeToPut){
+                                if(clickedImageOrder.getId().equals(suitableCardOnClicked+"")){
+                                    if(ordered == null){
+                                        clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+                                        ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
+                                    }else if(ordered.getIdType() == suitableCardOnClicked){
+                                        clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+                                        ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
+                                    }// TODO: 11.05.2016 continue
+                                    break;
+                                }
+                            }
+                        });
+
+                    }
+
+                }else{
+                    spCardsTypeOrdering.setVisible(false);
+                    apOrderingCards.setVisible(true);
+                    apColorCardsOrdering.setVisible(true);
+
+
+                }
 
                 //show available cards to order when trying to end turn
                 //after player choose card to order set btnEndTurn.setDisable(false)
                 // TODO: 26.04.2016 show window where player can choose ordered card
                 // TODO: 26.04.2016 remember to add otpion for ordering "nothing"
+            }else{
+                clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+                cardsToPut.add(cardFromPlayer);
             }
         }
     }
