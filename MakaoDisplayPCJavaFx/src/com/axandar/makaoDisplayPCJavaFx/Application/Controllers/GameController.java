@@ -40,6 +40,7 @@ public class GameController{
     private List<Integer> suitableCardsTypeToPut = new ArrayList<>();
     private Card orderedCard = null;
     private Card ordered = null;
+    private ImageView lastClickedIVToOrder;
 
     @FXML private HBox cardsInHand;
     @FXML private ListView<String> playersList;
@@ -236,6 +237,8 @@ public class GameController{
                     apColorCardsOrdering.setVisible(false);
                     apOrderingCards.setVisible(true);
                     spCardsTypeOrdering.setVisible(true);
+                    int index = 0;
+                    List<ImageView> ivToAdd = new ArrayList<>();
 
                     for(Integer suitableCard: suitableCardsTypeToPut) {
                         ImageView ivCard = new ImageView();
@@ -244,24 +247,39 @@ public class GameController{
                         ivCard.setFitWidth(96);
                         ivCard.setFitHeight(150);
                         ivCard.setId(suitableCard+"");
+                        index++;
 
                         ivCard.setOnMouseClicked(event -> {
                             ImageView clickedImageOrder = (ImageView) event.getSource();
 
                             for(Integer suitableCardOnClicked: suitableCardsTypeToPut){
                                 if(clickedImageOrder.getId().equals(suitableCardOnClicked+"")){
-                                    if(ordered == null){
+                                    if(ordered != null){
                                         clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
                                         ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
-                                    }else if(ordered.getIdType() == suitableCardOnClicked){
-                                        clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+                                        lastClickedIVToOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 0, 0, 0, 0)");
+                                        lastClickedIVToOrder = clickedImageOrder;
+                                    }else{
+                                        clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
                                         ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
-                                    }// TODO: 11.05.2016 continue
+                                        lastClickedIVToOrder = clickedImageOrder;
+                                    }
                                     break;
                                 }
                             }
                         });
 
+                        ivToAdd.add(ivCard);
+
+                        if(index%3 == 0){
+                            HBox hb = new HBox();
+                            hb.setPrefHeight(150);
+                            // TODO: 11.05.2016 adding separators
+                            for(ImageView iv:ivToAdd){
+                                hb.getChildren().add(iv);
+                            }
+                            imageViewsType.getChildren().add(hb);
+                        }
                     }
 
                 }else{
@@ -269,7 +287,7 @@ public class GameController{
                     apOrderingCards.setVisible(true);
                     apColorCardsOrdering.setVisible(true);
 
-
+                    // TODO: 11.05.2016 continue working
                 }
 
                 //show available cards to order when trying to end turn
