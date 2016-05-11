@@ -209,94 +209,102 @@ public class GameController{
         }else{
             if(cardFromPlayer.getFunction().getFunctionID() == Function.CHANGE_COLOR ||
                     cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
-                btnEndTurn.setDisable(true);
-
-                btnCancel.setOnMouseClicked(event -> {
-                    apOrderingCards.setVisible(false);
-                    apColorCardsOrdering.setVisible(false);
-                    spCardsTypeOrdering.setVisible(false);
-                });
-
-                btnOrder.setOnMouseClicked(event -> {
-                    if(ordered != null){
-                        orderedCard = ordered;
-                        ordered = null;
-                        apOrderingCards.setVisible(false);
-                        apColorCardsOrdering.setVisible(false);
-                        spCardsTypeOrdering.setVisible(false);
-                        clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-                        cardsToPut.add(cardFromPlayer);
-
-                        imageViewsType.getChildren().clear();
-
-                        btnEndTurn.setDisable(false);
-                    }
-                });
-
-                if(cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
-                    apColorCardsOrdering.setVisible(false);
-                    apOrderingCards.setVisible(true);
-                    spCardsTypeOrdering.setVisible(true);
-                    int index = 0;
-                    List<ImageView> ivToAdd = new ArrayList<>();
-
-                    for(Integer suitableCard: suitableCardsTypeToPut) {
-                        ImageView ivCard = new ImageView();
-                        Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + suitableCard + ".png"));
-                        ivCard.setImage(image);
-                        ivCard.setFitWidth(96);
-                        ivCard.setFitHeight(150);
-                        ivCard.setId(suitableCard+"");
-                        index++;
-
-                        ivCard.setOnMouseClicked(event -> {
-                            ImageView clickedImageOrder = (ImageView) event.getSource();
-
-                            for(Integer suitableCardOnClicked: suitableCardsTypeToPut){
-                                if(clickedImageOrder.getId().equals(suitableCardOnClicked+"")){
-                                    if(ordered != null){
-                                        clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-                                        ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
-                                        lastClickedIVToOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 0, 0, 0, 0)");
-                                        lastClickedIVToOrder = clickedImageOrder;
-                                    }else{
-                                        clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-                                        ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
-                                        lastClickedIVToOrder = clickedImageOrder;
-                                    }
-                                    break;
-                                }
-                            }
-                        });
-
-                        ivToAdd.add(ivCard);
-
-                        if(index%3 == 0){
-                            HBox hb = new HBox();
-                            hb.setPrefHeight(150);
-                            // TODO: 11.05.2016 adding separators
-                            for(ImageView iv:ivToAdd){
-                                hb.getChildren().add(iv);
-                            }
-                            imageViewsType.getChildren().add(hb);
-                        }
-                    }
-
-                }else{
-                    spCardsTypeOrdering.setVisible(false);
-                    apOrderingCards.setVisible(true);
-                    apColorCardsOrdering.setVisible(true);
-
-                    // TODO: 11.05.2016 continue working
-                }
-
-                //show available cards to order when trying to end turn
-                //after player choose card to order set btnEndTurn.setDisable(false)
-                // TODO: 26.04.2016 show window where player can choose ordered card
-                // TODO: 26.04.2016 remember to add otpion for ordering "nothing"
+                clickedOrderCard(clickedImage, cardFromPlayer);
             }else{
                 clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
                 cardsToPut.add(cardFromPlayer);
+            }
+        }
+    }
+
+    private void clickedOrderCard(ImageView clickedImage, Card cardFromPlayer){
+        btnEndTurn.setDisable(true);
+
+        btnCancel.setOnMouseClicked(event -> {
+            apOrderingCards.setVisible(false);
+            apColorCardsOrdering.setVisible(false);
+            spCardsTypeOrdering.setVisible(false);
+        });
+
+        btnOrder.setOnMouseClicked(event -> {
+            if(ordered != null){
+                orderedCard = ordered;
+                ordered = null;
+
+                apOrderingCards.setVisible(false);
+                apColorCardsOrdering.setVisible(false);
+                spCardsTypeOrdering.setVisible(false);
+
+                clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+
+                cardsToPut.add(cardFromPlayer);
+                imageViewsType.getChildren().clear();
+                btnEndTurn.setDisable(false);
+            }
+        });
+
+        if(cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
+            apColorCardsOrdering.setVisible(false);
+            apOrderingCards.setVisible(true);
+            spCardsTypeOrdering.setVisible(true);
+
+            handleClickedOrderingType();
+        }else{
+            spCardsTypeOrdering.setVisible(false);
+            apOrderingCards.setVisible(true);
+            apColorCardsOrdering.setVisible(true);
+
+            // TODO: 11.05.2016 ordering color
+        }
+
+        // TODO: 26.04.2016 remember to add option for ordering "nothing"
+    }
+
+    private void handleClickedOrderingType(){
+        int index = 0;
+        List<ImageView> ivToAdd = new ArrayList<>();
+
+        for(Integer suitableCard: suitableCardsTypeToPut) {
+            ImageView ivCard = new ImageView();
+            Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + suitableCard + ".png"));
+            ivCard.setImage(image);
+            ivCard.setFitWidth(96);
+            ivCard.setFitHeight(150);
+            ivCard.setId(suitableCard+"");
+
+            index++;
+            ivCard.setOnMouseClicked(event -> {
+                ImageView clickedImageOrder = (ImageView) event.getSource();
+                selectedOrderingType(clickedImageOrder);
+            });
+            ivToAdd.add(ivCard);
+
+            if(index%3 == 0){
+                HBox hb = new HBox();
+                hb.setPrefHeight(150);
+                // TODO: 11.05.2016 adding separators
+                for(ImageView iv:ivToAdd){
+                    hb.getChildren().add(iv);
+                }
+                imageViewsType.getChildren().add(hb);
+            }// TODO: 26.04.2016 remember to add option for ordering "nothing"
+        }
+    }
+
+    private void selectedOrderingType(ImageView clickedImageOrder){
+        for(Integer suitableCardOnClicked: suitableCardsTypeToPut){
+            if(clickedImageOrder.getId().equals(suitableCardOnClicked+"")){
+                if(ordered != null){
+                    clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+                    ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
+                    lastClickedIVToOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 0, 0, 0, 0)");
+                    lastClickedIVToOrder = clickedImageOrder;
+                }else{
+                    clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+                    ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
+                    lastClickedIVToOrder = clickedImageOrder;
+                }
+                break;
             }
         }
     }
