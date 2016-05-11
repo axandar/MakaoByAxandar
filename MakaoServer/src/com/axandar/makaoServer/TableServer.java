@@ -53,7 +53,7 @@ public class TableServer {
     }
 
     private void setCardsProperlyToOrder(){
-        int index = 0;
+        int index = 1; //Types are starting from 1
         for(List<Function> functionList:functionsList){
             int i = 0;
             for(Function fucntion:functionList){
@@ -119,7 +119,7 @@ public class TableServer {
                 return true;
             }else return false;
         }else{
-            Logger.logConsole("TableServer: ", "Error in putting card on table");
+            Logger.logConsole(TAG, "Error in putting card on table");
             return false;
         }
     }

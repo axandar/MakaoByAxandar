@@ -100,28 +100,7 @@
                         </Pane>
                         <ScrollPane fx:id="spCardsTypeOrdering" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS">
                            <content>
-                              <VBox fx:id="imageViewsType" prefHeight="200.0" prefWidth="585.0">
-                                 <children>
-                                    <HBox prefHeight="150.0" prefWidth="200.0">
-                                       <children>
-                                          <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-                                          <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-                                       </children>
-                                    </HBox>
-                                    <HBox prefHeight="150.0" prefWidth="200.0">
-                                       <children>
-                                          <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-                                          <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-                                       </children>
-                                    </HBox>
-                                    <HBox prefHeight="150.0" prefWidth="200.0">
-                                       <children>
-                                          <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-                                          <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-                                       </children>
-                                    </HBox>
-                                 </children>
-                              </VBox>
+                              <VBox fx:id="imageViewsType" prefHeight="200.0" prefWidth="585.0" />
                            </content>
                         </ScrollPane>
                         <AnchorPane fx:id="apColorCardsOrdering" prefHeight="200.0" prefWidth="200.0" visible="false">

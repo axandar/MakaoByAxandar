@@ -219,6 +219,6 @@ public class ClientProperties{
     }
 
     public void setSuitableCardsToOrder(List<Integer> suitableCardsToOrder){
-        this.setSuitableCardsToOrder(suitableCardsToOrder);
+        this.suitableCardsToOrder = suitableCardsToOrder;
     }
 }

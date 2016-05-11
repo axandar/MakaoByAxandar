@@ -30,6 +30,9 @@ public class GameController{
     // TODO: 29.04.2016 TODO
     //player wait turns --- not working
     //show to player last puttedCards and clear that array
+    //order card type for all players and color for only next
+    //show ordering card and ordered card ???and from which player???
+    //complete color ordering
 
 
     private final String TAG = "Client side";
@@ -294,6 +297,7 @@ public class GameController{
     private void selectedOrderingType(ImageView clickedImageOrder){
         for(Integer suitableCardOnClicked: suitableCardsTypeToPut){
             if(clickedImageOrder.getId().equals(suitableCardOnClicked+"")){
+                Logger.logConsole(TAG, "Clicked order card type: " + suitableCardOnClicked);
                 if(ordered != null){
                     clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
                     ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
