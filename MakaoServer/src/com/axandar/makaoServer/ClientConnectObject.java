@@ -119,7 +119,7 @@ public class ClientConnectObject implements Runnable {
                 playerGetCards(5);
             }
 
-            checkForMakao();
+            checkForStopMakao();
         }
         Logger.logConsole(TAG, "Player started turn");
         turnStarted();
@@ -148,7 +148,7 @@ public class ClientConnectObject implements Runnable {
         send(ServerProtocol.STOP_UPDATE);
     }
 
-    private void checkForMakao(){
+    private void checkForStopMakao(){
         send(ServerProtocol.IS_SAID_STOPMAKAO);
         Object received = receive();
         if(received instanceof Integer && (int)received == ServerProtocol.PLAYER_SAID_STOPMAKAO){
@@ -221,7 +221,6 @@ public class ClientConnectObject implements Runnable {
 
     private void getOrderedCard(Card orderingCard){
         Object received = receive();
-        //send(ServerProtocol.GOT_ORDERED_CARD);
         if(received instanceof Card){
             Card orderedCard = (Card) received;
             if(table.putOrderCardOnTable(orderingCard, orderedCard)){
@@ -236,7 +235,6 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void gotNormalCard(Card card){
-        //send(ServerProtocol.GOT_CARD);
         if(table.putCardOnTable(card)){
             Logger.logConsole(TAG, "Received card accepted");
             threadPlayer.removeCardFromHand(card);

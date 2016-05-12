@@ -34,6 +34,12 @@ public class GameController{
     //show ordering card and ordered card ???and from which player???
     //complete color ordering
 
+    //when player ending turn without putting card, player object is updated and turn is not ended to show new added card
+    //when player have to get cards from 2/3/king - first card is taken; when same type as onTop then add it, update
+    //player object and wait for player decision(when not putting it add only cards from 2/3/king)
+
+    //counter for how many players putted ordered card and when graveyard card on top or ordered in TableServer
+
 
     private final String TAG = "Client side";
 
@@ -44,6 +50,7 @@ public class GameController{
     private Card orderedCard = null;
     private Card ordered = null;
     private ImageView lastClickedIVToOrder;
+    private List<Card> notAcceptedCards = new ArrayList<>();
 
     @FXML private HBox cardsInHand;
     @FXML private ListView<String> playersList;
@@ -87,7 +94,7 @@ public class GameController{
                 while(properties.isClientRunning()){
                     Platform.runLater(endTurnBtnLogin);
                     if(properties.isUpdateGame()){
-                        Logger.logConsole(TAG, "Updated added to runLater()");
+                        Logger.logConsole(TAG, "Update added to runLater()");
                         Platform.runLater(updateGUI);
                         properties.setUpdateGame(false);
                     }
@@ -105,6 +112,9 @@ public class GameController{
         Logger.logConsole(TAG, "Start updating GUI");
 
         suitableCardsTypeToPut = properties.getSuitableCardsToOrder();
+        notAcceptedCards = properties.getNotAcceptedCards();
+
+        properties.setNotAcceptedCards(new ArrayList<>());
         properties.setSuitableCardsToOrder(new ArrayList<>());
 
         player = properties.getLocalPlayer();
@@ -156,9 +166,9 @@ public class GameController{
             cardsToPut = new ArrayList<>();
         }
 
-        Logger.logConsole(TAG, "ending turn");
         properties.setTurnStarted(false);
         properties.setTurnEnded(true);
+        Logger.logConsole(TAG, "Ended turn");
     }
 
     private void addCardToHandGUI(Card card){
@@ -260,7 +270,6 @@ public class GameController{
             // TODO: 11.05.2016 ordering color
         }
 
-        // TODO: 26.04.2016 remember to add option for ordering "nothing"
     }
 
     private void handleClickedOrderingType(){
@@ -290,7 +299,7 @@ public class GameController{
                     hb.getChildren().add(iv);
                 }
                 imageViewsType.getChildren().add(hb);
-            }// TODO: 26.04.2016 remember to add option for ordering "nothing"
+            }
         }
     }
 

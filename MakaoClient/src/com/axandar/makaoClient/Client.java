@@ -22,7 +22,6 @@ public class Client implements Runnable{
     // TODO: 29.04.2016 Tests:
     //1. Makao operation
     //2. Sending many cards
-    //3. Sending cards after failure
     //4. More players
     //5. Ordering cards
 
@@ -204,7 +203,7 @@ public class Client implements Runnable{
                     isCardsEquals = false;
                 }
             }
-            // TODO: 27.04.2016 cant send again card when failed at first time
+
             if(isCardsEquals){
                 Logger.logConsole(TAG, "Cards equal");
                 for(Card card:cardsToPut){
@@ -239,6 +238,7 @@ public class Client implements Runnable{
             if(properties.getNotAcceptedCards().size() > 0){
                 Logger.logConsole(TAG, "Cards rejected");
                 properties.setTurnEnded(false);
+                properties.setTurnStarted(true);
                 properties.setCardsRejected(true);
                 properties.setUpdateGame(true);
                 turnProcessing();

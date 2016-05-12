@@ -94,11 +94,11 @@ public class TableServer {
                 putCard(card);
                 return true;
             }else if(sessionInfo.getOrderingCard().getFunction().getFunctionID() == Function.CHANGE_COLOR
-                    && isColorCorrectly(card)){
+                    && isOrderColorCorrectly(card)){
                 putCard(card);
                 return true;
             }else if(sessionInfo.getOrderingCard().getFunction().getFunctionID() == Function.ORDER_CARD
-                    && isTypeCorrectly(card)){
+                    && isOrderTypeCorrectly(card)){
                 putCard(card);
                 return true;
             }else return false;
@@ -155,6 +155,7 @@ public class TableServer {
             sessionInfo.setNextPlayerForward(true);
         }
         sessionInfo.addLastPlacedCard(card);
+        // TODO: 12.05.2016 counter for how many players putted ordered card and when graveyard card on top or ordered
         sessionInfo.addCardToGraveyard(sessionInfo.getCardOnTop());
         sessionInfo.setCardOnTop(card);
     }
@@ -181,6 +182,14 @@ public class TableServer {
 
     private boolean isTypeCorrectly(Card card) {
         return sessionInfo.getCardOnTop().getIdType() == card.getIdType();
+    }
+
+    private boolean isOrderColorCorrectly(Card card) {
+        return sessionInfo.getOrderedCard().getIdColor() == card.getIdColor();
+    }
+
+    private boolean isOrderTypeCorrectly(Card card) {
+        return sessionInfo.getOrderedCard().getIdType() == card.getIdType();
     }
 
     public void endTurn(Player player){
