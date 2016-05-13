@@ -259,7 +259,6 @@ public class Client implements Runnable{
 
     private void endingTurn(){
         Logger.logConsole(TAG, "Ending turn");
-        //properties.setCardsToPut(new ArrayList<>());
         properties.setTurnEnded(false);
         if(properties.getLocalPlayer().isMakao()){
             Logger.logConsole(TAG, "Setting makao");

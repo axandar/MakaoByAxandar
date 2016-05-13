@@ -39,6 +39,9 @@ public class GameController{
     //player object and wait for player decision(when not putting it add only cards from 2/3/king)
 
     //counter for how many players putted ordered card and when graveyard card on top or ordered in TableServer
+//to check   //when player putted one wrong card from array, all before it is putted; need to delete only them from hand
+    //add option to say makao before turn ending
+    //add option to say stop makao while in turn and after ending it
 
 
     private final String TAG = "Client side";
@@ -50,7 +53,7 @@ public class GameController{
     private Card orderedCard = null;
     private Card ordered = null;
     private ImageView lastClickedIVToOrder;
-    private List<Card> notAcceptedCards = new ArrayList<>();
+    private List<Card> puttedCards = new ArrayList<>();
 
     @FXML private HBox cardsInHand;
     @FXML private ListView<String> playersList;
@@ -112,15 +115,24 @@ public class GameController{
         Logger.logConsole(TAG, "Start updating GUI");
 
         suitableCardsTypeToPut = properties.getSuitableCardsToOrder();
-        notAcceptedCards = properties.getNotAcceptedCards();
+        List<Card> notAcceptedCards = properties.getNotAcceptedCards();
+        puttedCards = properties.getPuttedCards();//show somewhere in GUI
 
         properties.setNotAcceptedCards(new ArrayList<>());
         properties.setSuitableCardsToOrder(new ArrayList<>());
+        properties.setPuttedCards(new ArrayList<>());
 
         player = properties.getLocalPlayer();
-        if(properties.getCardsToPut().size() > 0){
+        //to check
+        //when player putted one wrong card from array, all before it is putted; need to delete only them from hand
+        if(properties.getCardsToPut().size() > 0 && properties.getNotAcceptedCards().size() == 0){
             properties.setCardsToPut(new ArrayList<>());
+        }else if(notAcceptedCards.size() > 0){
+            for(Card card: notAcceptedCards){
+                properties.getLocalPlayer().removeCardFromHand(card);
+            }
         }
+
         putCardsWasGood();
         Logger.logConsole(TAG, "Started adding cards");
         clearCards();
@@ -295,8 +307,16 @@ public class GameController{
                 HBox hb = new HBox();
                 hb.setPrefHeight(150);
                 // TODO: 11.05.2016 adding separators
+                int x = 0;
+                Separator separator = new Separator();
+                separator.setPrefHeight(150);
+
                 for(ImageView iv:ivToAdd){
                     hb.getChildren().add(iv);
+                    if(x < 3){
+                        hb.getChildren().add(separator);
+                        x++;
+                    }
                 }
                 imageViewsType.getChildren().add(hb);
             }
