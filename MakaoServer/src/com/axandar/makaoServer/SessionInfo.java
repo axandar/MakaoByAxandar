@@ -32,6 +32,7 @@ public class SessionInfo {
     private Deck deckOnTable;
     private TableServer table;
     private List<Integer> suitableCardsToOrder = new ArrayList<>();
+    private int numberOfWaitingPlayers = 0;
 
     public SessionInfo(){
 
@@ -219,5 +220,13 @@ public class SessionInfo {
 
     public void addSuitableCardsToOrder(Integer suitableCardsToOrder){
         this.suitableCardsToOrder.add(suitableCardsToOrder);
+    }
+
+    public int getNumberOfWaitingPlayers(){
+        return numberOfWaitingPlayers;
+    }
+
+    public void setNumberOfWaitingPlayers(int numberOfWaitingPlayers){
+        this.numberOfWaitingPlayers = numberOfWaitingPlayers;
     }
 }

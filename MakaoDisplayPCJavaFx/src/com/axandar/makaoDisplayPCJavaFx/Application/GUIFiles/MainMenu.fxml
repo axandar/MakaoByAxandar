@@ -8,61 +8,77 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="600.0" maxWidth="350.0" minHeight="600.0" minWidth="350.0" prefHeight="600.0" prefWidth="350.0" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.axandar.makaoDisplayPCJavaFx.Application.Controllers.MainMenuController">
-   <children>
-      <AnchorPane fx:id="apAnotherOptions" maxHeight="600.0" maxWidth="350.0" minHeight="600.0" minWidth="350.0" prefHeight="600.0" prefWidth="350.0" visible="false" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <children>
-            <AnchorPane prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            <AnchorPane fx:id="apMultiplayer" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-               <children>
-                  <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="75.0">
-                    <columnConstraints>
-                      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                     <children>
-                        <TextField fx:id="tfNickname" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" promptText="Nickname" />
-                        <TextField fx:id="tfIP" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" promptText="IP adress" GridPane.rowIndex="1" />
-                        <TextField fx:id="tfPort" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" promptText="Port" GridPane.rowIndex="2" />
-                        <Button fx:id="btnConnect" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false" onAction="#startMultiplayerGame" prefWidth="150.0" text="Connect" GridPane.rowIndex="3" />
-                     </children>
-                  </GridPane>
-               </children>
-            </AnchorPane>
-            <Button fx:id="btnBack" layoutX="100.0" layoutY="312.0" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false" onAction="#showMainMenu" prefWidth="150.0" text="Back" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="310.0" />
-         </children>
-      </AnchorPane>
-      <AnchorPane fx:id="apMainMenu" maxHeight="600.0" maxWidth="350.0" minHeight="600.0" minWidth="350.0" prefHeight="600.0" prefWidth="350.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <children>
-            <GridPane layoutX="100.0" layoutY="37.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="150.0">
-              <columnConstraints>
-                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="300.0" minWidth="10.0" prefWidth="300.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Button fx:id="btnSingleplayer" disable="true" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false" prefWidth="150.0" text="Singleplayer" />
-                  <Button fx:id="btnMultiplayer" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false" onAction="#showMultiplayer" prefWidth="150.0" text="Multiplayer" GridPane.rowIndex="1" />
-                  <Button fx:id="btnHighscores" disable="true" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false" prefWidth="150.0" text="Hightscores" GridPane.rowIndex="2" />
-                  <Button fx:id="btnSettings" disable="true" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false" prefWidth="150.0" text="Settings" GridPane.rowIndex="3" />
-                  <Button fx:id="btnAuthor" disable="true" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false" prefWidth="150.0" text="Author" GridPane.rowIndex="4" />
-                  <Button fx:id="btnExit" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false" onAction="#exitGame" prefWidth="150.0" text="Exit" GridPane.rowIndex="5" />
-               </children>
+<AnchorPane maxHeight="600.0" maxWidth="350.0" minHeight="600.0" minWidth="350.0" prefHeight="600.0" prefWidth="350.0"
+            xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.axandar.makaoDisplayPCJavaFx.Application.Controllers.MainMenuController">
+    <AnchorPane fx:id="apAnotherOptions" maxHeight="600.0" maxWidth="350.0" minHeight="600.0" minWidth="350.0"
+                prefHeight="600.0" prefWidth="350.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0"
+                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <AnchorPane prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="150.0"
+                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+        <AnchorPane fx:id="apMultiplayer" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="150.0"
+                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0"
+                      AnchorPane.topAnchor="75.0">
+                <columnConstraints>
+                    <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                </rowConstraints>
+                <TextField fx:id="tfNickname" maxWidth="150.0" minWidth="150.0" prefWidth="150.0"
+                           promptText="Nickname" text="axandar"/>
+                <TextField fx:id="tfIP" maxWidth="150.0" minWidth="150.0" prefWidth="150.0"
+                           promptText="IP adress" text="0.0.0.0" GridPane.rowIndex="1"/>
+                <TextField fx:id="tfPort" maxWidth="150.0" minWidth="150.0" prefWidth="150.0"
+                           promptText="Port" text="5000" GridPane.rowIndex="2"/>
+                <Button fx:id="btnConnect" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false"
+                        onAction="#startMultiplayerGame" prefWidth="150.0" text="Connect"
+                        GridPane.rowIndex="3"/>
             </GridPane>
-            <ImageView fx:id="imLogo" fitHeight="100.0" fitWidth="200.0" layoutX="75.0" layoutY="35.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="470.0" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="30.0" />
-         </children>
-      </AnchorPane>
-      <ImageView fx:id="imBanner" fitHeight="100.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="470.0" />
-   </children>
+        </AnchorPane>
+        <Button fx:id="btnBack" layoutX="100.0" layoutY="312.0" maxWidth="150.0" minWidth="150.0"
+                mnemonicParsing="false" onAction="#showMainMenu" prefWidth="150.0" text="Back"
+                AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="310.0"/>
+    </AnchorPane>
+    <AnchorPane fx:id="apMainMenu" maxHeight="600.0" maxWidth="350.0" minHeight="600.0" minWidth="350.0"
+                prefHeight="600.0" prefWidth="350.0" visible="false" AnchorPane.bottomAnchor="150.0"
+                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <GridPane layoutX="100.0" layoutY="37.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="50.0"
+                  AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="150.0">
+            <columnConstraints>
+                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="300.0" minWidth="10.0"
+                                   prefWidth="300.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+            </rowConstraints>
+            <Button fx:id="btnSingleplayer" disable="true" maxWidth="150.0" minWidth="150.0"
+                    mnemonicParsing="false" prefWidth="150.0" text="Singleplayer"/>
+            <Button fx:id="btnMultiplayer" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false"
+                    onAction="#showMultiplayer" prefWidth="150.0" text="Multiplayer" GridPane.rowIndex="1"/>
+            <Button fx:id="btnHighscores" disable="true" maxWidth="150.0" minWidth="150.0"
+                    mnemonicParsing="false" prefWidth="150.0" text="Hightscores" GridPane.rowIndex="2"/>
+            <Button fx:id="btnSettings" disable="true" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false"
+                    prefWidth="150.0" text="Settings" GridPane.rowIndex="3"/>
+            <Button fx:id="btnAuthor" disable="true" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false"
+                    prefWidth="150.0" text="Author" GridPane.rowIndex="4"/>
+            <Button fx:id="btnExit" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false"
+                    onAction="#exitGame" prefWidth="150.0" text="Exit" GridPane.rowIndex="5"/>
+        </GridPane>
+        <ImageView fx:id="imLogo" fitHeight="100.0" fitWidth="200.0" layoutX="75.0" layoutY="35.0"
+                   pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="470.0"
+                   AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="30.0"/>
+    </AnchorPane>
+    <ImageView fx:id="imBanner" fitHeight="100.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true"
+               AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="75.0"
+               AnchorPane.topAnchor="470.0"/>
 </AnchorPane>

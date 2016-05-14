@@ -28,10 +28,15 @@ import java.util.List;
 public class GameController{
 
     // TODO: 29.04.2016 TODO
+    //when only two players and one is waiting there are no trigger for update information
     //player wait turns --- not working
+
     //show to player last puttedCards and clear that array
+
     //order card type for all players and color for only next
+
     //show ordering card and ordered card ???and from which player???
+
     //complete color ordering
 
     //when player ending turn without putting card, player object is updated and turn is not ended to show new added card
@@ -39,7 +44,7 @@ public class GameController{
     //player object and wait for player decision(when not putting it add only cards from 2/3/king)
 
     //counter for how many players putted ordered card and when graveyard card on top or ordered in TableServer
-//to check   //when player putted one wrong card from array, all before it is putted; need to delete only them from hand
+
     //add option to say makao before turn ending
     //add option to say stop makao while in turn and after ending it
 
@@ -123,8 +128,7 @@ public class GameController{
         properties.setPuttedCards(new ArrayList<>());
 
         player = properties.getLocalPlayer();
-        //to check
-        //when player putted one wrong card from array, all before it is putted; need to delete only them from hand
+
         if(properties.getCardsToPut().size() > 0 && properties.getNotAcceptedCards().size() == 0){
             properties.setCardsToPut(new ArrayList<>());
         }else if(notAcceptedCards.size() > 0){

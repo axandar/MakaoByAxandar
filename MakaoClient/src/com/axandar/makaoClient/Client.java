@@ -166,7 +166,7 @@ public class Client implements Runnable{
     }
 
     private void receivedPlayer(Player player){
-        Logger.logConsole(TAG, " ---- updated player");
+        Logger.logConsole(TAG, " ---- updated another player");
         if(player.getPlayerID() != properties.getLocalPlayer().getPlayerID()){
             updatedPlayers.add(player);
         }else{
@@ -199,8 +199,10 @@ public class Client implements Runnable{
             List<Card> cardsToPut = properties.getCardsToPut();
             boolean isCardsEquals = true;
             for(int i = 1; i < cardsToPut.size(); i++){
-                if(!cardsToPut.get(i-1).getFunction().equals(cardsToPut.get(i).getFunction())){
+                if(!(cardsToPut.get(i-1).getFunction().getFunctionID()
+                        == cardsToPut.get(i).getFunction().getFunctionID())){
                     isCardsEquals = false;
+                    break;
                 }
             }
 

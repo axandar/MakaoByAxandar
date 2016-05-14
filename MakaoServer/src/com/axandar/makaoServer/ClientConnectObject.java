@@ -127,14 +127,20 @@ public class ClientConnectObject implements Runnable {
     }
 
     private void waitForNextPlayerEndTurn(){
+        Logger.logConsole(TAG, "Waiting for next player ending turn");
         Player playerEndedTurnCache = sessionInfo.getLastTurnEndedPlayer();
-        while(playerEndedTurnCache.equals(sessionInfo.getLastTurnEndedPlayer())){
+        while(playerEndedTurnCache.equals(sessionInfo.getLastTurnEndedPlayer()) || isRestPlayersWait()){
             try{
-                Thread.sleep(1000);
+                Thread.sleep(100);
             }catch(InterruptedException e){
                 Logger.logError(e);
             }
         }
+        Logger.logConsole(TAG, "Ended waiting for next player ending turn");
+    }
+
+    private boolean isRestPlayersWait(){
+        return sessionInfo.getNumberOfPlayers() - sessionInfo.getNumberOfWaitingPlayers() == 1;
     }
 
     private void handleAnotherPlayersTurns(){
@@ -258,7 +264,7 @@ public class ClientConnectObject implements Runnable {
             playerGetCards(sessionInfo.getQuantityCardsToTake());
             threadPlayer.setWasPuttedCard(false);
         }else if(sessionInfo.getQuantityTurnsToWait() > 0){
-            threadPlayer.setWasPuttedCard(false);
+            threadPlayer.setWasPuttedCard(true);//to prevent from getting card when waiting
             playerWaitTurns();
         }else{
             threadPlayer.setWasPuttedCard(false);
