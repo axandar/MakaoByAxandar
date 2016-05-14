@@ -114,6 +114,7 @@ public class Client implements Runnable{
     }
 
     private void handleCommands(){
+        // TODO: 14.05.2016 add statement for only updating card on top
         while(properties.isClientRunning()){
             Object received = receive();
             if(received instanceof Integer){
@@ -141,7 +142,7 @@ public class Client implements Runnable{
         command = -1;
         updatedPlayers = new ArrayList<>();
 
-        while(command != ServerProtocol.STOP_UPDATE){
+        while(!(command == ServerProtocol.STOP_UPDATE)){
             handleInput();
         }
         properties.setAdditionalPlayers(updatedPlayers);

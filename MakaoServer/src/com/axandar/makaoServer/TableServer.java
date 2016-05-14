@@ -74,6 +74,10 @@ public class TableServer {
             for(int i = 0; i < 5; i++){
                 cardsToAdd.add(sessionInfo.getDeckOnTable().getCardFromDeck());
             }
+            cardsToAdd.add(new Card(0, 4, new Function(2, 1)));
+            cardsToAdd.add(new Card(0, 5, new Function(6, -1)));
+            cardsToAdd.add(new Card(0, 5, new Function(6, -1)));
+            cardsToAdd.add(new Card(0, 12, new Function(4, -1)));
             player.setCardsInHand(cardsToAdd);
         }
     }

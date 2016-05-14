@@ -28,22 +28,15 @@ import java.util.List;
 public class GameController{
 
     // TODO: 29.04.2016 TODO
-    //when only two players and one is waiting there are no trigger for update information
-    //player wait turns --- not working
+    //when only two players and one is waiting the waiting one is not showing updated card on top
 
-    //show to player last puttedCards and clear that array
+    //when putting functional king, wrong player is chose next
 
     //order card type for all players and color for only next
 
     //show ordering card and ordered card ???and from which player???
 
     //complete color ordering
-
-    //when player ending turn without putting card, player object is updated and turn is not ended to show new added card
-    //when player have to get cards from 2/3/king - first card is taken; when same type as onTop then add it, update
-    //player object and wait for player decision(when not putting it add only cards from 2/3/king)
-
-    //counter for how many players putted ordered card and when graveyard card on top or ordered in TableServer
 
     //add option to say makao before turn ending
     //add option to say stop makao while in turn and after ending it

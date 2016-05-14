@@ -129,7 +129,13 @@ public class ClientConnectObject implements Runnable {
     private void waitForNextPlayerEndTurn(){
         Logger.logConsole(TAG, "Waiting for next player ending turn");
         Player playerEndedTurnCache = sessionInfo.getLastTurnEndedPlayer();
+        int numberOfWaitingPlayersCache = sessionInfo.getNumberOfWaitingPlayers();
         while(playerEndedTurnCache.equals(sessionInfo.getLastTurnEndedPlayer()) || isRestPlayersWait()){
+            if(numberOfWaitingPlayersCache != sessionInfo.getNumberOfWaitingPlayers()){
+                numberOfWaitingPlayersCache = sessionInfo.getNumberOfWaitingPlayers();
+                handleAnotherPlayersTurns();
+            }
+
             try{
                 Thread.sleep(100);
             }catch(InterruptedException e){
