@@ -34,7 +34,9 @@ public class GameController{
 
     //order card type for all players and color for only next
 
-    //show ordering card and ordered card ???and from which player???
+    ///////show ordered card ???and from which player???
+
+    //when player clicked on card on top, displaying new vertical scroll pane with last putted cards
 
     //complete color ordering
 
@@ -58,6 +60,13 @@ public class GameController{
     @FXML private ImageView cardOnTop;
     @FXML private Button btnEndTurn;
     @FXML private Button btnSayMakao;
+    //
+    @FXML private Button btnSayStopMakao;
+    @FXML private ImageView ivOrderedCard;
+    @FXML private AnchorPane apLastPutCardsView;
+    @FXML private ScrollPane spLastPutCards;
+    @FXML private Button btnExitView;
+    //
     @FXML private AnchorPane apOrderingCards;
     @FXML private ScrollPane spCardsTypeOrdering;
     @FXML private AnchorPane apColorCardsOrdering;
@@ -120,6 +129,8 @@ public class GameController{
         properties.setSuitableCardsToOrder(new ArrayList<>());
         properties.setPuttedCards(new ArrayList<>());
 
+        setOrderedCardImage();
+
         player = properties.getLocalPlayer();
 
         if(properties.getCardsToPut().size() > 0 && properties.getNotAcceptedCards().size() == 0){
@@ -145,6 +156,24 @@ public class GameController{
             playersList.getItems().add(player.getPlayerName());
         }
         Logger.logConsole(TAG, "Update ended");
+    }
+
+    private void setOrderedCardImage(){
+        Card orderedCard = properties.getOrderedCard();
+        Image image;
+
+        if(orderedCard == null){
+            ivOrderedCard.setVisible(false);
+        }else if(orderedCard.getFunction().getFunctionID() == 1){
+            image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + orderedCard.getIdType() + ".png"));
+            ivOrderedCard.setImage(image);
+            ivOrderedCard.setVisible(true);
+            // TODO: 16.05.2016 check name correction
+        }else{
+            image = new Image(this.getClass().getResourceAsStream("/TaliaKart/c" + orderedCard.getIdColor() + ".png"));
+            ivOrderedCard.setImage(image);
+            ivOrderedCard.setVisible(true);
+        }
     }
 
     private void putCardsWasGood(){
@@ -326,12 +355,13 @@ public class GameController{
                 Logger.logConsole(TAG, "Clicked order card type: " + suitableCardOnClicked);
                 if(ordered != null){
                     clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-                    ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
+                    ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 1));
                     lastClickedIVToOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 0, 0, 0, 0)");
                     lastClickedIVToOrder = clickedImageOrder;
                 }else{
                     clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-                    ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 0));
+                    ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 1));
+                    //cards ordered only type have function value = 1
                     lastClickedIVToOrder = clickedImageOrder;
                 }
                 break;
