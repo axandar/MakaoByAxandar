@@ -27,6 +27,7 @@ public class Connection{
                 counter--;
                 send(object);
             }else{
+                // TODO: 18.05.2016 reset connection or close client/server
                 Logger.logError(e);
             }
         }
@@ -41,6 +42,7 @@ public class Connection{
                 counter--;
                 return receive();
             }else{
+                // TODO: 18.05.2016 reset connection or close client/server
                 Logger.logError(e);
             }
         }catch(ClassNotFoundException e){

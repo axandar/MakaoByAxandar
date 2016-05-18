@@ -114,7 +114,6 @@ public class Client implements Runnable{
     }
 
     private void handleCommands(){
-        // TODO: 14.05.2016 add statement for only updating card on top
         while(properties.isClientRunning()){
             Object received = receive();
             if(received instanceof Integer){

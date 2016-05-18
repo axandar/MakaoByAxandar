@@ -33,6 +33,7 @@ public class SessionInfo {
     private TableServer table;
     private List<Integer> suitableCardsToOrder = new ArrayList<>();
     private int numberOfWaitingPlayers = 0;
+    private int turnCounter = 0;
 
     public SessionInfo(){
 
@@ -228,5 +229,13 @@ public class SessionInfo {
 
     public void setNumberOfWaitingPlayers(int numberOfWaitingPlayers){
         this.numberOfWaitingPlayers = numberOfWaitingPlayers;
+    }
+
+    public int getTurnCounter(){
+        return turnCounter;
+    }
+
+    public void setTurnCounter(int turnCounter){
+        this.turnCounter = turnCounter;
     }
 }

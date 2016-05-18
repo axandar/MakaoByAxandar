@@ -28,20 +28,17 @@ import java.util.List;
 public class GameController{
 
     // TODO: 29.04.2016 TODO
+    //bugs:
     //when only two players and one is waiting the waiting one is not showing updated card on top
-
     //when putting functional king, wrong player is chose next
-
-    //order card type for all players and color for only next
-
-    ///////show ordered card ???and from which player???
-
+    //
+    //
     //when player clicked on card on top, displaying new vertical scroll pane with last putted cards
+    //reset put cards after player end turn
 
     //complete color ordering
 
-    //add option to say makao before turn ending
-    //add option to say stop makao while in turn and after ending it
+    //when clicked stop makao show dialog with list of all players to choose to which say
 
 
     private final String TAG = "Client side";
@@ -60,13 +57,11 @@ public class GameController{
     @FXML private ImageView cardOnTop;
     @FXML private Button btnEndTurn;
     @FXML private Button btnSayMakao;
-    //
     @FXML private Button btnSayStopMakao;
     @FXML private ImageView ivOrderedCard;
     @FXML private AnchorPane apLastPutCardsView;
     @FXML private ScrollPane spLastPutCards;
     @FXML private Button btnExitView;
-    //
     @FXML private AnchorPane apOrderingCards;
     @FXML private ScrollPane spCardsTypeOrdering;
     @FXML private AnchorPane apColorCardsOrdering;
@@ -78,7 +73,6 @@ public class GameController{
     @FXML private ImageView ivTrefl;
     @FXML private ImageView ivPik;
 
-    // TODO: 26.04.2016 add option to say "Stop makao"
     public GameController(ClientProperties _clientProperties){
         properties = _clientProperties;
     }
@@ -87,11 +81,20 @@ public class GameController{
     private void initialize(){
         Logger.logConsole(TAG, "Game started");
 
+        ivCaro.setOnMouseClicked(event -> {
+            ImageView clickedImage = (ImageView) event.getSource();
+            handleClickOnColorOrderCard(clickedImage);
+        });
+
         Runnable updateGUI = this::updateGUI;
         Runnable endTurnBtnLogin = () ->{
             if(properties.isTurnStarted()){
                 btnEndTurn.setDisable(false);
-            }else btnEndTurn.setDisable(true);
+                btnSayMakao.setDisable(false);
+            }else{
+                btnEndTurn.setDisable(true);
+                btnSayMakao.setDisable(true);
+            }
         };
 
         Task taskToUpdateGUI = new Task(){
@@ -123,7 +126,7 @@ public class GameController{
 
         suitableCardsTypeToPut = properties.getSuitableCardsToOrder();
         List<Card> notAcceptedCards = properties.getNotAcceptedCards();
-        puttedCards = properties.getPuttedCards();//show somewhere in GUI
+        puttedCards = properties.getPuttedCards();
 
         properties.setNotAcceptedCards(new ArrayList<>());
         properties.setSuitableCardsToOrder(new ArrayList<>());
@@ -168,7 +171,6 @@ public class GameController{
             image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + orderedCard.getIdType() + ".png"));
             ivOrderedCard.setImage(image);
             ivOrderedCard.setVisible(true);
-            // TODO: 16.05.2016 check name correction
         }else{
             image = new Image(this.getClass().getResourceAsStream("/TaliaKart/c" + orderedCard.getIdColor() + ".png"));
             ivOrderedCard.setImage(image);
@@ -190,6 +192,18 @@ public class GameController{
 
     private void clearCards(){
         cardsInHand.getChildren().clear();
+    }
+
+    @FXML
+    public void sayMakao(){
+        if(properties.getLocalPlayer().getCardsInHand().size() == 1 && !properties.getLocalPlayer().isMakao()){
+            properties.getLocalPlayer().setMakao(true);
+            btnSayMakao.setText("Say not makao");
+        }else if(properties.getLocalPlayer().isMakao()){
+            properties.getLocalPlayer().setMakao(false);
+            btnSayMakao.setText("Say makao");
+        }
+
     }
 
     @FXML
@@ -239,6 +253,10 @@ public class GameController{
         separator.getStyleClass().add("betweenCardsSeparator");
 
         cardsInHand.getChildren().add(separator);
+    }
+
+    private void handleClickOnColorOrderCard(ImageView clickedImage){
+        ;
     }
 
     private void handleClickOnCard(ImageView clickedImage){

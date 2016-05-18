@@ -85,14 +85,17 @@ public class TableServer {
     public boolean putCardOnTable(Card card){
         if(sessionInfo.getOrderedCard() == null && sessionInfo.getQuantityCardsToTake() == 0
                 && sessionInfo.getQuantityTurnsToWait() == 0){
+
             if(isTypeCorrectly(card) || isColorCorrectly(card) ||
                     (card.getFunction().getFunctionID() == Function.CAMELEON_CARD
                             || sessionInfo.getCardOnTop().getFunction().getFunctionID() == Function.CAMELEON_CARD)){
                 putCard(card);
                 return true;
             }else return false;
+
         }else if(sessionInfo.getOrderedCard() != null && sessionInfo.getQuantityTurnsToWait() == 0
                 && sessionInfo.getQuantityCardsToTake() == 0){
+
             if(sessionInfo.getOrderingCard().getFunction().getFunctionID() == card.getFunction().getFunctionID() &&
                     (isColorCorrectly(card) || isTypeCorrectly(card))){
                 putCard(card);
@@ -106,13 +109,17 @@ public class TableServer {
                 putCard(card);
                 return true;
             }else return false;
+
         }else if(sessionInfo.getQuantityTurnsToWait() != 0){
+
             if(card.getFunction().getFunctionID() == Function.WAIT_TURNS &&
                     (isTypeCorrectly(card) || isColorCorrectly(card))){
                 putCard(card);
                 return true;
             }else return false;
+
         }else if(sessionInfo.getQuantityCardsToTake() != 0){
+
             if(card.getFunction().getFunctionID() == Function.GET_CARDS_FORWARD &&
                     (isTypeCorrectly(card) || isColorCorrectly(card))){
                 putCard(card);
@@ -122,6 +129,7 @@ public class TableServer {
                 putCard(card);
                 return true;
             }else return false;
+
         }else{
             Logger.logConsole(TAG, "Error in putting card on table");
             return false;
@@ -132,6 +140,9 @@ public class TableServer {
         if(putCardOnTable(card)){
             sessionInfo.setOrderedCard(_orderedCard);
             sessionInfo.setOrderingCard(card);
+            if(card.getFunction().getFunctionID() == Function.ORDER_CARD){
+                sessionInfo.setTurnCounter(sessionInfo.getNumberOfPlayers()+1);
+            }
             return true;
         }else return false;
     }
@@ -158,8 +169,14 @@ public class TableServer {
         }else{
             sessionInfo.setNextPlayerForward(true);
         }
+
+        if(sessionInfo.getOrderedCard() != null
+                && sessionInfo.getOrderingCard().getFunction().getFunctionID() == Function.CHANGE_COLOR){
+            sessionInfo.setOrderingCard(null);
+            sessionInfo.setOrderedCard(null);
+        }
+
         sessionInfo.addLastPlacedCard(card);
-        // TODO: 12.05.2016 counter for how many players putted ordered card and when graveyard card on top or ordered
         sessionInfo.addCardToGraveyard(sessionInfo.getCardOnTop());
         sessionInfo.setCardOnTop(card);
     }
@@ -197,6 +214,14 @@ public class TableServer {
     }
 
     public void endTurn(Player player){
+        if(sessionInfo.getOrderedCard() != null){
+            sessionInfo.setTurnCounter(sessionInfo.getTurnCounter() - 1);
+            if(sessionInfo.getTurnCounter() == 0){
+                sessionInfo.setOrderedCard(null);
+                sessionInfo.setOrderingCard(null);
+            }
+        }
+
         if(player.isMakao()){
             sessionInfo.getPlayersObjectsInOrder().remove(player);
             if(sessionInfo.getPlayersObjectsInOrder().size() == 1){
