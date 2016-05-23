@@ -29,7 +29,7 @@ public class GameSession implements Runnable{
     private volatile SessionInfo sessionInfo;
     private volatile TableServer table;
 
-    public GameSession(int _numberOfPlayers, int _numberOfDecks, List<List<Function>> _functions, int _port) {
+    public GameSession(int _numberOfPlayers, int _numberOfDecks, List<List<Function>> _functions, int _port){
         numberOfPlayers = _numberOfPlayers;
         numberOfDecks = _numberOfDecks;
         functions = _functions;
@@ -39,7 +39,7 @@ public class GameSession implements Runnable{
     public void run(){
         sessionInfo = new SessionInfo();
         sessionInfo.setNumberOfPlayers(numberOfPlayers);
-        try {
+        try{
             sSocket = new ServerSocket(port);
             Logger.logConsole("Starting server", "Server started at: " + new Date() + " at port: " + port);
             Logger.logConsole("Starting server", "Server started at ip: " + sSocket.getInetAddress().toString());
@@ -49,14 +49,14 @@ public class GameSession implements Runnable{
             table = setTableServer();
             table.initializeGame();
 
-        } catch(IOException | InterruptedException e) {
+        }catch(IOException | InterruptedException e){
             Logger.logError(e);
         }
     }
 
     public void settingUpPlayers(ServerSocket serverSocket) throws IOException{
         int actualId = 0;
-        while(actualId < numberOfPlayers) {
+        while(actualId < numberOfPlayers){
             sessionInfo.increasePlayersNotReady();
             Socket socket = serverSocket.accept();
 

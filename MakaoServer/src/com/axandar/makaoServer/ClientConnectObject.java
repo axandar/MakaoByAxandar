@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Created by Axandar on 06.02.2016.
  */
-public class ClientConnectObject implements Runnable {
+public class ClientConnectObject implements Runnable{
 
     private Socket socket;
     private int id;
@@ -32,12 +32,12 @@ public class ClientConnectObject implements Runnable {
 
     public ClientConnectObject(Socket _socket, int _id, SessionInfo _sessionInfo){
         socket = _socket;
-        id =_id;
+        id = _id;
         sessionInfo = _sessionInfo;
     }
 
     @Override
-    public void run() {
+    public void run(){
         String playerIp = socket.getInetAddress().toString();
         TAG += " " + playerIp;
         Logger.logConsole(TAG, "Player connected");
@@ -49,13 +49,13 @@ public class ClientConnectObject implements Runnable {
 
             send(ServerProtocol.GAME_STARTED);
             send(threadPlayer);
-            for(Player player:sessionInfo.getPlayersObjectsInOrder()){
+            for(Player player : sessionInfo.getPlayersObjectsInOrder()){
                 if(player.getPlayerID() != threadPlayer.getPlayerID()){
                     send(player);
                 }
             }
 
-            for(Integer suitableCard:sessionInfo.getSuitableCardsToOrder()){
+            for(Integer suitableCard : sessionInfo.getSuitableCardsToOrder()){
                 send(suitableCard);
             }
 
@@ -88,7 +88,7 @@ public class ClientConnectObject implements Runnable {
     private void settingUpPlayer(String playerIp){
         Object received = receive();
         if(received instanceof String){
-            threadPlayer = new Player((String)received, playerIp, id);
+            threadPlayer = new Player((String) received, playerIp, id);
             sessionInfo.addPlayerObjectToList(threadPlayer);
             send(sessionInfo.getNumberOfPlayers());
             sessionInfo.decreasePlayersNotReady();
@@ -99,15 +99,15 @@ public class ClientConnectObject implements Runnable {
 
     private void waitForGameStart(){
         while(!sessionInfo.isGameStarted()){
-            try {
+            try{
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
+            }catch(InterruptedException e){
                 Logger.logError(e);
             }
         }
     }
 
-    private void runningGame() {
+    private void runningGame(){
         while(!(sessionInfo.getActualTurnPlayer().equals(threadPlayer))){
             Logger.logConsole(TAG, "Handle another player turn");
             waitForNextPlayerEndTurn();
@@ -151,10 +151,10 @@ public class ClientConnectObject implements Runnable {
 
     private void handleAnotherPlayersTurns(){
         send(ServerProtocol.START_UPDATE);
-        for(Player player:sessionInfo.getPlayersObjectsInOrder()){
+        for(Player player : sessionInfo.getPlayersObjectsInOrder()){
             send(player);
         }
-        for(Card card:sessionInfo.getLastPlacedCards()){
+        for(Card card : sessionInfo.getLastPlacedCards()){
             send(card);
         }
         send(ServerProtocol.STOP_UPDATE);
@@ -163,9 +163,9 @@ public class ClientConnectObject implements Runnable {
     private void checkForStopMakao(){
         send(ServerProtocol.IS_SAID_STOPMAKAO);
         Object received = receive();
-        if(received instanceof Integer && (int)received == ServerProtocol.PLAYER_SAID_STOPMAKAO){
+        if(received instanceof Integer && (int) received == ServerProtocol.PLAYER_SAID_STOPMAKAO){
             received = receive();
-            sessionInfo.setLastSaid((StopMakao)received);
+            sessionInfo.setLastSaid((StopMakao) received);
         }
     }
 
@@ -183,7 +183,7 @@ public class ClientConnectObject implements Runnable {
         }
 
         Logger.logConsole(TAG, "Updating player data");
-        for(Player player:sessionInfo.getPlayersObjectsInOrder()){
+        for(Player player : sessionInfo.getPlayersObjectsInOrder()){
             if(player.getPlayerID() == threadPlayer.getPlayerID()){
                 List<Player> players = sessionInfo.getPlayersObjectsInOrder();
                 int index = players.indexOf(player);
@@ -302,7 +302,7 @@ public class ClientConnectObject implements Runnable {
         sessionInfo.removePlayerFromList(threadPlayer);
     }
 
-    private void closeSockets() {
+    private void closeSockets(){
         Logger.logConsole(TAG, "Closing client socket");
         conn.close();
         try{

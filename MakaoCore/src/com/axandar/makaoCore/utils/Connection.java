@@ -36,7 +36,7 @@ public class Connection{
 
     public Object receive(){
         try{
-           return objectInputStream.readUnshared();
+            return objectInputStream.readUnshared();
         }catch(IOException e){
             if(counter > 0){
                 counter--;

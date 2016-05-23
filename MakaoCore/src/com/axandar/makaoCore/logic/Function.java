@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Created by Axandar on 25.01.2016.
  */
-public class Function implements Serializable {
+public class Function implements Serializable{
 
     public static final int GET_CARDS_FORWARD = 0;
     public static final int GET_CARDS_BACKWARD = 1;

@@ -36,7 +36,7 @@ public class Client implements Runnable{
     private int command = -1;
     private List<Player> updatedPlayers = new ArrayList<>();
 
-    public Client(ClientProperties _properties) {
+    public Client(ClientProperties _properties){
         properties = _properties;
         ip = properties.getIp();
         port = properties.getPort();
@@ -77,16 +77,16 @@ public class Client implements Runnable{
 
         Object received = receive();
         if(received instanceof Integer){
-            properties.setEstimatedPlayersNumber((int)received);
+            properties.setEstimatedPlayersNumber((int) received);
         }
 
         received = receive();
-        if(received instanceof Integer && (int)received == ServerProtocol.GAME_STARTED){
+        if(received instanceof Integer && (int) received == ServerProtocol.GAME_STARTED){
             received = receive();
             if(received instanceof Player){
-                properties.setLocalPlayer((Player)received);
-                TAG =  properties.getLocalPlayer().getPlayerName() + " with id: " +
-                            properties.getLocalPlayer().getPlayerID() + " " + TAG;
+                properties.setLocalPlayer((Player) received);
+                TAG = properties.getLocalPlayer().getPlayerName() + " with id: " +
+                        properties.getLocalPlayer().getPlayerID() + " " + TAG;
             }
 
             int i = 1;
@@ -94,7 +94,7 @@ public class Client implements Runnable{
                 received = receive();
                 if(received instanceof Player){
                     i++;
-                    properties.addPlayer((Player)received);
+                    properties.addPlayer((Player) received);
                     Logger.logConsole(TAG, "Added player: " + ((Player) received).getPlayerName());
                 }
             }
@@ -105,7 +105,7 @@ public class Client implements Runnable{
             }
 
             if(received instanceof Card){
-                properties.setCardOnTop((Card)received);
+                properties.setCardOnTop((Card) received);
             }
             properties.setUpdateGame(true);
             handleCommands();
@@ -117,17 +117,17 @@ public class Client implements Runnable{
         while(properties.isClientRunning()){
             Object received = receive();
             if(received instanceof Integer){
-                if((int)received == ServerProtocol.START_UPDATE){
+                if((int) received == ServerProtocol.START_UPDATE){
                     Logger.logConsole(TAG, "Start update players");
                     updatePlayersInformation();
-                }else if((int)received == ServerProtocol.IS_SAID_STOPMAKAO){
+                }else if((int) received == ServerProtocol.IS_SAID_STOPMAKAO){
                     Logger.logConsole(TAG, "is stop makao said there?");
                     if(properties.isSaidMakao()){
                         send(ServerProtocol.PLAYER_SAID_STOPMAKAO);
                         send(properties.getStopMakao());
                         properties.setSaidMakao(false);
                     }else send(ServerProtocol.PLAYER_NOT_SAID_STOPMAKAO);
-                }else if((int)received == ServerProtocol.TURN_STARTED){
+                }else if((int) received == ServerProtocol.TURN_STARTED){
                     Logger.logConsole(TAG, "Turn started");
                     properties.setTurnStarted(true);
                     turnProcessing();
@@ -147,7 +147,7 @@ public class Client implements Runnable{
         properties.setAdditionalPlayers(updatedPlayers);
 
         if(properties.getPuttedCards().size() > 0){
-            int indexOfLastCard = properties.getPuttedCards().size()-1;
+            int indexOfLastCard = properties.getPuttedCards().size() - 1;
             properties.setCardOnTop(properties.getPuttedCards().get(indexOfLastCard));
         }
         properties.setUpdateGame(true);
@@ -199,7 +199,7 @@ public class Client implements Runnable{
             List<Card> cardsToPut = properties.getCardsToPut();
             boolean isCardsEquals = true;
             for(int i = 1; i < cardsToPut.size(); i++){
-                if(!(cardsToPut.get(i-1).getFunction().getFunctionID()
+                if(!(cardsToPut.get(i - 1).getFunction().getFunctionID()
                         == cardsToPut.get(i).getFunction().getFunctionID())){
                     isCardsEquals = false;
                     break;
@@ -208,22 +208,22 @@ public class Client implements Runnable{
 
             if(isCardsEquals){
                 Logger.logConsole(TAG, "Cards equal");
-                for(Card card:cardsToPut){
+                for(Card card : cardsToPut){
                     Object received;
                     if(isOrderCard(card)){
                         send(card);
                         received = receive();
-                        if(received instanceof Integer && (int)received == ServerProtocol.GOT_ORDER_CARD){
+                        if(received instanceof Integer && (int) received == ServerProtocol.GOT_ORDER_CARD){
                             send(properties.getOrderedCard());
                             received = receive();
-                            if(received instanceof Integer && (int)received == ServerProtocol.CARD_NOTACCEPTED){
+                            if(received instanceof Integer && (int) received == ServerProtocol.CARD_NOTACCEPTED){
                                 properties.addNotAcceptedCard(card);
                             }
                         }
                     }else{
                         send(card);
                         received = receive();
-                        if(received instanceof Integer && (int)received == ServerProtocol.CARD_NOTACCEPTED){
+                        if(received instanceof Integer && (int) received == ServerProtocol.CARD_NOTACCEPTED){
                             properties.addNotAcceptedCard(card);
                         }
                     }
@@ -272,8 +272,8 @@ public class Client implements Runnable{
             Logger.logConsole(TAG, "Received player object updated after turn ending");
             properties.setLocalPlayer((Player) received);
             Logger.logConsole(TAG, "Received player object after ending tunr have: "
-                    + ((Player)received).getCardsInHand().size() + " cards in hand");
-            if(((Player)received).getCardsInHand().size() == 0){
+                    + ((Player) received).getCardsInHand().size() + " cards in hand");
+            if(((Player) received).getCardsInHand().size() == 0){
                 Logger.logConsole(TAG, "Player ended turn");
                 properties.setGameEnded(true);
             }

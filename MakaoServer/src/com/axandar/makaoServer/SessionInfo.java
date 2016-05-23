@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by Axandar on 14.02.2016.
  */
-public class SessionInfo {
+public class SessionInfo{
 
     private int numberOfPlayers;
     private int playersNotReady = 0;
@@ -76,14 +76,14 @@ public class SessionInfo {
     }
 
     public int getNextPlayerIndex(Player player){
-        if(playersObjectsInOrder.indexOf(player) == playersObjectsInOrder.size()-1){
+        if(playersObjectsInOrder.indexOf(player) == playersObjectsInOrder.size() - 1){
             return 0;
         }else return playersObjectsInOrder.indexOf(player) + 1;
     }
 
     public int getPreviousPlayerIndex(Player player){
         if(playersObjectsInOrder.indexOf(player) == 0){
-            return playersObjectsInOrder.size()-1;
+            return playersObjectsInOrder.size() - 1;
         }else return playersObjectsInOrder.indexOf(player);
     }
 

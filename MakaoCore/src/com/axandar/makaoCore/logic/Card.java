@@ -31,32 +31,33 @@ public class Card implements Serializable{
     private int idType;
     private Function function;
 
-    public Card(int _idColor, int _idType, Function _function) {
+    public Card(int _idColor, int _idType, Function _function){
         idColor = _idColor;
         idType = _idType;
         function = _function;
     }
-    public int getIdColor() {
+
+    public int getIdColor(){
         return idColor;
     }
 
-    public void setIdColor(int idColor) {
+    public void setIdColor(int idColor){
         this.idColor = idColor;
     }
 
-    public int getIdType() {
+    public int getIdType(){
         return idType;
     }
 
-    public void setIdType(int idType) {
+    public void setIdType(int idType){
         this.idType = idType;
     }
 
-    public Function getFunction() {
+    public Function getFunction(){
         return function;
     }
 
-    public void setFunction(Function function) {
+    public void setFunction(Function function){
         this.function = function;
     }
 }

@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Created by Axandar on 25.01.2016.
  */
-public class Deck implements Serializable {
+public class Deck implements Serializable{
 
     private List<Card> deck = new ArrayList<>();
     private final String TAG = "Operation on deck";
@@ -20,10 +20,10 @@ public class Deck implements Serializable {
     }
 
     public Deck(int _numberOfDecks, List<List<Function>> functionsList){
-        for (int x = 0; x < _numberOfDecks; x++) {
-            for (int i = 0; i < 13; i++) {
-                for (int j = 0; j < 4; j++) {
-                    deck.add(new Card(j, i+1, functionsList.get(i).get(j)));
+        for(int x = 0; x < _numberOfDecks; x++){
+            for(int i = 0; i < 13; i++){
+                for(int j = 0; j < 4; j++){
+                    deck.add(new Card(j, i + 1, functionsList.get(i).get(j)));
                 }
             }
         }
@@ -34,7 +34,7 @@ public class Deck implements Serializable {
     }
 
     public Card getCardFromDeck(){
-        int cardIndex =  ThreadLocalRandom.current().nextInt(0, deck.size());
+        int cardIndex = ThreadLocalRandom.current().nextInt(0, deck.size());
         Card card = deck.get(cardIndex);
         Logger.logConsole(TAG, "Take card from deck with name: " + card.getIdType() + "-" + card.getIdColor());
         deck.remove(cardIndex);

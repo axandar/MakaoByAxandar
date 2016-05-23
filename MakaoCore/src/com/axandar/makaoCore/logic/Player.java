@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by Axandar on 25.01.2016.
  */
-public class Player implements Serializable {
+public class Player implements Serializable{
 
     private String playerName;
     private String playerIP;
@@ -27,61 +27,61 @@ public class Player implements Serializable {
         isEndedGame = false;
         isMakao = false;
         wasPuttedCard = false;
-        toWaitTurns= 0;
+        toWaitTurns = 0;
     }
 
-    public String getPlayerName() {
+    public String getPlayerName(){
         return playerName;
     }
 
-    public void setPlayerName(String playerName) {
+    public void setPlayerName(String playerName){
         this.playerName = playerName;
     }
 
-    public String getPlayerIP() {
+    public String getPlayerIP(){
         return playerIP;
     }
 
-    public void setPlayerIP(String playerIP) {
+    public void setPlayerIP(String playerIP){
         this.playerIP = playerIP;
     }
 
-    public int getPlayerID() {
+    public int getPlayerID(){
         return playerID;
     }
 
-    public void setPlayerID(int playerID) {
+    public void setPlayerID(int playerID){
         this.playerID = playerID;
     }
 
-    public boolean isEndedGame() {
+    public boolean isEndedGame(){
         return isEndedGame;
     }
 
-    public void setEndedGame(boolean endedGame) {
+    public void setEndedGame(boolean endedGame){
         isEndedGame = endedGame;
     }
 
-    public boolean isMakao() {
+    public boolean isMakao(){
         return isMakao;
     }
 
-    public void setMakao(boolean makao) {
+    public void setMakao(boolean makao){
         isMakao = makao;
     }
 
-    public List<Card> getCardsInHand() {
+    public List<Card> getCardsInHand(){
         return cardsInHand;
     }
 
-    public void setCardsInHand(List<Card> cardsInHand) {
+    public void setCardsInHand(List<Card> cardsInHand){
         this.cardsInHand = cardsInHand;
     }
 
     public void removeCardFromHand(Card card){
         Logger.logConsole("Operation on player", "Removed card: " + card.getIdType() + "-" + card.getIdColor());
         int index = -1;
-        for(Card cardInHand:cardsInHand){
+        for(Card cardInHand : cardsInHand){
             if(cardInHand.getIdColor() == card.getIdColor() && cardInHand.getIdType() == card.getIdType()){
                 index = cardsInHand.indexOf(cardInHand);
                 break;

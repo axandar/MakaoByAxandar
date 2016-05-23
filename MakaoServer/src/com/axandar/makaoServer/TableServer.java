@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Created by Axandar on 25.01.2016.
  */
-public class TableServer {
+public class TableServer{
 
     private final String TAG = "TableServer on server";
 
@@ -24,7 +24,7 @@ public class TableServer {
     private SessionInfo sessionInfo;
 
     public TableServer(SessionInfo sessionInfo, int _numberOfPlayers, int _numberOfDecks,
-                       List<List<Function>> _functionList) {
+                       List<List<Function>> _functionList){
         this.sessionInfo = sessionInfo;
         numberOfDecks = _numberOfDecks;
         numberOfPlayers = _numberOfPlayers;
@@ -41,7 +41,7 @@ public class TableServer {
                 + "-" + sessionInfo.getCardOnTop().getIdColor());
         givePlayersCards();
 
-        int firstPlayerID =  ThreadLocalRandom.current().nextInt(0, numberOfPlayers);
+        int firstPlayerID = ThreadLocalRandom.current().nextInt(0, numberOfPlayers);
         Logger.logConsole(TAG, "First player id: " + firstPlayerID);
 
         Player firstPlayer = sessionInfo.getPlayerObject(firstPlayerID);
@@ -54,9 +54,9 @@ public class TableServer {
 
     private void setCardsProperlyToOrder(){
         int index = 1; //Types are starting from 1
-        for(List<Function> functionList:functionsList){
+        for(List<Function> functionList : functionsList){
             int i = 0;
-            for(Function fucntion:functionList){
+            for(Function fucntion : functionList){
                 if(fucntion.getFunctionID() == Function.NOTHING){
                     i++;
                 }
@@ -69,7 +69,7 @@ public class TableServer {
     }
 
     private void givePlayersCards(){
-        for (Player player: sessionInfo.getPlayersObjectsInOrder()) {
+        for(Player player : sessionInfo.getPlayersObjectsInOrder()){
             List<Card> cardsToAdd = new ArrayList<>();
             for(int i = 0; i < 5; i++){
                 cardsToAdd.add(sessionInfo.getDeckOnTable().getCardFromDeck());
@@ -141,7 +141,7 @@ public class TableServer {
             sessionInfo.setOrderedCard(_orderedCard);
             sessionInfo.setOrderingCard(card);
             if(card.getFunction().getFunctionID() == Function.ORDER_CARD){
-                sessionInfo.setTurnCounter(sessionInfo.getNumberOfPlayers()+1);
+                sessionInfo.setTurnCounter(sessionInfo.getNumberOfPlayers() + 1);
             }
             return true;
         }else return false;
@@ -197,19 +197,19 @@ public class TableServer {
         return player;
     }
 
-    private boolean isColorCorrectly(Card card) {
+    private boolean isColorCorrectly(Card card){
         return sessionInfo.getCardOnTop().getIdColor() == card.getIdColor();
     }
 
-    private boolean isTypeCorrectly(Card card) {
+    private boolean isTypeCorrectly(Card card){
         return sessionInfo.getCardOnTop().getIdType() == card.getIdType();
     }
 
-    private boolean isOrderColorCorrectly(Card card) {
+    private boolean isOrderColorCorrectly(Card card){
         return sessionInfo.getOrderedCard().getIdColor() == card.getIdColor();
     }
 
-    private boolean isOrderTypeCorrectly(Card card) {
+    private boolean isOrderTypeCorrectly(Card card){
         return sessionInfo.getOrderedCard().getIdType() == card.getIdType();
     }
 

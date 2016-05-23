@@ -8,11 +8,11 @@ import java.util.List;
 /**
  * Created by Axandar on 25.01.2016.
  */
-public class Main {
+public class Main{
 
     private static List<List<Function>> functions = new ArrayList<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args){
 
         initializeFunctions();
 

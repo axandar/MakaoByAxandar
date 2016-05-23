@@ -52,26 +52,46 @@ public class GameController{
     private ImageView lastClickedIVToOrder;
     private List<Card> puttedCards = new ArrayList<>();
 
-    @FXML private HBox cardsInHand;
-    @FXML private ListView<String> playersList;
-    @FXML private ImageView cardOnTop;
-    @FXML private Button btnEndTurn;
-    @FXML private Button btnSayMakao;
-    @FXML private Button btnSayStopMakao;
-    @FXML private ImageView ivOrderedCard;
-    @FXML private AnchorPane apLastPutCardsView;
-    @FXML private ScrollPane spLastPutCards;
-    @FXML private Button btnExitView;
-    @FXML private AnchorPane apOrderingCards;
-    @FXML private ScrollPane spCardsTypeOrdering;
-    @FXML private AnchorPane apColorCardsOrdering;
-    @FXML private Button btnOrder;
-    @FXML private Button btnCancel;
-    @FXML private VBox imageViewsType;
-    @FXML private ImageView ivCaro;
-    @FXML private ImageView ivKier;
-    @FXML private ImageView ivTrefl;
-    @FXML private ImageView ivPik;
+    @FXML
+    private HBox cardsInHand;
+    @FXML
+    private ListView<String> playersList;
+    @FXML
+    private ImageView cardOnTop;
+    @FXML
+    private Button btnEndTurn;
+    @FXML
+    private Button btnSayMakao;
+    @FXML
+    private Button btnSayStopMakao;
+    @FXML
+    private ImageView ivOrderedCard;
+    @FXML
+    private AnchorPane apLastPutCardsView;
+    @FXML
+    private ScrollPane spLastPutCards;
+    @FXML
+    private Button btnExitView;
+    @FXML
+    private AnchorPane apOrderingCards;
+    @FXML
+    private ScrollPane spCardsTypeOrdering;
+    @FXML
+    private AnchorPane apColorCardsOrdering;
+    @FXML
+    private Button btnOrder;
+    @FXML
+    private Button btnCancel;
+    @FXML
+    private VBox imageViewsType;
+    @FXML
+    private ImageView ivCaro;
+    @FXML
+    private ImageView ivKier;
+    @FXML
+    private ImageView ivTrefl;
+    @FXML
+    private ImageView ivPik;
 
     public GameController(ClientProperties _clientProperties){
         properties = _clientProperties;
@@ -87,7 +107,7 @@ public class GameController{
         });
 
         Runnable updateGUI = this::updateGUI;
-        Runnable endTurnBtnLogin = () ->{
+        Runnable endTurnBtnLogin = () -> {
             if(properties.isTurnStarted()){
                 btnEndTurn.setDisable(false);
                 btnSayMakao.setDisable(false);
@@ -139,7 +159,7 @@ public class GameController{
         if(properties.getCardsToPut().size() > 0 && properties.getNotAcceptedCards().size() == 0){
             properties.setCardsToPut(new ArrayList<>());
         }else if(notAcceptedCards.size() > 0){
-            for(Card card: notAcceptedCards){
+            for(Card card : notAcceptedCards){
                 properties.getLocalPlayer().removeCardFromHand(card);
             }
         }
@@ -147,15 +167,15 @@ public class GameController{
         putCardsWasGood();
         Logger.logConsole(TAG, "Started adding cards");
         clearCards();
-        for(Card card:player.getCardsInHand()){
+        for(Card card : player.getCardsInHand()){
             addCardToHandGUI(card);
         }
 
         setCardOnTopTexture(properties.getCardOnTop());
 
         List<Player> listOfRestPlayers = properties.getAdditionalPlayers();
-        playersList.getItems().remove(0, playersList.getItems().size()-1);
-        for(Player player:listOfRestPlayers){
+        playersList.getItems().remove(0, playersList.getItems().size() - 1);
+        for(Player player : listOfRestPlayers){
             playersList.getItems().add(player.getPlayerName());
         }
         Logger.logConsole(TAG, "Update ended");
@@ -332,13 +352,13 @@ public class GameController{
         int index = 0;
         List<ImageView> ivToAdd = new ArrayList<>();
 
-        for(Integer suitableCard: suitableCardsTypeToPut) {
+        for(Integer suitableCard : suitableCardsTypeToPut){
             ImageView ivCard = new ImageView();
             Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + suitableCard + ".png"));
             ivCard.setImage(image);
             ivCard.setFitWidth(96);
             ivCard.setFitHeight(150);
-            ivCard.setId(suitableCard+"");
+            ivCard.setId(suitableCard + "");
 
             index++;
             ivCard.setOnMouseClicked(event -> {
@@ -355,7 +375,7 @@ public class GameController{
                 Separator separator = new Separator();
                 separator.setPrefHeight(150);
 
-                for(ImageView iv:ivToAdd){
+                for(ImageView iv : ivToAdd){
                     hb.getChildren().add(iv);
                     if(x < 3){
                         hb.getChildren().add(separator);
@@ -368,8 +388,8 @@ public class GameController{
     }
 
     private void selectedOrderingType(ImageView clickedImageOrder){
-        for(Integer suitableCardOnClicked: suitableCardsTypeToPut){
-            if(clickedImageOrder.getId().equals(suitableCardOnClicked+"")){
+        for(Integer suitableCardOnClicked : suitableCardsTypeToPut){
+            if(clickedImageOrder.getId().equals(suitableCardOnClicked + "")){
                 Logger.logConsole(TAG, "Clicked order card type: " + suitableCardOnClicked);
                 if(ordered != null){
                     clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");

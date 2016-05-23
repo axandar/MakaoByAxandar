@@ -19,17 +19,28 @@ import java.io.IOException;
  */
 public class MainMenuController extends Application{
 
-    @FXML private AnchorPane apMainMenu;
-    @FXML private AnchorPane apAnotherOptions;
-    @FXML private AnchorPane apSingleplayer = new AnchorPane();
-    @FXML private AnchorPane apMultiplayer;
-    @FXML private TextField tfNickname;
-    @FXML private TextField tfIP;
-    @FXML private TextField tfPort;
-    @FXML private Button btnConnect;
-    @FXML private AnchorPane apHighscore = new AnchorPane();
-    @FXML private AnchorPane apSettings = new AnchorPane();
-    @FXML private AnchorPane apAuthor = new AnchorPane();
+    @FXML
+    private AnchorPane apMainMenu;
+    @FXML
+    private AnchorPane apAnotherOptions;
+    @FXML
+    private AnchorPane apSingleplayer = new AnchorPane();
+    @FXML
+    private AnchorPane apMultiplayer;
+    @FXML
+    private TextField tfNickname;
+    @FXML
+    private TextField tfIP;
+    @FXML
+    private TextField tfPort;
+    @FXML
+    private Button btnConnect;
+    @FXML
+    private AnchorPane apHighscore = new AnchorPane();
+    @FXML
+    private AnchorPane apSettings = new AnchorPane();
+    @FXML
+    private AnchorPane apAuthor = new AnchorPane();
 
     public static void launchMenu(){
         launch();
@@ -40,7 +51,7 @@ public class MainMenuController extends Application{
         Main.setPrimaryStage(primaryStage);
         try{
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainMenuController.class.getResource("../GUIFiles/MainMenu.fxml"));
+            loader.setLocation(MainMenuController.class.getResource("/GUIFiles/MainMenu.fxml"));
             AnchorPane gameView = loader.load();
             Scene scene = new Scene(gameView);
             scene = Main.loadMainCSS(scene);
@@ -61,7 +72,7 @@ public class MainMenuController extends Application{
             LoadApplication loadApplication =
                     new LoadApplication("1280x720", tfIP.getText(), tfPort.getText(), tfNickname.getText());
             FXMLLoader fxmlLoader = new FXMLLoader();
-            fxmlLoader.setLocation(MainMenuController.class.getResource("../GUIFiles/LoadingScreen.fxml"));
+            fxmlLoader.setLocation(MainMenuController.class.getResource("/GUIFiles/LoadingScreen.fxml"));
             fxmlLoader.setController(loadApplication);
             AnchorPane loadingScreen = fxmlLoader.load();
             Scene scene = new Scene(loadingScreen);

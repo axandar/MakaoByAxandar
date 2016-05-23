@@ -27,7 +27,7 @@ public class LoadApplication{
     private ClientProperties cProperties;
 
     public LoadApplication(String _gameResolution, String _ip, String _port, String _nickname){
-        gameResolution =_gameResolution;
+        gameResolution = _gameResolution;
         ip = _ip;
         port = _port;
         nickname = _nickname;

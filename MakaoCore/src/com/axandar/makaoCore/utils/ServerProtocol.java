@@ -3,8 +3,8 @@ package com.axandar.makaoCore.utils;
 /**
  * Created by Axandar on 06.02.2016.
  */
-public class ServerProtocol {
-    
+public class ServerProtocol{
+
     //Server commands
     public static int GOT_CMD = 0x001;
     public static int GOT_CARD = 0x002;
@@ -13,7 +13,7 @@ public class ServerProtocol {
     public static int START_UPDATE = 0x005;
     public static int STOP_UPDATE = 0x006;
     public static int IS_SAID_STOPMAKAO = 0x007;
-    
+
     //Game commands
     public static int ACCEPTED_NICK = 0x101;
     public static int GAME_STARTED = 0x102;
@@ -37,5 +37,5 @@ public class ServerProtocol {
     //Errors
     public static int PLAYER_DISCONNECTED = 0x402;
 
-    
+
 }
