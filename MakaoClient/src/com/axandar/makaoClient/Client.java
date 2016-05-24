@@ -197,44 +197,25 @@ public class Client implements Runnable{
         Logger.logConsole(TAG, "Started sending cards");
         if(properties.getCardsToPut().size() > 0){
             List<Card> cardsToPut = properties.getCardsToPut();
-            boolean isCardsEquals = true;
-            for(int i = 1; i < cardsToPut.size(); i++){
-                if(!(cardsToPut.get(i - 1).getFunction().getFunctionID()
-                        == cardsToPut.get(i).getFunction().getFunctionID())){
-                    isCardsEquals = false;
-                    break;
-                }
-            }
-
-            if(isCardsEquals){
-                Logger.logConsole(TAG, "Cards equal");
-                for(Card card : cardsToPut){
-                    Object received;
-                    if(isOrderCard(card)){
-                        send(card);
-                        received = receive();
-                        if(received instanceof Integer && (int) received == ServerProtocol.GOT_ORDER_CARD){
-                            send(properties.getOrderedCard());
-                            received = receive();
-                            if(received instanceof Integer && (int) received == ServerProtocol.CARD_NOTACCEPTED){
-                                properties.addNotAcceptedCard(card);
-                            }
-                        }
-                    }else{
-                        send(card);
+            for(Card card : cardsToPut){
+                Object received;
+                if(isOrderCard(card)){
+                    send(card);
+                    received = receive();
+                    if(received instanceof Integer && (int) received == ServerProtocol.GOT_ORDER_CARD){
+                        send(properties.getOrderedCard());
                         received = receive();
                         if(received instanceof Integer && (int) received == ServerProtocol.CARD_NOTACCEPTED){
                             properties.addNotAcceptedCard(card);
                         }
                     }
+                }else{
+                    send(card);
+                    received = receive();
+                    if(received instanceof Integer && (int) received == ServerProtocol.CARD_NOTACCEPTED){
+                        properties.addNotAcceptedCard(card);
+                    }
                 }
-            }else{
-                Logger.logConsole(TAG, "Cards not equal");
-                properties.setTurnEnded(false);
-                properties.setTurnStarted(true);
-                properties.setCardsRejected(true);
-                properties.setUpdateGame(true);
-                turnProcessing();
             }
 
             if(properties.getNotAcceptedCards().size() > 0){

@@ -203,11 +203,11 @@ public class GameController{
             Logger.logConsole(TAG, "Some cards not accepted");
             Notifications.create().title("Wrong cards")
                     .text("Some of cards that you tried to send was incorrect").showWarning();
-        }else if(properties.isCardsRejected()){
+        }/**else if(properties.isCardsRejected()){
             Logger.logConsole(TAG, "Cards was not equals");
             Notifications.create().title("Wrong cards")
                     .text("Cards which you have tried to send was not equal function").showWarning();
-        }
+        }**/
     }
 
     private void clearCards(){
