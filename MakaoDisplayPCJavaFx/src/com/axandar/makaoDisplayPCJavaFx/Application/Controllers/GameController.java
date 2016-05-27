@@ -1,12 +1,11 @@
 package com.axandar.makaoDisplayPCJavaFx.Application.Controllers;
 
 import com.axandar.makaoClient.ClientProperties;
+import com.axandar.makaoClient.view.GameMainViewController;
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
 import com.axandar.makaoCore.utils.Logger;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -25,73 +24,30 @@ import java.util.List;
 /**
  * Created by Axandar on 09.03.2016.
  */
-public class GameController{
-
-    // TODO: 29.04.2016 TODO
-    //bugs:
-    //when only two players and one is waiting the waiting one is not showing updated card on top
-    //when putting functional king, wrong player is chose next
-    //
-    //
-    //when player clicked on card on top, displaying new vertical scroll pane with last putted cards
-    //reset put cards after player end turn
-
-    //complete color ordering
-
-    //when clicked stop makao show dialog with list of all players to choose to which say
 
 
-    private final String TAG = "Client side";
+public class GameController extends GameMainViewController{
 
-    private volatile ClientProperties properties;
-    private Player player;
-    private List<Card> cardsToPut = new ArrayList<>();
-    private List<Integer> suitableCardsTypeToPut = new ArrayList<>();
-    private Card orderedCard = null;
-    private Card ordered = null;
-    private ImageView lastClickedIVToOrder;
-    private List<Card> puttedCards = new ArrayList<>();
-
-    @FXML
-    private HBox cardsInHand;
-    @FXML
-    private ListView<String> playersList;
-    @FXML
-    private ImageView cardOnTop;
-    @FXML
-    private Button btnEndTurn;
-    @FXML
-    private Button btnSayMakao;
-    @FXML
-    private Button btnSayStopMakao;
-    @FXML
-    private ImageView ivOrderedCard;
-    @FXML
-    private AnchorPane apLastPutCardsView;
-    @FXML
-    private ScrollPane spLastPutCards;
-    @FXML
-    private Button btnExitView;
-    @FXML
-    private AnchorPane apOrderingCards;
-    @FXML
-    private ScrollPane spCardsTypeOrdering;
-    @FXML
-    private AnchorPane apColorCardsOrdering;
-    @FXML
-    private Button btnOrder;
-    @FXML
-    private Button btnCancel;
-    @FXML
-    private VBox imageViewsType;
-    @FXML
-    private ImageView ivCaro;
-    @FXML
-    private ImageView ivKier;
-    @FXML
-    private ImageView ivTrefl;
-    @FXML
-    private ImageView ivPik;
+    @FXML private HBox cardsInHand;
+    @FXML private ImageView cardOnTop;
+    @FXML private ListView<String> playersList;
+    @FXML private Button btnEndTurn;
+    @FXML private Button btnSayMakao;
+    @FXML private Button btnSayStopMakao;
+    @FXML private ImageView ivOrderedCard;
+    @FXML private AnchorPane apLastPutCardsView;
+    @FXML private ScrollPane spLastPutCards;
+    @FXML private Button btnExitView;
+    @FXML private AnchorPane apOrderingCards;
+    @FXML private ScrollPane spCardsTypeOrdering;
+    @FXML private AnchorPane apColorCardsOrdering;
+    @FXML private Button btnOrder;
+    @FXML private Button btnCancel;
+    @FXML private VBox imageViewsType;
+    @FXML private ImageView ivCaro;
+    @FXML private ImageView ivKier;
+    @FXML private ImageView ivTrefl;
+    @FXML private ImageView ivPik;
 
     public GameController(ClientProperties _clientProperties){
         properties = _clientProperties;
@@ -99,89 +55,35 @@ public class GameController{
 
     @FXML
     private void initialize(){
-        Logger.logConsole(TAG, "Game started");
-
-        ivCaro.setOnMouseClicked(event -> {
-            ImageView clickedImage = (ImageView) event.getSource();
-            handleClickOnColorOrderCard(clickedImage);
-        });
-
-        Runnable updateGUI = this::updateGUI;
-        Runnable endTurnBtnLogin = () -> {
-            if(properties.isTurnStarted()){
-                btnEndTurn.setDisable(false);
-                btnSayMakao.setDisable(false);
-            }else{
-                btnEndTurn.setDisable(true);
-                btnSayMakao.setDisable(true);
-            }
-        };
-
-        Task taskToUpdateGUI = new Task(){
-            @Override
-            protected Object call() throws Exception{
-                while(!properties.isClientRunning()){
-                    Thread.sleep(1000);
-                    //waiting for client initialize
-                }
-                while(properties.isClientRunning()){
-                    Platform.runLater(endTurnBtnLogin);
-                    if(properties.isUpdateGame()){
-                        Logger.logConsole(TAG, "Update added to runLater()");
-                        Platform.runLater(updateGUI);
-                        properties.setUpdateGame(false);
-                    }
-                    Platform.runLater(endTurnBtnLogin);
-                    Thread.sleep(2000);
-                }
-                return null;
-            }
-        };
-        Thread updatingGUI = new Thread(taskToUpdateGUI);
-        updatingGUI.start();
+        initializeController();
     }
 
-    private void updateGUI(){
-        Logger.logConsole(TAG, "Start updating GUI");
+    @Override
+    protected void setCardOnTopTexture(Card card){
+        Logger.logConsole(TAG, "Received card on top");
+        int cardColor = card.getIdColor();
+        int cardType = card.getIdType();
+        String cardFileName = cardType + "-" + cardColor;
+        Logger.logConsole(TAG, "File name of card texture to add on top: " + cardFileName);
 
-        suitableCardsTypeToPut = properties.getSuitableCardsToOrder();
-        List<Card> notAcceptedCards = properties.getNotAcceptedCards();
-        puttedCards = properties.getPuttedCards();
-
-        properties.setNotAcceptedCards(new ArrayList<>());
-        properties.setSuitableCardsToOrder(new ArrayList<>());
-        properties.setPuttedCards(new ArrayList<>());
-
-        setOrderedCardImage();
-
-        player = properties.getLocalPlayer();
-
-        if(properties.getCardsToPut().size() > 0 && properties.getNotAcceptedCards().size() == 0){
-            properties.setCardsToPut(new ArrayList<>());
-        }else if(notAcceptedCards.size() > 0){
-            for(Card card : notAcceptedCards){
-                properties.getLocalPlayer().removeCardFromHand(card);
-            }
-        }
-
-        putCardsWasGood();
-        Logger.logConsole(TAG, "Started adding cards");
-        clearCards();
-        for(Card card : player.getCardsInHand()){
-            addCardToHandGUI(card);
-        }
-
-        setCardOnTopTexture(properties.getCardOnTop());
-
-        List<Player> listOfRestPlayers = properties.getAdditionalPlayers();
-        playersList.getItems().remove(0, playersList.getItems().size() - 1);
-        for(Player player : listOfRestPlayers){
-            playersList.getItems().add(player.getPlayerName());
-        }
-        Logger.logConsole(TAG, "Update ended");
+        Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
+        cardOnTop.setImage(image);
     }
 
-    private void setOrderedCardImage(){
+    @Override
+    protected void setGUIOnTurnActive(){
+        btnEndTurn.setDisable(false);
+        btnSayMakao.setDisable(false);
+    }
+
+    @Override
+    protected void setGUIOnTurnInactive(){
+        btnEndTurn.setDisable(true);
+        btnSayMakao.setDisable(true);
+    }
+
+    @Override
+    protected void setOrderedCardImage(){
         Card orderedCard = properties.getOrderedCard();
         Image image;
 
@@ -198,20 +100,48 @@ public class GameController{
         }
     }
 
-    private void putCardsWasGood(){
-        if(properties.isCardsRejected() && properties.getNotAcceptedCards().size() > 0){
-            Logger.logConsole(TAG, "Some cards not accepted");
-            Notifications.create().title("Wrong cards")
-                    .text("Some of cards that you tried to send was incorrect").showWarning();
-        }/**else if(properties.isCardsRejected()){
-            Logger.logConsole(TAG, "Cards was not equals");
-            Notifications.create().title("Wrong cards")
-                    .text("Cards which you have tried to send was not equal function").showWarning();
-        }**/
+    @Override
+    protected void clearHandFromCards(){
+        cardsInHand.getChildren().clear();
     }
 
-    private void clearCards(){
-        cardsInHand.getChildren().clear();
+    @Override
+    protected void addCardToHandGUI(Card card){
+        int cardColor = card.getIdColor();
+        int cardType = card.getIdType();
+        String cardFileName = cardType + "-" + cardColor;
+
+        if(cardsInHand.getChildren().size() > 0){
+            addSeparator();
+        }
+
+        ImageView imageView = new ImageView();
+        Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
+        imageView.setImage(image);
+        imageView.setFitWidth(96);
+        imageView.setFitHeight(150);
+        imageView.setId(cardFileName);
+
+        imageView.setOnMouseClicked(event -> {
+            ImageView clickedImage = (ImageView) event.getSource();
+            handleClickOnCard(clickedImage);
+        });
+
+        cardsInHand.getChildren().add(imageView);
+    }
+
+    @Override
+    protected void makeNotification(String title, String text){
+        Notifications.create().title(title).text(text).showWarning();
+    }
+
+    @Override
+    protected void populateListOfAnotherPlayers(){
+        List<Player> listOfRestPlayers = properties.getAdditionalPlayers();
+        playersList.getItems().remove(0, playersList.getItems().size() - 1);
+        for(Player player : listOfRestPlayers){
+            playersList.getItems().add(player.getPlayerName());
+        }
     }
 
     @FXML
@@ -241,30 +171,6 @@ public class GameController{
         properties.setTurnStarted(false);
         properties.setTurnEnded(true);
         Logger.logConsole(TAG, "Ended turn");
-    }
-
-    private void addCardToHandGUI(Card card){
-        int cardColor = card.getIdColor();
-        int cardType = card.getIdType();
-        String cardFileName = cardType + "-" + cardColor;
-
-        if(cardsInHand.getChildren().size() > 0){
-            addSeparator();
-        }
-
-        ImageView imageView = new ImageView();
-        Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
-        imageView.setImage(image);
-        imageView.setFitWidth(96);
-        imageView.setFitHeight(150);
-        imageView.setId(cardFileName);
-
-        imageView.setOnMouseClicked(event -> {
-            ImageView clickedImage = (ImageView) event.getSource();
-            handleClickOnCard(clickedImage);
-        });
-
-        cardsInHand.getChildren().add(imageView);
     }
 
     private void addSeparator(){
@@ -405,16 +311,5 @@ public class GameController{
                 break;
             }
         }
-    }
-
-    private void setCardOnTopTexture(Card card){
-        Logger.logConsole(TAG, "Received card on top");
-        int cardColor = card.getIdColor();
-        int cardType = card.getIdType();
-        String cardFileName = cardType + "-" + cardColor;
-        Logger.logConsole(TAG, "File name of card texture to add on top: " + cardFileName);
-
-        Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
-        cardOnTop.setImage(image);
     }
 }
