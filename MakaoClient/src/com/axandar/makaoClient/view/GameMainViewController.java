@@ -2,6 +2,7 @@ package com.axandar.makaoClient.view;
 
 import com.axandar.makaoClient.ClientProperties;
 import com.axandar.makaoCore.logic.Card;
+import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
 import com.axandar.makaoCore.utils.Logger;
 import javafx.application.Platform;
@@ -125,4 +126,32 @@ public abstract class GameMainViewController{
     protected abstract void setCardOnTopTexture(Card card);
 
     protected abstract void populateListOfAnotherPlayers();
+
+    protected void handleSayMakao(){
+        if(properties.getLocalPlayer().getCardsInHand().size() == 1 && !properties.getLocalPlayer().isMakao()){
+            properties.getLocalPlayer().setMakao(true);
+            setSayMakao(true);
+        }else if(properties.getLocalPlayer().isMakao()){
+            properties.getLocalPlayer().setMakao(false);
+            setSayMakao(false);
+        }
+    }
+
+    protected abstract void setSayMakao(boolean isMakao);
+
+    protected void handleEndTurn(){
+        if(cardsToPut.size() > 0){
+            Logger.logConsole(TAG, "Requested sending cards");
+            properties.setCardsToPut(cardsToPut);
+            if(cardsToPut.get(0).getFunction().getFunctionID() == Function.CHANGE_COLOR ||
+                    cardsToPut.get(0).getFunction().getFunctionID() == Function.ORDER_CARD){
+                properties.setOrderedCard(orderedCard);
+            }
+            cardsToPut = new ArrayList<>();
+        }
+
+        properties.setTurnStarted(false);
+        properties.setTurnEnded(true);
+        Logger.logConsole(TAG, "Ended turn");
+    }
 }

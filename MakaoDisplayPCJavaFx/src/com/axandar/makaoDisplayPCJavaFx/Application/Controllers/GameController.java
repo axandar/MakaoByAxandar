@@ -146,31 +146,20 @@ public class GameController extends GameMainViewController{
 
     @FXML
     public void sayMakao(){
-        if(properties.getLocalPlayer().getCardsInHand().size() == 1 && !properties.getLocalPlayer().isMakao()){
-            properties.getLocalPlayer().setMakao(true);
+        handleSayMakao();
+    }
+
+    protected void setSayMakao(boolean isMakao){
+        if(isMakao){
             btnSayMakao.setText("Say not makao");
-        }else if(properties.getLocalPlayer().isMakao()){
-            properties.getLocalPlayer().setMakao(false);
+        }else {
             btnSayMakao.setText("Say makao");
         }
-
     }
 
     @FXML
     public void endTurn(){
-        if(cardsToPut.size() > 0){
-            Logger.logConsole(TAG, "Requested sending cards");
-            properties.setCardsToPut(cardsToPut);
-            if(cardsToPut.get(0).getFunction().getFunctionID() == Function.CHANGE_COLOR ||
-                    cardsToPut.get(0).getFunction().getFunctionID() == Function.ORDER_CARD){
-                properties.setOrderedCard(orderedCard);
-            }
-            cardsToPut = new ArrayList<>();
-        }
-
-        properties.setTurnStarted(false);
-        properties.setTurnEnded(true);
-        Logger.logConsole(TAG, "Ended turn");
+        handleEndTurn();
     }
 
     private void addSeparator(){
