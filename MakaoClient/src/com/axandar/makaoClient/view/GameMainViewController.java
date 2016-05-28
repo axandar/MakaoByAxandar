@@ -121,6 +121,45 @@ public abstract class GameMainViewController{
 
     protected abstract void addCardToHandGUI(Card card);
 
+    protected void handleClickOnCard(String cardViewContainerID){
+        for(Card cardFromPlayer : player.getCardsInHand()){
+            String cardName = cardFromPlayer.getIdType() + "-" + cardFromPlayer.getIdColor();
+            if(cardViewContainerID.equals(cardName)){
+                changeClickedCardState(cardViewContainerID, cardFromPlayer);
+                Logger.logConsole(TAG, "Clicked card: " + cardName);
+                break;
+            }
+        }
+    }
+
+    private void changeClickedCardState(String cardViewContainerID, Card cardFromPlayer){
+        if(cardsToPut.contains(cardFromPlayer)){
+            cardClickedSecondTime(cardViewContainerID, cardFromPlayer);
+        }else{
+            whichCardTypeClickedFirstTime(cardViewContainerID, cardFromPlayer);
+        }
+    }
+
+    protected abstract void cardClickedSecondTime(String cardViewContainerID, Card cardFromPlayer);
+
+    protected void removeCardToPut(Card card){
+        cardsToPut.remove(card);
+    }
+
+    protected void whichCardTypeClickedFirstTime(String cardViewContainerID, Card cardFromPlayer){
+        if(cardFromPlayer.getFunction().getFunctionID() == Function.CHANGE_COLOR ||
+                cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
+
+            clickedOrderCardFirstTime(cardViewContainerID, cardFromPlayer);
+        }else{
+            clickedNormalCardFirstTime(cardViewContainerID, cardFromPlayer);
+        }
+    }
+
+    protected abstract void clickedOrderCardFirstTime(String cardViewContainerID, Card cardFromPlayer);
+
+    protected abstract void clickedNormalCardFirstTime(String cardViewContainerID, Card cardFromPlayer);
+
     protected abstract void makeNotification(String title, String text);
 
     protected abstract void setCardOnTopTexture(Card card);

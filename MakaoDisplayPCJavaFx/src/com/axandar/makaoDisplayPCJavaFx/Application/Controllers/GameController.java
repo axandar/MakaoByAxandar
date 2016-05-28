@@ -48,6 +48,8 @@ public class GameController extends GameMainViewController{
     @FXML private ImageView ivKier;
     @FXML private ImageView ivTrefl;
     @FXML private ImageView ivPik;
+    
+    private List<ImageView> cardsInHandImageViews = new ArrayList<>();
 
     public GameController(ClientProperties _clientProperties){
         properties = _clientProperties;
@@ -103,6 +105,7 @@ public class GameController extends GameMainViewController{
     @Override
     protected void clearHandFromCards(){
         cardsInHand.getChildren().clear();
+        cardsInHandImageViews.clear();
     }
 
     @Override
@@ -124,10 +127,50 @@ public class GameController extends GameMainViewController{
 
         imageView.setOnMouseClicked(event -> {
             ImageView clickedImage = (ImageView) event.getSource();
-            handleClickOnCard(clickedImage);
+            handleClickOnCard(clickedImage.getId());
         });
 
         cardsInHand.getChildren().add(imageView);
+        cardsInHandImageViews.add(imageView);
+    }
+
+    private void addSeparator(){
+        Separator separator = new Separator();
+        separator.setPrefHeight(150);
+        separator.getStyleClass().add("betweenCardsSeparator");
+
+        cardsInHand.getChildren().add(separator);
+    }
+
+    @Override
+    protected void cardClickedSecondTime(String cardViewContainerID, Card cardFromPlayer){
+        //get imagev
+        getImageViewByID(cardViewContainerID)
+                .setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0), 0, 0, 0, 0)");
+        removeCardToPut(cardFromPlayer);
+        btnEndTurn.setDisable(false);
+    }
+
+    @Override
+    protected void clickedOrderCardFirstTime(String cardViewContainerID, Card cardFromPlayer){
+        //show window for choose order card
+    }
+
+    @Override
+    protected void clickedNormalCardFirstTime(String cardViewContainerID, Card cardFromPlayer){
+        getImageViewByID(cardViewContainerID)
+                .setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+        cardsToPut.add(cardFromPlayer);
+    }
+
+    private ImageView getImageViewByID(String imageViewID){
+        for(ImageView iv:cardsInHandImageViews){
+            if(iv.getId().equals(imageViewID)){
+                return iv;
+            }
+        }
+        Logger.logConsole(TAG, "Error in finding proper ImageView");
+        return new ImageView();
     }
 
     @Override
@@ -136,7 +179,7 @@ public class GameController extends GameMainViewController{
     }
 
     @Override
-    protected void populateListOfAnotherPlayers(){
+    protected void populateListOfAnotherPlayers(){ 
         List<Player> listOfRestPlayers = properties.getAdditionalPlayers();
         playersList.getItems().remove(0, playersList.getItems().size() - 1);
         for(Player player : listOfRestPlayers){
@@ -160,45 +203,6 @@ public class GameController extends GameMainViewController{
     @FXML
     public void endTurn(){
         handleEndTurn();
-    }
-
-    private void addSeparator(){
-        Separator separator = new Separator();
-        separator.setPrefHeight(150);
-        separator.getStyleClass().add("betweenCardsSeparator");
-
-        cardsInHand.getChildren().add(separator);
-    }
-
-    private void handleClickOnColorOrderCard(ImageView clickedImage){
-        ;
-    }
-
-    private void handleClickOnCard(ImageView clickedImage){
-        for(Card cardFromPlayer : player.getCardsInHand()){
-            String cardName = cardFromPlayer.getIdType() + "-" + cardFromPlayer.getIdColor();
-            if(clickedImage.getId().equals(cardName)){
-                changeClickedCardState(clickedImage, cardFromPlayer);
-                Logger.logConsole(TAG, "Clicked card: " + cardName);
-                break;
-            }
-        }
-    }
-
-    private void changeClickedCardState(ImageView clickedImage, Card cardFromPlayer){
-        if(cardsToPut.contains(cardFromPlayer)){
-            clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0), 0, 0, 0, 0)");
-            cardsToPut.remove(cardFromPlayer);
-            btnEndTurn.setDisable(false);
-        }else{
-            if(cardFromPlayer.getFunction().getFunctionID() == Function.CHANGE_COLOR ||
-                    cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
-                clickedOrderCard(clickedImage, cardFromPlayer);
-            }else{
-                clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-                cardsToPut.add(cardFromPlayer);
-            }
-        }
     }
 
     private void clickedOrderCard(ImageView clickedImage, Card cardFromPlayer){
