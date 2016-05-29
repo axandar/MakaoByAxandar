@@ -144,7 +144,6 @@ public class GameController extends GameMainViewController{
 
     @Override
     protected void cardClickedSecondTime(String cardViewContainerID, Card cardFromPlayer){
-        //get imagev
         getImageViewByID(cardViewContainerID)
                 .setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0), 0, 0, 0, 0)");
         removeCardToPut(cardFromPlayer);
@@ -179,7 +178,7 @@ public class GameController extends GameMainViewController{
     }
 
     @Override
-    protected void populateListOfAnotherPlayers(){ 
+    protected void populateListOfAnotherPlayers(){
         List<Player> listOfRestPlayers = properties.getAdditionalPlayers();
         playersList.getItems().remove(0, playersList.getItems().size() - 1);
         for(Player player : listOfRestPlayers){
