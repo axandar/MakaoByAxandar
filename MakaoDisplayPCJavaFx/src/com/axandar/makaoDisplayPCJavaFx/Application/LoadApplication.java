@@ -102,7 +102,7 @@ public class LoadApplication{
             GameController gameController = new GameController(cProperties);
 
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(LoadApplication.class.getResource("GUIFiles/Game" + gameResolution + ".fxml"));
+            loader.setLocation(GameController.class.getResource("/GUIFiles/Game" + gameResolution + ".fxml"));
             loader.setController(gameController);
             BorderPane gameView = loader.load();
 

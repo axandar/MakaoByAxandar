@@ -7,7 +7,6 @@ import com.axandar.makaoCore.logic.Player;
 import com.axandar.makaoCore.utils.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.scene.image.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,6 @@ public abstract class GameMainViewController{
     protected List<Integer> suitableCardsTypeToPut = new ArrayList<>();
     protected Card orderedCard = null;
     protected Card ordered = null;
-    protected ImageView lastClickedIVToOrder;
     protected List<Card> puttedCards = new ArrayList<>();
 
     private Runnable endTurnBtnLogin;
@@ -70,7 +68,7 @@ public abstract class GameMainViewController{
     private void updateGUI(){
         Logger.logConsole(TAG, "Start updating GUI");
 
-        suitableCardsTypeToPut = properties.getSuitableCardsToOrder();
+        suitableCardsTypeToPut = properties.getSuitableCardsToOrder();//Numbers from Card class
         List<Card> notAcceptedCards = properties.getNotAcceptedCards();
         puttedCards = properties.getPuttedCards();
 
@@ -134,13 +132,14 @@ public abstract class GameMainViewController{
 
     private void changeClickedCardState(String cardViewContainerID, Card cardFromPlayer){
         if(cardsToPut.contains(cardFromPlayer)){
-            cardClickedSecondTime(cardViewContainerID, cardFromPlayer);
+            removeCardToPut(cardFromPlayer);
+            cardClickedSecondTime(cardViewContainerID);
         }else{
             whichCardTypeClickedFirstTime(cardViewContainerID, cardFromPlayer);
         }
     }
 
-    protected abstract void cardClickedSecondTime(String cardViewContainerID, Card cardFromPlayer);
+    protected abstract void cardClickedSecondTime(String cardViewContainerID);
 
     protected void removeCardToPut(Card card){
         cardsToPut.remove(card);
@@ -152,13 +151,14 @@ public abstract class GameMainViewController{
 
             clickedOrderCardFirstTime(cardViewContainerID, cardFromPlayer);
         }else{
-            clickedNormalCardFirstTime(cardViewContainerID, cardFromPlayer);
+            clickedNormalCardFirstTime(cardViewContainerID);
         }
+        cardsToPut.add(cardFromPlayer);
     }
 
     protected abstract void clickedOrderCardFirstTime(String cardViewContainerID, Card cardFromPlayer);
 
-    protected abstract void clickedNormalCardFirstTime(String cardViewContainerID, Card cardFromPlayer);
+    protected abstract void clickedNormalCardFirstTime(String cardViewContainerID);
 
     protected abstract void makeNotification(String title, String text);
 

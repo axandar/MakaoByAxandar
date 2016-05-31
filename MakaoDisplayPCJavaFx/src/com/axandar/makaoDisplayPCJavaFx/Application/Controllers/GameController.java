@@ -48,6 +48,7 @@ public class GameController extends GameMainViewController{
     @FXML private ImageView ivKier;
     @FXML private ImageView ivTrefl;
     @FXML private ImageView ivPik;
+    private ImageView lastClickedIVToOrder;
     
     private List<ImageView> cardsInHandImageViews = new ArrayList<>();
 
@@ -143,23 +144,36 @@ public class GameController extends GameMainViewController{
     }
 
     @Override
-    protected void cardClickedSecondTime(String cardViewContainerID, Card cardFromPlayer){
+    protected void cardClickedSecondTime(String cardViewContainerID){
         getImageViewByID(cardViewContainerID)
                 .setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0), 0, 0, 0, 0)");
-        removeCardToPut(cardFromPlayer);
         btnEndTurn.setDisable(false);
     }
 
     @Override
     protected void clickedOrderCardFirstTime(String cardViewContainerID, Card cardFromPlayer){
         //show window for choose order card
+        btnEndTurn.setDisable(true);
+
+        if(cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
+            apColorCardsOrdering.setVisible(false);
+            apOrderingCards.setVisible(true);
+            spCardsTypeOrdering.setVisible(true);
+
+            handleClickedOrderingType();
+        }else{
+            spCardsTypeOrdering.setVisible(false);
+            apOrderingCards.setVisible(true);
+            apColorCardsOrdering.setVisible(true);
+
+            // TODO: 11.05.2016 ordering color
+        }
     }
 
     @Override
-    protected void clickedNormalCardFirstTime(String cardViewContainerID, Card cardFromPlayer){
+    protected void clickedNormalCardFirstTime(String cardViewContainerID){
         getImageViewByID(cardViewContainerID)
                 .setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-        cardsToPut.add(cardFromPlayer);
     }
 
     private ImageView getImageViewByID(String imageViewID){
@@ -204,49 +218,31 @@ public class GameController extends GameMainViewController{
         handleEndTurn();
     }
 
-    private void clickedOrderCard(ImageView clickedImage, Card cardFromPlayer){
-        btnEndTurn.setDisable(true);
+    @FXML
+    public void returnToMainView(){
+        apOrderingCards.setVisible(false);
+        apColorCardsOrdering.setVisible(false);
+        spCardsTypeOrdering.setVisible(false);
+        apLastPutCardsView.setVisible(false);
+    }
 
-        btnCancel.setOnMouseClicked(event -> {
-            apOrderingCards.setVisible(false);
-            apColorCardsOrdering.setVisible(false);
-            spCardsTypeOrdering.setVisible(false);
-        });
+    @FXML
+    public void orderCard(){
+        if(ordered != null){
+            orderedCard = ordered;
+            ordered = null;
 
-        btnOrder.setOnMouseClicked(event -> {
-            if(ordered != null){
-                orderedCard = ordered;
-                ordered = null;
+            returnToMainView();
 
-                apOrderingCards.setVisible(false);
-                apColorCardsOrdering.setVisible(false);
-                spCardsTypeOrdering.setVisible(false);
+            lastClickedIVToOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
 
-                clickedImage.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-
-                cardsToPut.add(cardFromPlayer);
-                imageViewsType.getChildren().clear();
-                btnEndTurn.setDisable(false);
-            }
-        });
-
-        if(cardFromPlayer.getFunction().getFunctionID() == Function.ORDER_CARD){
-            apColorCardsOrdering.setVisible(false);
-            apOrderingCards.setVisible(true);
-            spCardsTypeOrdering.setVisible(true);
-
-            handleClickedOrderingType();
-        }else{
-            spCardsTypeOrdering.setVisible(false);
-            apOrderingCards.setVisible(true);
-            apColorCardsOrdering.setVisible(true);
-
-            // TODO: 11.05.2016 ordering color
+            imageViewsType.getChildren().clear();
+            btnEndTurn.setDisable(false);
         }
-
     }
 
     private void handleClickedOrderingType(){
+        // TODO: 31.05.2016 Not showing cards to choose order type
         int index = 0;
         List<ImageView> ivToAdd = new ArrayList<>();
 
@@ -261,7 +257,7 @@ public class GameController extends GameMainViewController{
             index++;
             ivCard.setOnMouseClicked(event -> {
                 ImageView clickedImageOrder = (ImageView) event.getSource();
-                selectedOrderingType(clickedImageOrder);
+                clickedSelectOrderingTypeCard(clickedImageOrder);
             });
             ivToAdd.add(ivCard);
 
@@ -285,7 +281,7 @@ public class GameController extends GameMainViewController{
         }
     }
 
-    private void selectedOrderingType(ImageView clickedImageOrder){
+    private void clickedSelectOrderingTypeCard(ImageView clickedImageOrder){
         for(Integer suitableCardOnClicked : suitableCardsTypeToPut){
             if(clickedImageOrder.getId().equals(suitableCardOnClicked + "")){
                 Logger.logConsole(TAG, "Clicked order card type: " + suitableCardOnClicked);
