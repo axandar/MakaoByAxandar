@@ -73,7 +73,6 @@ public abstract class GameMainViewController{
         puttedCards = properties.getPuttedCards();
 
         properties.setNotAcceptedCards(new ArrayList<>());
-        properties.setSuitableCardsToOrder(new ArrayList<>());
         properties.setPuttedCards(new ArrayList<>());
 
         setOrderedCardImage();

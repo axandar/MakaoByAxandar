@@ -13,9 +13,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import org.controlsfx.control.Notifications;
 
 import java.util.ArrayList;
@@ -43,7 +41,7 @@ public class GameController extends GameMainViewController{
     @FXML private AnchorPane apColorCardsOrdering;
     @FXML private Button btnOrder;
     @FXML private Button btnCancel;
-    @FXML private VBox imageViewsType;
+    @FXML private GridPane imageViewsType;
     @FXML private ImageView ivCaro;
     @FXML private ImageView ivKier;
     @FXML private ImageView ivTrefl;
@@ -220,6 +218,10 @@ public class GameController extends GameMainViewController{
 
     @FXML
     public void returnToMainView(){
+        clearHandFromCards();
+        for(Card card : player.getCardsInHand()){
+            addCardToHandGUI(card);
+        }
         apOrderingCards.setVisible(false);
         apColorCardsOrdering.setVisible(false);
         spCardsTypeOrdering.setVisible(false);
@@ -242,43 +244,47 @@ public class GameController extends GameMainViewController{
     }
 
     private void handleClickedOrderingType(){
-        // TODO: 31.05.2016 Not showing cards to choose order type
-        int index = 0;
-        List<ImageView> ivToAdd = new ArrayList<>();
+        int cardInViewHeight = 225;
+        int cardInViewWidth = 144;
+        Logger.logConsole(TAG, "Received " + suitableCardsTypeToPut.size() + " suitable cards");
+        imageViewsType.getColumnConstraints().add(new ColumnConstraints(cardInViewWidth/4));
+        imageViewsType.getColumnConstraints().add(new ColumnConstraints(cardInViewWidth));
+        imageViewsType.getColumnConstraints().add(new ColumnConstraints(cardInViewWidth/4));
+        imageViewsType.getColumnConstraints().add(new ColumnConstraints(cardInViewWidth));
+        imageViewsType.getColumnConstraints().add(new ColumnConstraints(cardInViewWidth/4));
+        imageViewsType.getColumnConstraints().add(new ColumnConstraints(cardInViewWidth));
+        imageViewsType.getColumnConstraints().add(new ColumnConstraints(cardInViewWidth/4));
+        imageViewsType.getRowConstraints().add(new RowConstraints(cardInViewWidth/4));
+        imageViewsType.getRowConstraints().add(new RowConstraints(cardInViewHeight));
 
+        int row = 1;
+        int column = 1;
         for(Integer suitableCard : suitableCardsTypeToPut){
             ImageView ivCard = new ImageView();
             Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + suitableCard + ".png"));
             ivCard.setImage(image);
-            ivCard.setFitWidth(96);
-            ivCard.setFitHeight(150);
+            ivCard.setFitWidth(cardInViewWidth);
+            ivCard.setFitHeight(cardInViewHeight);
             ivCard.setId(suitableCard + "");
 
-            index++;
             ivCard.setOnMouseClicked(event -> {
                 ImageView clickedImageOrder = (ImageView) event.getSource();
                 clickedSelectOrderingTypeCard(clickedImageOrder);
             });
-            ivToAdd.add(ivCard);
 
-            if(index%3 == 0){
-                HBox hb = new HBox();
-                hb.setPrefHeight(150);
-                // TODO: 11.05.2016 adding separators
-                int x = 0;
-                Separator separator = new Separator();
-                separator.setPrefHeight(150);
-
-                for(ImageView iv : ivToAdd){
-                    hb.getChildren().add(iv);
-                    if(x < 3){
-                        hb.getChildren().add(separator);
-                        x++;
-                    }
-                }
-                imageViewsType.getChildren().add(hb);
+            if(column <= 5){
+                imageViewsType.add(ivCard, column, row);
+                column+=2;
+            }else{
+                column = 1;
+                row+=2;
+                imageViewsType.getRowConstraints().add(new RowConstraints(cardInViewWidth/4));
+                imageViewsType.getRowConstraints().add(new RowConstraints(cardInViewHeight));
+                imageViewsType.add(ivCard, column, row);
+                column+=2;
             }
         }
+        imageViewsType.getRowConstraints().add(new RowConstraints(cardInViewWidth/4));
     }
 
     private void clickedSelectOrderingTypeCard(ImageView clickedImageOrder){
