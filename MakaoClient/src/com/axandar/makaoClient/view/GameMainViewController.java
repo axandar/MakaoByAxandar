@@ -187,7 +187,7 @@ public abstract class GameMainViewController{
             }
             cardsToPut = new ArrayList<>();
         }
-
+        setOrderedCardImage();
         properties.setTurnStarted(false);
         properties.setTurnEnded(true);
         Logger.logConsole(TAG, "Ended turn");

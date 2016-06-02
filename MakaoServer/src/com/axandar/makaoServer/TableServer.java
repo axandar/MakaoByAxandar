@@ -1,10 +1,10 @@
 package com.axandar.makaoServer;
 
+import com.axandar.makaoCore.logic.Card;
+import com.axandar.makaoCore.logic.Deck;
 import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
 import com.axandar.makaoCore.utils.Logger;
-import com.axandar.makaoCore.logic.Card;
-import com.axandar.makaoCore.logic.Deck;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +109,10 @@ public class TableServer{
                     && isOrderTypeCorrectly(card)){
                 putCard(card);
                 return true;
+            }else if(sessionInfo.getOrderingCard().getFunction().getFunctionValue() == 0 &&
+                    isColorCorrectly(card) || isTypeCorrectly(card)){
+                putCard(card);
+                return true;
             }else return false;
 
         }else if(sessionInfo.getQuantityTurnsToWait() != 0){
@@ -173,8 +177,9 @@ public class TableServer{
 
         if(sessionInfo.getOrderedCard() != null
                 && sessionInfo.getOrderingCard().getFunction().getFunctionID() == Function.CHANGE_COLOR){
-            sessionInfo.setOrderingCard(null);
-            sessionInfo.setOrderedCard(null);
+            Logger.logConsole(TAG, "Clearing ordering state after order color");
+            sessionInfo.setOrderingCard(new Card(-1, -1, new Function(Function.ORDERED,0)));
+            sessionInfo.setOrderedCard(new Card(-1, -1, new Function(Function.ORDERED,0)));
         }
 
         sessionInfo.addLastPlacedCard(card);
@@ -216,10 +221,13 @@ public class TableServer{
 
     public void endTurn(Player player){
         if(sessionInfo.getOrderedCard() != null){
+            Logger.logConsole(TAG, "Checking counter");
             sessionInfo.setTurnCounter(sessionInfo.getTurnCounter() - 1);
             if(sessionInfo.getTurnCounter() == 0){
-                sessionInfo.setOrderedCard(null);
-                sessionInfo.setOrderingCard(null);
+                Logger.logConsole(TAG, "Counter for order ended");
+                sessionInfo.setOrderedCard(new Card(-1, -1, new Function(Function.ORDERED, 0)));
+                //for sending empty card to disable ordered view on client
+                sessionInfo.setOrderingCard(new Card(-1, -1, new Function(Function.ORDERED, 0)));
             }
         }
 

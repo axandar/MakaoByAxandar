@@ -151,6 +151,7 @@ public class ClientConnectObject implements Runnable{
 
     private void handleAnotherPlayersTurns(){
         send(ServerProtocol.START_UPDATE);
+        send(sessionInfo.getOrderedCard());
         for(Player player : sessionInfo.getPlayersObjectsInOrder()){
             send(player);
         }

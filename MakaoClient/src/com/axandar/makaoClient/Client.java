@@ -158,7 +158,10 @@ public class Client implements Runnable{
         Object received = receive();
         if(received instanceof Player){
             receivedPlayer((Player) received);
+        }else if(received instanceof Card && ((Card) received).getFunction().getFunctionID() == Function.ORDERED){
+            receivedOrderedCard((Card) received);
         }else if(received instanceof Card){
+            //getting normal card
             receivedCard((Card) received);
         }else if(received instanceof Integer){
             receivedCommand((Integer) received);
@@ -178,7 +181,13 @@ public class Client implements Runnable{
 
     private void receivedCard(Card card){
         Logger.logConsole(TAG, " ---- updated put card");
+        Logger.logConsole(TAG, "                   ---------- updated card color " + card.getIdColor());
         properties.addPuttedCard(card);
+    }
+
+    private void receivedOrderedCard(Card card){
+        Logger.logConsole(TAG, " ---- updated ordered card");
+        properties.setOrderedCard(card);
     }
 
     private void receivedCommand(int received){

@@ -88,13 +88,16 @@ public class GameController extends GameMainViewController{
         Card orderedCard = properties.getOrderedCard();
         Image image;
 
-        if(orderedCard == null){
+        Logger.logConsole(TAG, "Is ordered card null: " + (orderedCard == null));
+        if(orderedCard != null && orderedCard.getFunction().getFunctionValue() == 0){
+            Logger.logConsole(TAG, "              - - - - -- -    WESZLO2");
             ivOrderedCard.setVisible(false);
-        }else if(orderedCard.getFunction().getFunctionID() == 1){
+        }else if(orderedCard != null && orderedCard.getFunction().getFunctionValue() == 1){
+            Logger.logConsole(TAG, "              - - - - -- -    WESZLO1");
             image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + orderedCard.getIdType() + ".png"));
             ivOrderedCard.setImage(image);
             ivOrderedCard.setVisible(true);
-        }else{
+        }else if(orderedCard != null){
             image = new Image(this.getClass().getResourceAsStream("/TaliaKart/c" + orderedCard.getIdColor() + ".png"));
             ivOrderedCard.setImage(image);
             ivOrderedCard.setVisible(true);
@@ -222,6 +225,11 @@ public class GameController extends GameMainViewController{
         for(Card card : player.getCardsInHand()){
             addCardToHandGUI(card);
         }
+
+        if(orderedCard == null){
+            cardsToPut.remove(cardsToPut.size()-1);
+        }
+
         apOrderingCards.setVisible(false);
         apColorCardsOrdering.setVisible(false);
         spCardsTypeOrdering.setVisible(false);
@@ -244,6 +252,7 @@ public class GameController extends GameMainViewController{
     }
 
     private void handleClickedOrderingType(){
+        orderedCard = null;
         int cardInViewHeight = 225;
         int cardInViewWidth = 144;
         Logger.logConsole(TAG, "Received " + suitableCardsTypeToPut.size() + " suitable cards");
@@ -293,12 +302,12 @@ public class GameController extends GameMainViewController{
                 Logger.logConsole(TAG, "Clicked order card type: " + suitableCardOnClicked);
                 if(ordered != null){
                     clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-                    ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 1));
+                    ordered = new Card(0, suitableCardOnClicked, new Function(Function.ORDERED, 1));
                     lastClickedIVToOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 0, 0, 0, 0)");
                     lastClickedIVToOrder = clickedImageOrder;
                 }else{
                     clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-                    ordered = new Card(0, suitableCardOnClicked, new Function(Function.NOTHING, 1));
+                    ordered = new Card(0, suitableCardOnClicked, new Function(Function.ORDERED, 1));
                     //cards ordered only type have function value = 1
                     lastClickedIVToOrder = clickedImageOrder;
                 }

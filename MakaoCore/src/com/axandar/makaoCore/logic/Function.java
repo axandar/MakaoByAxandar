@@ -14,6 +14,7 @@ public class Function implements Serializable{
     public static final int CAMELEON_CARD = 4;
     public static final int CHANGE_COLOR = 5;
     public static final int NOTHING = 6;
+    public static final int ORDERED = 7; //value=1 for type; value=2 for color; value=0 for no order
 
     private int function;
     private int value;
