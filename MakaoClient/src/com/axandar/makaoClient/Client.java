@@ -181,7 +181,6 @@ public class Client implements Runnable{
 
     private void receivedCard(Card card){
         Logger.logConsole(TAG, " ---- updated put card");
-        Logger.logConsole(TAG, "                   ---------- updated card color " + card.getIdColor());
         properties.addPuttedCard(card);
     }
 
@@ -261,7 +260,7 @@ public class Client implements Runnable{
         if(received instanceof Player){
             Logger.logConsole(TAG, "Received player object updated after turn ending");
             properties.setLocalPlayer((Player) received);
-            Logger.logConsole(TAG, "Received player object after ending tunr have: "
+            Logger.logConsole(TAG, "Received player object after ending turn have: "
                     + ((Player) received).getCardsInHand().size() + " cards in hand");
             if(((Player) received).getCardsInHand().size() == 0){
                 Logger.logConsole(TAG, "Player ended turn");

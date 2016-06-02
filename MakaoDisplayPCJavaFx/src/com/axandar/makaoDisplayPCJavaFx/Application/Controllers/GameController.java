@@ -88,12 +88,9 @@ public class GameController extends GameMainViewController{
         Card orderedCard = properties.getOrderedCard();
         Image image;
 
-        Logger.logConsole(TAG, "Is ordered card null: " + (orderedCard == null));
         if(orderedCard != null && orderedCard.getFunction().getFunctionValue() == 0){
-            Logger.logConsole(TAG, "              - - - - -- -    WESZLO2");
             ivOrderedCard.setVisible(false);
         }else if(orderedCard != null && orderedCard.getFunction().getFunctionValue() == 1){
-            Logger.logConsole(TAG, "              - - - - -- -    WESZLO1");
             image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + orderedCard.getIdType() + ".png"));
             ivOrderedCard.setImage(image);
             ivOrderedCard.setVisible(true);
@@ -308,7 +305,6 @@ public class GameController extends GameMainViewController{
                 }else{
                     clickedImageOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
                     ordered = new Card(0, suitableCardOnClicked, new Function(Function.ORDERED, 1));
-                    //cards ordered only type have function value = 1
                     lastClickedIVToOrder = clickedImageOrder;
                 }
                 break;
