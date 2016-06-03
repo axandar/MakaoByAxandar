@@ -24,7 +24,7 @@ public class Card implements Serializable{
 
     public static final int COLOR_KARO = 0;
     public static final int COLOR_TREFL = 1;
-    public static final int COLOD_KIER = 2;
+    public static final int COLOR_KIER = 2;
     public static final int COLOR_PIK = 3;
 
     private int idColor;

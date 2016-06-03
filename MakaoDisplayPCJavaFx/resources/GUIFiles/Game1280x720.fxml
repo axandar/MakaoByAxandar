@@ -94,7 +94,7 @@
                                 <RowConstraints maxHeight="348.0" minHeight="10.0" prefHeight="51.0" vgrow="SOMETIMES" />
                             </rowConstraints>
                             <children>
-                                <Pane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                <Pane fx:id="apOrderingCardsPane" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
                                     <children>
                                         <Button fx:id="btnOrder" layoutX="181.0" layoutY="13.0" mnemonicParsing="false" onAction="#orderCard" text="Order" />
                                         <Button fx:id="btnCancel" layoutX="374.0" layoutY="13.0" mnemonicParsing="false" onAction="#returnToMainView" text="Cancel" />
@@ -119,10 +119,10 @@
                                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                             </rowConstraints>
                                             <children>
-                                                <ImageView fx:id="ivCaro" fitHeight="150.0" fitWidth="96.0" pickOnBounds="true" preserveRatio="true" />
-                                                <ImageView fx:id="ivKier" fitHeight="150.0" fitWidth="96.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" />
-                                                <ImageView fx:id="ivTrefl" fitHeight="150.0" fitWidth="96.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" />
-                                                <ImageView fx:id="ivPik" fitHeight="150.0" fitWidth="96.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" />
+                                                <ImageView fx:id="ivCaro" fitHeight="150.0" fitWidth="96.0" onMouseClicked="#clickedColorCaro" pickOnBounds="true" preserveRatio="true" />
+                                                <ImageView fx:id="ivKier" fitHeight="150.0" fitWidth="96.0" onMouseClicked="#clickedColorKier" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" />
+                                                <ImageView fx:id="ivTrefl" fitHeight="150.0" fitWidth="96.0" onMouseClicked="#clickedColorTrefl" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" />
+                                                <ImageView fx:id="ivPik" fitHeight="150.0" fitWidth="96.0" onMouseClicked="#clickedColorPik" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" />
                                             </children>
                                         </GridPane>
                                     </children>

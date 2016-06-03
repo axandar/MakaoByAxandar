@@ -164,6 +164,7 @@ public class GameController extends GameMainViewController{
             apOrderingCards.setVisible(true);
             apColorCardsOrdering.setVisible(true);
 
+            handleClickedOrderingColor();
             // TODO: 11.05.2016 ordering color
         }
     }
@@ -240,9 +241,7 @@ public class GameController extends GameMainViewController{
             ordered = null;
 
             returnToMainView();
-
             lastClickedIVToOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
-
             imageViewsType.getChildren().clear();
             btnEndTurn.setDisable(false);
         }
@@ -250,9 +249,14 @@ public class GameController extends GameMainViewController{
 
     private void handleClickedOrderingType(){
         orderedCard = null;
+        Logger.logConsole(TAG, "Received " + suitableCardsTypeToPut.size() + " suitable cards");
+        setTableWithCardsTypes();
+    }
+
+    private void setTableWithCardsTypes(){
         int cardInViewHeight = 225;
         int cardInViewWidth = 144;
-        Logger.logConsole(TAG, "Received " + suitableCardsTypeToPut.size() + " suitable cards");
+
         imageViewsType.getColumnConstraints().add(new ColumnConstraints(cardInViewWidth/4));
         imageViewsType.getColumnConstraints().add(new ColumnConstraints(cardInViewWidth));
         imageViewsType.getColumnConstraints().add(new ColumnConstraints(cardInViewWidth/4));
@@ -309,6 +313,53 @@ public class GameController extends GameMainViewController{
                 }
                 break;
             }
+        }
+    }
+
+    private void handleClickedOrderingColor(){
+        Image ivCaroImage = new Image(this.getClass().getResourceAsStream("/TaliaKart/c0.png"));
+        ivCaro.setImage(ivCaroImage);
+
+        Image ivKierImage = new Image(this.getClass().getResourceAsStream("/TaliaKart/c2.png"));
+        ivKier.setImage(ivKierImage);
+
+        Image ivTreflImage = new Image(this.getClass().getResourceAsStream("/TaliaKart/c1.png"));
+        ivTrefl.setImage(ivTreflImage);
+
+        Image ivPikImage = new Image(this.getClass().getResourceAsStream("/TaliaKart/c3.png"));
+        ivPik.setImage(ivPikImage);
+    }
+
+    @FXML
+    public void clickedColorCaro(){
+        clickedColorToOrder(ivCaro, Card.COLOR_KARO);
+    }
+
+    @FXML
+    public void clickedColorKier(){
+        clickedColorToOrder(ivKier, Card.COLOR_KIER);
+    }
+
+    @FXML
+    public void clickedColorTrefl(){
+        clickedColorToOrder(ivTrefl, Card.COLOR_TREFL);
+    }
+
+    @FXML
+    public void clickedColorPik(){
+        clickedColorToOrder(ivPik, Card.COLOR_PIK);
+    }
+
+    private void clickedColorToOrder(ImageView ivColor, int colorID){
+        if(ordered != null){
+            ivColor.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+            ordered = new Card(colorID, 0, new Function(Function.ORDERED, 2));
+            lastClickedIVToOrder.setStyle("-fx-effect: dropshadow(three-pass-box, red, 0, 0, 0, 0)");
+            lastClickedIVToOrder = ivColor;
+        }else{
+            ivColor.setStyle("-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0)");
+            ordered = new Card(colorID, 0, new Function(Function.ORDERED, 2));
+            lastClickedIVToOrder = ivColor;
         }
     }
 }
