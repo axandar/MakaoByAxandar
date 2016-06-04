@@ -7,10 +7,7 @@ import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
 import com.axandar.makaoCore.utils.Logger;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -46,6 +43,7 @@ public class GameController extends GameMainViewController{
     @FXML private ImageView ivKier;
     @FXML private ImageView ivTrefl;
     @FXML private ImageView ivPik;
+    @FXML private VBox imageViewsLastPlacedCards;
     private ImageView lastClickedIVToOrder;
     
     private List<ImageView> cardsInHandImageViews = new ArrayList<>();
@@ -114,7 +112,7 @@ public class GameController extends GameMainViewController{
         String cardFileName = cardType + "-" + cardColor;
 
         if(cardsInHand.getChildren().size() > 0){
-            addSeparator();
+            addSeparatorToCardsInHand();
         }
 
         ImageView imageView = new ImageView();
@@ -133,7 +131,7 @@ public class GameController extends GameMainViewController{
         cardsInHandImageViews.add(imageView);
     }
 
-    private void addSeparator(){
+    private void addSeparatorToCardsInHand(){
         Separator separator = new Separator();
         separator.setPrefHeight(150);
         separator.getStyleClass().add("betweenCardsSeparator");
@@ -200,19 +198,6 @@ public class GameController extends GameMainViewController{
     }
 
     @FXML
-    public void sayMakao(){
-        handleSayMakao();
-    }
-
-    protected void setSayMakao(boolean isMakao){
-        if(isMakao){
-            btnSayMakao.setText("Say not makao");
-        }else {
-            btnSayMakao.setText("Say makao");
-        }
-    }
-
-    @FXML
     public void endTurn(){
         handleEndTurn();
     }
@@ -228,10 +213,11 @@ public class GameController extends GameMainViewController{
             cardsToPut.remove(cardsToPut.size()-1);
         }
 
+        imageViewsType.getChildren().clear();
+
         apOrderingCards.setVisible(false);
         apColorCardsOrdering.setVisible(false);
         spCardsTypeOrdering.setVisible(false);
-        apLastPutCardsView.setVisible(false);
     }
 
     @FXML
@@ -361,5 +347,82 @@ public class GameController extends GameMainViewController{
             ordered = new Card(colorID, 0, new Function(Function.ORDERED, 2));
             lastClickedIVToOrder = ivColor;
         }
+    }
+
+    @FXML
+    public void sayMakao(){
+        handleSayMakao();
+    }
+
+    protected void setSayMakao(boolean isMakao){
+        if(isMakao){
+            btnSayMakao.setText("Say not makao");
+        }else {
+            btnSayMakao.setText("Say makao");
+        }
+    }
+
+    @FXML
+    public void sayStopMakao(){
+        handleSayStopMakao(null);
+    }
+
+    @FXML
+    public void showLastPlacedCards(){
+        addLastPlacedCardsToView();
+
+        apLastPutCardsView.setVisible(true);
+    }
+
+    private void addLastPlacedCardsToView(){
+        int cardInViewHeight = 150;
+        int cardInViewWidth = 96;
+
+        for(List<Card> cardsList:cardsPlacedByAnotherPLayers){
+            ScrollPane sPane = new ScrollPane();
+            sPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            sPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+            sPane.setHmax(cardInViewHeight + 10);
+            sPane.setHmin(cardInViewHeight + 10);
+
+            HBox hBox = new HBox();
+            hBox.setMaxHeight(cardInViewHeight);
+            hBox.setMinHeight(cardInViewHeight);
+
+            for(Card card:cardsList){
+                Logger.logConsole(TAG, "Adding card to last placed cards view");
+                int cardColor = card.getIdColor();
+                int cardType = card.getIdType();
+                String cardFileName = cardType + "-" + cardColor;
+
+                if(hBox.getChildren().size() > 0){
+                    addSeparatorToLastPlacedCards(cardInViewHeight);
+                }
+
+                ImageView imageView = new ImageView();
+                Image image = new Image(this.getClass().getResourceAsStream("/TaliaKart/" + cardFileName + ".png"));
+                imageView.setImage(image);
+                imageView.setFitWidth(cardInViewWidth);
+                imageView.setFitHeight(cardInViewHeight);
+
+                hBox.getChildren().add(imageView);
+            }
+
+            sPane.setContent(hBox);
+            imageViewsLastPlacedCards.getChildren().add(sPane);
+            imageViewsLastPlacedCards.getChildren().add(new Label());
+        }
+    }
+
+    private void addSeparatorToLastPlacedCards(int height){
+        Separator separator = new Separator();
+        separator.setPrefHeight(height);
+        imageViewsLastPlacedCards.getChildren().add(separator);
+    }
+
+    @FXML
+    public void closePlacedCardsView(){
+        apLastPutCardsView.setVisible(false);
+        imageViewsLastPlacedCards.getChildren().clear();
     }
 }

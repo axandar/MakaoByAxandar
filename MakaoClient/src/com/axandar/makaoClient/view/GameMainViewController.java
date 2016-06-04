@@ -4,6 +4,7 @@ import com.axandar.makaoClient.ClientProperties;
 import com.axandar.makaoCore.logic.Card;
 import com.axandar.makaoCore.logic.Function;
 import com.axandar.makaoCore.logic.Player;
+import com.axandar.makaoCore.logic.StopMakao;
 import com.axandar.makaoCore.utils.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -23,7 +24,9 @@ public abstract class GameMainViewController{
     protected List<Integer> suitableCardsTypeToPut = new ArrayList<>();
     protected Card orderedCard = null;
     protected Card ordered = null;
-    protected List<Card> puttedCards = new ArrayList<>();
+    private List<Card> placedCardsTemp = new ArrayList<>();
+    private List<Card> placedCards = new ArrayList<>();
+    protected List<List<Card>> cardsPlacedByAnotherPLayers = new ArrayList<>();
 
     private Runnable endTurnBtnLogin;
     private Runnable updateGUI;
@@ -70,7 +73,12 @@ public abstract class GameMainViewController{
 
         suitableCardsTypeToPut = properties.getSuitableCardsToOrder();//Numbers from Card class
         List<Card> notAcceptedCards = properties.getNotAcceptedCards();
-        puttedCards = properties.getPuttedCards();
+        placedCardsTemp = properties.getPuttedCards();
+
+        if(!placedCardsTemp.equals(placedCards)){
+            placedCards = placedCardsTemp;
+            cardsPlacedByAnotherPLayers.add(placedCardsTemp);
+        }
 
         properties.setNotAcceptedCards(new ArrayList<>());
         properties.setPuttedCards(new ArrayList<>());
@@ -165,16 +173,6 @@ public abstract class GameMainViewController{
 
     protected abstract void populateListOfAnotherPlayers();
 
-    protected void handleSayMakao(){
-        if(properties.getLocalPlayer().getCardsInHand().size() == 1 && !properties.getLocalPlayer().isMakao()){
-            properties.getLocalPlayer().setMakao(true);
-            setSayMakao(true);
-        }else if(properties.getLocalPlayer().isMakao()){
-            properties.getLocalPlayer().setMakao(false);
-            setSayMakao(false);
-        }
-    }
-
     protected abstract void setSayMakao(boolean isMakao);
 
     protected void handleEndTurn(){
@@ -188,8 +186,24 @@ public abstract class GameMainViewController{
             cardsToPut = new ArrayList<>();
         }
         setOrderedCardImage();
+        cardsPlacedByAnotherPLayers = new ArrayList<>();
         properties.setTurnStarted(false);
         properties.setTurnEnded(true);
         Logger.logConsole(TAG, "Ended turn");
+    }
+
+    protected void handleSayMakao(){
+        if(properties.getLocalPlayer().getCardsInHand().size() == 1 && !properties.getLocalPlayer().isMakao()){
+            properties.getLocalPlayer().setMakao(true);
+            setSayMakao(true);
+        }else if(properties.getLocalPlayer().isMakao()){
+            properties.getLocalPlayer().setMakao(false);
+            setSayMakao(false);
+        }
+    }
+
+    protected void handleSayStopMakao(Player toWho){
+        StopMakao stopMakao = new StopMakao(properties.getLocalPlayer(), toWho);
+        properties.setStopMakao(stopMakao);
     }
 }
