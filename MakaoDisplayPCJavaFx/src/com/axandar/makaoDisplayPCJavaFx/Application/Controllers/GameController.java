@@ -23,6 +23,7 @@ import java.util.List;
 
 public class GameController extends GameMainViewController{
 
+    @FXML private Label lNickname;
     @FXML private HBox cardsInHand;
     @FXML private ImageView cardOnTop;
     @FXML private ListView<String> playersList;
@@ -190,10 +191,11 @@ public class GameController extends GameMainViewController{
 
     @Override
     protected void populateListOfAnotherPlayers(){
-        List<Player> listOfRestPlayers = properties.getAdditionalPlayers();
-        playersList.getItems().remove(0, playersList.getItems().size() - 1);
-        for(Player player : listOfRestPlayers){
-            playersList.getItems().add(player.getPlayerName());
+        lNickname.setText(properties.getLocalPlayer().getPlayerName());
+        playersList.getItems().clear();
+        for(Player player : properties.getAdditionalPlayers()){
+            Logger.logConsole(TAG, "Adding player to list: " + player.getPlayerName());
+            playersList.getItems().add(player.getPlayerName() + " - " + player.getCardsInHand().size());
         }
     }
 

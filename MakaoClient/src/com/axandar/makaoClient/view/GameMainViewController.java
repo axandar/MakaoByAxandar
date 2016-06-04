@@ -66,6 +66,7 @@ public abstract class GameMainViewController{
         };
         Thread updatingGUI = new Thread(taskToUpdateGUI);
         updatingGUI.start();
+
     }
 
     private void updateGUI(){
