@@ -71,15 +71,21 @@ public class TableServer{
     private void givePlayersCards(){
         for(Player player : sessionInfo.getPlayersObjectsInOrder()){
             List<Card> cardsToAdd = new ArrayList<>();
-            for(int i = 0; i < 5; i++){
+            // TODO: 05.06.2016 Remove on release
+            /**for(int i = 0; i < 5; i++){
                 cardsToAdd.add(sessionInfo.getDeckOnTable().getCardFromDeck());
-            }
+            }**/
             //Debug only
-            cardsToAdd.add(new Card(0, 1, new Function(5, -1)));
+            /**cardsToAdd.add(new Card(0, 1, new Function(5, -1)));
             cardsToAdd.add(new Card(0, 4, new Function(2, 1)));
             cardsToAdd.add(new Card(0, 5, new Function(6, -1)));
             cardsToAdd.add(new Card(0, 12, new Function(4, -1)));
-            cardsToAdd.add(new Card(0, 11, new Function(Function.ORDER_CARD, -1)));
+            cardsToAdd.add(new Card(0, 11, new Function(Function.ORDER_CARD, -1)));**/
+            cardsToAdd.add(new Card(Card.COLOR_KARO, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
+            cardsToAdd.add(new Card(Card.COLOR_KIER, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
+            cardsToAdd.add(new Card(Card.COLOR_TREFL, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
+            cardsToAdd.add(new Card(Card.COLOR_PIK, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
+            cardsToAdd.add(new Card(Card.COLOR_KARO, Card.CARD_5, new Function(Function.NOTHING, -1)));
             player.setCardsInHand(cardsToAdd);
         }
     }

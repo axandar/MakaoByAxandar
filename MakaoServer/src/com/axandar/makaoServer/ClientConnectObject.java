@@ -113,13 +113,14 @@ public class ClientConnectObject implements Runnable{
             waitForNextPlayerEndTurn();
             handleAnotherPlayersTurns();
 
+            checkForStopMakao();
+
             StopMakao stopMakao = sessionInfo.getLastSaid();
-            if(stopMakao != null && stopMakao.getToWho().equals(threadPlayer) &&
+            if(stopMakao != null && (stopMakao.getToWho().getPlayerID() == threadPlayer.getPlayerID()) &&
                     threadPlayer.getCardsInHand().size() == 1 && !threadPlayer.isMakao()){
                 playerGetCards(5);
+                sessionInfo.setLastSaid(null);
             }
-
-            checkForStopMakao();
         }
         Logger.logConsole(TAG, "Player started turn");
         turnStarted();

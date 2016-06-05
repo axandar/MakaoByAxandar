@@ -45,6 +45,7 @@ public class GameController extends GameMainViewController{
     @FXML private ImageView ivTrefl;
     @FXML private ImageView ivPik;
     @FXML private VBox imageViewsLastPlacedCards;
+    @FXML private ListView<String> stopMakaoPlayersList;
     private ImageView lastClickedIVToOrder;
     
     private List<ImageView> cardsInHandImageViews = new ArrayList<>();
@@ -194,7 +195,6 @@ public class GameController extends GameMainViewController{
         lNickname.setText(properties.getLocalPlayer().getPlayerName());
         playersList.getItems().clear();
         for(Player player : properties.getAdditionalPlayers()){
-            Logger.logConsole(TAG, "Adding player to list: " + player.getPlayerName());
             playersList.getItems().add(player.getPlayerName() + " - " + player.getCardsInHand().size());
         }
     }
@@ -366,8 +366,26 @@ public class GameController extends GameMainViewController{
 
     @FXML
     public void sayStopMakao(){
-        handleSayStopMakao(null);
+
+        stopMakaoPlayersList.getItems().clear();
+        for(Player player : properties.getAdditionalPlayers()){
+            stopMakaoPlayersList.getItems().add(player.getPlayerName() + " - " + player.getCardsInHand().size());
+        }
+        stopMakaoPlayersList.setVisible(true);
+
+        stopMakaoPlayersList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            Logger.logConsole(TAG, "Clicked on list: " + newValue);
+            for(Player player:properties.getAdditionalPlayers()){
+                String name = player.getPlayerName() + " - " + player.getCardsInHand().size();
+                if(name.equals(newValue)){
+                    handleSayStopMakao(player);
+                    stopMakaoPlayersList.setVisible(false);
+                    break;
+                }
+            }
+        });
     }
+
 
     @FXML
     public void showLastPlacedCards(){

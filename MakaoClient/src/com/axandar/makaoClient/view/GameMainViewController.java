@@ -24,7 +24,6 @@ public abstract class GameMainViewController{
     protected List<Integer> suitableCardsTypeToPut = new ArrayList<>();
     protected Card orderedCard = null;
     protected Card ordered = null;
-    private List<Card> placedCardsTemp = new ArrayList<>();
     private List<Card> placedCards = new ArrayList<>();
     protected List<List<Card>> cardsPlacedByAnotherPLayers = new ArrayList<>();
 
@@ -74,7 +73,7 @@ public abstract class GameMainViewController{
 
         suitableCardsTypeToPut = properties.getSuitableCardsToOrder();//Numbers from Card class
         List<Card> notAcceptedCards = properties.getNotAcceptedCards();
-        placedCardsTemp = properties.getPuttedCards();
+        List<Card> placedCardsTemp = properties.getPuttedCards();
 
         if(!placedCardsTemp.equals(placedCards)){
             placedCards = placedCardsTemp;

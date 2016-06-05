@@ -121,11 +121,11 @@ public class Client implements Runnable{
                     Logger.logConsole(TAG, "Start update players");
                     updatePlayersInformation();
                 }else if((int) received == ServerProtocol.IS_SAID_STOPMAKAO){
-                    Logger.logConsole(TAG, "is stop makao said there?");
-                    if(properties.isSaidMakao()){
+                    if(properties.getStopMakao() != null){
+                        Logger.logConsole(TAG, "Sending StopMakao object");
                         send(ServerProtocol.PLAYER_SAID_STOPMAKAO);
                         send(properties.getStopMakao());
-                        properties.setSaidMakao(false);
+                        properties.setStopMakao(null);
                     }else send(ServerProtocol.PLAYER_NOT_SAID_STOPMAKAO);
                 }else if((int) received == ServerProtocol.TURN_STARTED){
                     Logger.logConsole(TAG, "Turn started");
@@ -169,12 +169,18 @@ public class Client implements Runnable{
     }
 
     private void receivedPlayer(Player player){
-        Logger.logConsole(TAG, " ---- updated another player");
         if(player.getPlayerID() != properties.getLocalPlayer().getPlayerID()){
+            Logger.logConsole(TAG, "Updating another player object");
+
+            int numberOfCardsInHand = player.getCardsInHand().size();
+            player.getCardsInHand().clear();
+            for(int i = 0; i < numberOfCardsInHand; i++){
+                player.getCardsInHand().add(new Card(0, 0, new Function(Function.NOTHING, -1)));
+            }// TODO: 05.06.2016 check if working
             updatedPlayers.add(player);
         }else{
             properties.setLocalPlayer(player);
-            Logger.logConsole(TAG, "Player object from updating have: "
+            Logger.logConsole(TAG, "Local player object from updating have: "
                     + player.getCardsInHand().size() + " cards in hand");
         }
     }

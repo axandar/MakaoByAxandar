@@ -1,9 +1,11 @@
 package com.axandar.makaoCore.logic;
 
+import java.io.Serializable;
+
 /**
  * Created by Axandar on 11.04.2016.
  */
-public class StopMakao{
+public class StopMakao implements Serializable{
     private Player whoSaid;
     private Player toWho;
 
