@@ -21,6 +21,7 @@ public abstract class GameMainViewController{
     protected volatile ClientProperties properties;
     protected Player player;
     protected List<Card> cardsToPut = new ArrayList<>();
+    private List<String> idCardsToPut = new ArrayList<>();
     protected List<Integer> suitableCardsTypeToPut = new ArrayList<>();
     protected Card orderedCard = null;
     protected Card ordered = null;
@@ -129,7 +130,9 @@ public abstract class GameMainViewController{
     protected void handleClickOnCard(String cardViewContainerID){
         for(Card cardFromPlayer : player.getCardsInHand()){
             String cardName = cardFromPlayer.getIdType() + "-" + cardFromPlayer.getIdColor();
-            if(cardViewContainerID.equals(cardName)){
+            int lengthOfCardName = cardName.length();
+            Logger.logConsole(TAG, cardName + "-----      " + cardViewContainerID.substring(0, lengthOfCardName));
+            if(cardViewContainerID.substring(0, lengthOfCardName).equals(cardName)){
                 changeClickedCardState(cardViewContainerID, cardFromPlayer);
                 Logger.logConsole(TAG, "Clicked card: " + cardName);
                 break;
@@ -138,8 +141,10 @@ public abstract class GameMainViewController{
     }
 
     private void changeClickedCardState(String cardViewContainerID, Card cardFromPlayer){
-        if(cardsToPut.contains(cardFromPlayer)){
-            removeCardToPut(cardFromPlayer);
+
+
+        if(idCardsToPut.contains(cardViewContainerID)){
+            removeCardToPut(cardViewContainerID, cardFromPlayer);
             cardClickedSecondTime(cardViewContainerID);
         }else{
             whichCardTypeClickedFirstTime(cardViewContainerID, cardFromPlayer);
@@ -148,8 +153,9 @@ public abstract class GameMainViewController{
 
     protected abstract void cardClickedSecondTime(String cardViewContainerID);
 
-    protected void removeCardToPut(Card card){
-        cardsToPut.remove(card);
+    protected void removeCardToPut(String cardViewContainerID, Card card){
+        cardsToPut.remove(cardsToPut.indexOf(card));//prevent from deleting same card for too many times
+        idCardsToPut.remove(cardViewContainerID);
     }
 
     protected void whichCardTypeClickedFirstTime(String cardViewContainerID, Card cardFromPlayer){
@@ -161,6 +167,7 @@ public abstract class GameMainViewController{
             clickedNormalCardFirstTime(cardViewContainerID);
         }
         cardsToPut.add(cardFromPlayer);
+        idCardsToPut.add(cardViewContainerID);
     }
 
     protected abstract void clickedOrderCardFirstTime(String cardViewContainerID, Card cardFromPlayer);

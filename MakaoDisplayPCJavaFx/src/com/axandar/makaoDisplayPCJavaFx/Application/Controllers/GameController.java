@@ -47,6 +47,7 @@ public class GameController extends GameMainViewController{
     @FXML private VBox imageViewsLastPlacedCards;
     @FXML private ListView<String> stopMakaoPlayersList;
     private ImageView lastClickedIVToOrder;
+    private List<String> idOfCardsInHand = new ArrayList<>();
     
     private List<ImageView> cardsInHandImageViews = new ArrayList<>();
 
@@ -105,6 +106,7 @@ public class GameController extends GameMainViewController{
     protected void clearHandFromCards(){
         cardsInHand.getChildren().clear();
         cardsInHandImageViews.clear();
+        idOfCardsInHand.clear();
     }
 
     @Override
@@ -122,6 +124,13 @@ public class GameController extends GameMainViewController{
         imageView.setImage(image);
         imageView.setFitWidth(96);
         imageView.setFitHeight(150);
+
+        while(idOfCardsInHand.contains(cardFileName)){
+            cardFileName += "0";
+            Logger.logConsole(TAG, "Actual fileName for cards is: " + cardFileName);
+        }
+
+        idOfCardsInHand.add(cardFileName);
         imageView.setId(cardFileName);
 
         imageView.setOnMouseClicked(event -> {

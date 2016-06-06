@@ -82,7 +82,7 @@ public class TableServer{
             cardsToAdd.add(new Card(0, 12, new Function(4, -1)));
             cardsToAdd.add(new Card(0, 11, new Function(Function.ORDER_CARD, -1)));**/
             cardsToAdd.add(new Card(Card.COLOR_KARO, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
-            cardsToAdd.add(new Card(Card.COLOR_KIER, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
+            cardsToAdd.add(new Card(Card.COLOR_KARO, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
             cardsToAdd.add(new Card(Card.COLOR_TREFL, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
             cardsToAdd.add(new Card(Card.COLOR_PIK, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
             cardsToAdd.add(new Card(Card.COLOR_KARO, Card.CARD_5, new Function(Function.NOTHING, -1)));
