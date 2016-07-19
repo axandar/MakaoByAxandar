@@ -56,8 +56,8 @@ public class TableServer{
         int index = 1; //Types are starting from 1
         for(List<Function> functionList : functionsList){
             int i = 0;
-            for(Function fucntion : functionList){
-                if(fucntion.getFunctionID() == Function.NOTHING){
+            for(Function function : functionList){
+                if(function.getFunctionID() == Function.NOTHING){
                     i++;
                 }
             }
@@ -72,6 +72,7 @@ public class TableServer{
         for(Player player : sessionInfo.getPlayersObjectsInOrder()){
             List<Card> cardsToAdd = new ArrayList<>();
             // TODO: 05.06.2016 Remove on release
+            /**[START] ----- [DEBUG ONLY] ----- [START]**/
             /**for(int i = 0; i < 5; i++){
                 cardsToAdd.add(sessionInfo.getDeckOnTable().getCardFromDeck());
             }**/
@@ -81,12 +82,15 @@ public class TableServer{
             cardsToAdd.add(new Card(0, 5, new Function(6, -1)));
             cardsToAdd.add(new Card(0, 12, new Function(4, -1)));
             cardsToAdd.add(new Card(0, 11, new Function(Function.ORDER_CARD, -1)));**/
-            cardsToAdd.add(new Card(Card.COLOR_KARO, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
-            cardsToAdd.add(new Card(Card.COLOR_KARO, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
+            //cardsToAdd.add(new Card(Card.COLOR_KARO, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
+            //cardsToAdd.add(new Card(Card.COLOR_KARO, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
+            cardsToAdd.add(new Card(Card.COLOR_KIER, Card.CARD_4, new Function(Function.WAIT_TURNS, 2)));
+            cardsToAdd.add(new Card(Card.COLOR_PIK, Card.CARD_4, new Function(Function.WAIT_TURNS, 2)));
             cardsToAdd.add(new Card(Card.COLOR_TREFL, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
             cardsToAdd.add(new Card(Card.COLOR_PIK, Card.CARD_DAMA, new Function(Function.CAMELEON_CARD, -1)));
             cardsToAdd.add(new Card(Card.COLOR_KARO, Card.CARD_5, new Function(Function.NOTHING, -1)));
             player.setCardsInHand(cardsToAdd);
+            /**[END] ----- [DEBUG ONLY] ----- [END]**/
         }
     }
 

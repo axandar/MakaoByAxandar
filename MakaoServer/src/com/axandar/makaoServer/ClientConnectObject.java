@@ -120,17 +120,25 @@ public class ClientConnectObject implements Runnable{
                     threadPlayer.getCardsInHand().size() == 1 && !threadPlayer.isMakao()){
                 playerGetCards(5);
                 sessionInfo.setLastSaid(null);
+                Logger.logConsole(TAG, "Players is getting cards from stop makao");
             }
         }
+
+        Logger.logConsole(TAG, "Updating clint for getting cards from stop makao");
+        updateClient();
+
         Logger.logConsole(TAG, "Player started turn");
         turnStarted();
+
         Logger.logConsole(TAG, "Player ended turn");
     }
 
     private void waitForNextPlayerEndTurn(){
         Logger.logConsole(TAG, "Waiting for next player ending turn");
+
         Player playerEndedTurnCache = sessionInfo.getLastTurnEndedPlayer();
         int numberOfWaitingPlayersCache = sessionInfo.getNumberOfWaitingPlayers();
+
         while(playerEndedTurnCache.equals(sessionInfo.getLastTurnEndedPlayer()) || isRestPlayersWait()){
             if(numberOfWaitingPlayersCache != sessionInfo.getNumberOfWaitingPlayers()){
                 numberOfWaitingPlayersCache = sessionInfo.getNumberOfWaitingPlayers();
@@ -151,6 +159,10 @@ public class ClientConnectObject implements Runnable{
     }
 
     private void handleAnotherPlayersTurns(){
+        updateClient();
+    }
+
+    private void updateClient(){
         send(ServerProtocol.START_UPDATE);
         send(sessionInfo.getOrderedCard());
         for(Player player : sessionInfo.getPlayersObjectsInOrder()){
@@ -196,6 +208,10 @@ public class ClientConnectObject implements Runnable{
         }
         send(threadPlayer);
         send(sessionInfo.getCardOnTop());
+
+        //need to check for stop makao before ending turn
+        checkForStopMakao();
+
         table.endTurn(threadPlayer);
     }
 

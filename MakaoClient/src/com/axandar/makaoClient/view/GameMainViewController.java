@@ -131,11 +131,14 @@ public abstract class GameMainViewController{
         for(Card cardFromPlayer : player.getCardsInHand()){
             String cardName = cardFromPlayer.getIdType() + "-" + cardFromPlayer.getIdColor();
             int lengthOfCardName = cardName.length();
-            Logger.logConsole(TAG, cardName + "-----      " + cardViewContainerID.substring(0, lengthOfCardName));
-            if(cardViewContainerID.substring(0, lengthOfCardName).equals(cardName)){
-                changeClickedCardState(cardViewContainerID, cardFromPlayer);
-                Logger.logConsole(TAG, "Clicked card: " + cardName);
-                break;
+
+            if(cardViewContainerID.length() >= lengthOfCardName){
+                Logger.logConsole(TAG, cardName + "-----      " + cardViewContainerID.substring(0, lengthOfCardName));
+                if(cardViewContainerID.substring(0, lengthOfCardName).equals(cardName)){
+                    changeClickedCardState(cardViewContainerID, cardFromPlayer);
+                    Logger.logConsole(TAG, "Clicked card: " + cardName);
+                    break;
+                }
             }
         }
     }

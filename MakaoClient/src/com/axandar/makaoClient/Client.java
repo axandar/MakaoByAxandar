@@ -131,7 +131,6 @@ public class Client implements Runnable{
                     Logger.logConsole(TAG, "Turn started");
                     properties.setTurnStarted(true);
                     turnProcessing();
-
                 }
             }
         }
@@ -201,14 +200,16 @@ public class Client implements Runnable{
 
     private void turnProcessing(){
         while(!properties.isTurnEnded()){
-            Logger.logConsole(TAG, "waiting for turn end");
+            Logger.logConsole(TAG, "waiting for turn end by player");
             try{
                 Thread.sleep(2000);
             }catch(InterruptedException e){
                 Logger.logError(e);
             }
         }
+
         Logger.logConsole(TAG, "Started sending cards");
+
         if(properties.getCardsToPut().size() > 0){
             List<Card> cardsToPut = properties.getCardsToPut();
             for(Card card : cardsToPut){
